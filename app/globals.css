@@ -1,0 +1,112 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* @font-face {
+  font-family: "Gotham";
+  src: url("/fonts/gotham/Gotham-Regular.woff2") format("woff2"),
+       url("/fonts/gotham/Gotham-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Gotham";
+  src: url("/fonts/gotham/Gotham-Bold.woff2") format("woff2"),
+       url("/fonts/gotham/Gotham-Bold.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+} */
+
+@font-face {
+  font-family: "Gotham";
+  src: url("/fonts/Gotham-Medium_Web.woff2");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Gotham";
+  src: url("/fonts/Gotham-Book_Web.woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Gotham";
+  src: url("/fonts/Gotham-Book_Web.woff2");
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Gotham";
+  src: url("/fonts/Gotham-Bold_Web.woff2");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+:root {
+  --background: 15 15 15;
+  --foreground: 255 255 255;
+  --card: 26 26 26;
+  --card-foreground: 255 255 255;
+  --popover: 26 26 26;
+  --popover-foreground: 255 255 255;
+  --primary: 220 38 38;
+  --primary-foreground: 255 255 255;
+  --secondary: 38 38 38;
+  --secondary-foreground: 255 255 255;
+  --muted: 38 38 38;
+  --muted-foreground: 163 163 163;
+  --accent: 38 38 38;
+  --accent-foreground: 255 255 255;
+  --destructive: 220 38 38;
+  --destructive-foreground: 255 255 255;
+  --border: 38 38 38;
+  --input: 38 38 38;
+  --ring: 220 38 38;
+  --chart-1: 220 38 38;
+  --chart-2: 16 185 129;
+  --chart-3: 59 130 246;
+  --chart-4: 245 158 11;
+  --chart-5: 168 85 247;
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    scrollbar-width: none;
+  }
+
+  *::-webkit-scrollbar {
+    display: none;
+  }
+
+  body {
+    @apply bg-black-600 text-white-100;
+    font-family: "Gotham", system-ui, sans-serif;
+  }
+}
+html body,
+html body * {
+  font-family: "Gotham", system-ui, sans-serif;
+}
+
+@layer components {
+  .sidebar-item {
+    @apply flex items-center gap-3 py-4 px-3 text-sm text-white-100 hover:bg-black-400 hover:text-white-100 transition-colors rounded-[12px];
+  }
+
+  .sidebar-item.active {
+    @apply bg-red-600 text-white-100;
+  }
+
+  .stat-card {
+    @apply bg-dashboard-card border border-black-400 rounded-lg p-3 lg:p-6 hover:border-black-200 transition-colors;
+  }
+}
