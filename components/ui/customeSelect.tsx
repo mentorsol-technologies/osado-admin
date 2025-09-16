@@ -9,6 +9,7 @@ interface CustomSelectProps {
   defaultValue?: string;
   options: string[];
   onChange?: (value: string) => void;
+   className?: string;
 }
 
 export function CustomSelect({

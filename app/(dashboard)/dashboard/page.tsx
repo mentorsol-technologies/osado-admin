@@ -2,9 +2,8 @@
 import PaymentsChart from "@/components/charts/PaymentsChart";
 import RevenueChart from "@/components/charts/RevenueChart";
 import { StatsCards } from "@/components/dashboard/stats-cards";
-import CommonTable from "@/components/ui/commonTable";
+import { CommonTable } from "@/components/ui/table/commonTable";
 import { Edit, Eye, Trash2 } from "lucide-react";
-// import CommonTable from "@/components/ui/commonTable"
 
 const columns = [
   { key: "influencer", label: "Influencer" },

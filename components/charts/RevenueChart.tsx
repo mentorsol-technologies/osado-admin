@@ -9,7 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { CustomSelect } from "../ui/customeSelect";
+import { Select,SelectTrigger,SelectValue,SelectGroup,SelectItem,SelectContent } from "../ui/select";
 
 const data = [
   { month: "Jun", revenue: 15000 },
@@ -41,12 +41,20 @@ export default function RevenueChart() {
         <h2 className="text-white text-lg font-semibold mb-4">
           Revenue Generated
         </h2>
-        <CustomSelect
-          placeholder="Month"
-          defaultValue="January"
-          options={months}
-          onChange={(value) => console.log("Selected month:", value)}
-        />
+           <Select defaultValue="January" onValueChange={(value) => console.log("Selected month:", value)}>
+         <SelectTrigger className="w-[160px]">
+           <SelectValue placeholder="Month" />
+         </SelectTrigger>
+         <SelectContent className="w-[160px]">
+           <SelectGroup>
+             {months.map((month) => (
+               <SelectItem key={month} value={month}>
+                 {month}
+               </SelectItem>
+             ))}
+           </SelectGroup>
+         </SelectContent>
+       </Select>
       </div>
       <ResponsiveContainer width="100%" height={350}>
         <AreaChart

@@ -12,14 +12,25 @@ import {
   Shield,
   Tags,
   X,
+  ChevronDown,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-  { icon: Users, label: "Master", href: "/master" },
+  {
+    label: 'Master',
+    icon: Users,
+    children: [
+      { label: 'Categories', href: '/master/categories' },
+      { label: 'Sub Categories', href: '/master/sub-category' },
+      { label: 'Countries', href: '/master/countries' },
+      { label: 'Influencers Rank', href: '/master/influencers-rank' },
+    ],
+  },
   { icon: UserCheck, label: "Influencers", href: "/influencers" },
   { icon: Building2, label: "Service Providers", href: "/service-providers" },
   { icon: Calendar, label: "Service Booking", href: "/service-booking" },
@@ -38,6 +49,11 @@ interface SidebarProps {
 
 export function Sidebar({ onClose }: SidebarProps) {
   const pathname = usePathname();
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+
+  const toggleMenu = (label: string) => {
+    setOpenMenu(openMenu === label ? null : label);
+  };
 
   return (
     <div className="h-full flex flex-col overflow-y-auto bg-black-500 border-r border-black-300 px-8">
@@ -61,6 +77,53 @@ export function Sidebar({ onClose }: SidebarProps) {
             const Icon = item.icon;
             const isActive = pathname === item.href;
 
+            if (item.children) {
+              // Parent with submenu
+              return (
+                <li key={item.label}>
+                  <button
+                    onClick={() => toggleMenu(item.label)}
+                    className={`sidebar-item w-full flex justify-between items-center ${
+                      openMenu === item.label ? "active" : ""
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Icon size={18} />
+                      <span>{item.label}</span>
+                    </div>
+                    <ChevronDown
+                      size={16}
+                      className={`transition-transform ${
+                        openMenu === item.label ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+
+                  {openMenu === item.label && (
+                    <ul className="ml-6 mt-1 space-y-1">
+                      {item.children.map((sub) => {
+                        const subActive = pathname === sub.href;
+                        return (
+                          <li key={sub.href}>
+                            <Link
+                              href={sub.href}
+                              onClick={onClose}
+                              className={`sidebar-item text-sm ${
+                                subActive ? "active" : ""
+                              }`}
+                            >
+                              {sub.label}
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </li>
+              );
+            }
+
+            // Normal item
             return (
               <li key={item.href}>
                 <Link

@@ -1,31 +1,32 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Plus, Search, Filter, Shield } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Plus, Search, Filter, Shield } from "lucide-react";
+import CommonInput from "@/components/ui/input";
 
 export default function SubscriptionPage() {
   return (
     <div className="space-y-6">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Shield className="w-6 h-6 lg:w-8 lg:h-8 text-primary" />
-          <h1 className="text-2xl lg:text-3xl font-bold text-white">Subscription Manager</h1>
-        </div>
-        <Button className="bg-primary hover:bg-primary/90 w-full lg:w-auto">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Plan
-        </Button>
-      </div>
+      <div className="flex justify-between items-center mb-6">
+                   <h2 className="text-2xl font-bold text-white">Subscription</h2>
+                   <Button
+                       leftIcon={<Plus size={18} />}
+                   > 
+                       <span className="hidden md:inline">Add New subscription</span>
+                   </Button>
+                   </div>
 
       <div className="flex flex-col lg:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            placeholder="Search subscriptions..."
-            className="pl-10 bg-sidebar border-gray-700 text-white placeholder:text-gray-400"
-          />
-        </div>
-        <Button variant="outline" className="border-gray-700 text-gray-300 hover:text-white w-full lg:w-auto">
+        <CommonInput placeholder="Search subscriptions..." icon={<Search />} />
+        <Button
+          variant="outline"
+          className="border-gray-700 text-gray-300 hover:text-white w-full lg:w-auto"
+        >
           <Filter className="w-4 h-4 mr-2" />
           Filter
         </Button>

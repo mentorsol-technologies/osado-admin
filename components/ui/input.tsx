@@ -73,7 +73,7 @@ const CommonInput: React.FC<CommonInputProps> = ({
         </Label>
       )}
       <div
-        className={`flex items-center min-h-[51px] w-full rounded-[14px] border border-black-400 bg-black-500 px-[14px] gap-2 ${className}`}
+        className={`flex items-center min-h-[51px] w-full rounded-[14px] border border-black-300 bg-black-500 px-[14px] gap-2 ${className}`}
       >
         {icon && !prefix && <span className="text-white-100">{icon}</span>}
         {icon && prefix && (

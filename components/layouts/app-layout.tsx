@@ -33,7 +33,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           <Navbar onMenuClick={() => setSidebarOpen(true)} />
         </div>
 
-        <main className="p-4 lg:p-6">{children}</main>
+        <main className="p-4 lg:p-6  min-h-[calc(100vh-64px)]">{children}</main>
       </div>
     </div>
   );
