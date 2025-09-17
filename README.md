@@ -1,4 +1,4 @@
-# Next.js Project
+ # osado-admin
 
 This is a **Next.js 13.5** project powered by **TypeScript**, **Tailwind CSS**, and **Radix UI**.
 It comes pre-configured with modern tools and libraries for building scalable, accessible, and high-performance web applications.
