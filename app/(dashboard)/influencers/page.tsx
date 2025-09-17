@@ -1,52 +1,143 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Plus, Search, Filter, UserCheck } from "lucide-react";
-import CommonInput from "@/components/ui/input";
+"use client";
 
-export default function InfluencersPage() {
+import DeleteConfirmModal from "@/components/ui/commonComponent/DeleteConfirmModal";
+import FiltersBar from "@/components/ui/commonComponent/FiltersBar";
+import { useState } from "react";
+import InfluencerCard from "./InfluencersCard";
+import { Award, Crown, Star } from "lucide-react";
+import Pagination from "@/components/ui/pagination";
+
+const InfluencersRank = () => {
+  const [selectedFilters, setSelectedFilters] = useState<{
+    [key: string]: string;
+  }>({});
+  const [search, setSearch] = useState("");
+  const [selectedInfluencers, setSelectedInfluencers] = useState<any>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [page, setPage] = useState(2);
+
+  const filters = [
+    {
+      key: "rank",
+      label: "Rank",
+      options: ["Standard", "High-rank", "Elite"],
+    },
+    {
+      key: "location",
+      label: "Location",
+      options: ["USA", "UK", "Canada", "UAE", "Pakistan"],
+    },
+    {
+      key: "status",
+      label: "Status",
+      options: ["Active", "Inactive", "Pending"],
+    },
+    {
+      key: "sort_by",
+      label: "Sort by",
+      options: ["Newest", "Oldest", "A–Z", "Z–A"],
+    },
+  ];
+
+  const handleFilterChange = (key: string, value: string) => {
+    setSelectedFilters((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleDelete = () => {
+    console.log("Influencer deleted:", selectedInfluencers);
+  };
+  const influencers = [
+    {
+      id: 1,
+      icon: Award,
+      title: "Standard",
+      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+      name: "Amara Singh",
+      rating: 4.4,
+      memberSince: "12/07/2025",
+      location: "Paris, France",
+      status: "Active",
+    },
+    {
+      id: 2,
+      icon: Crown,
+      title: "Elite",
+      avatar: "https://randomuser.me/api/portraits/men/46.jpg",
+      name: "Liam Anderson",
+      rating: 4.4,
+      memberSince: "22/06/2025",
+      location: "Liverpool, England",
+      status: "Active",
+    },
+    {
+      id: 3,
+      icon: Crown,
+      title: "Elite",
+      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+      name: "Amara Singh",
+      rating: 4.4,
+      memberSince: "12/07/2025",
+      location: "Paris, France",
+      status: "Active",
+    },
+    {
+      id: 4,
+      icon: Star,
+      title: "High-rank",
+      avatar: "https://randomuser.me/api/portraits/men/46.jpg",
+      name: "Liam Anderson",
+      rating: 4.4,
+      memberSince: "22/06/2025",
+      location: "Liverpool, England",
+      status: "Active",
+    },
+  ];
+
   return (
-    <div className="space-y-6">
-       <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-white">Influence Manager</h2>
-                    <Button
-                        leftIcon={<Plus size={18} />}
-                    > 
-                        <span className="hidden md:inline">Add New Influence</span>
-                    </Button>
-                    </div>
-
-      <div className="flex flex-col lg:flex-row gap-4">
-        <CommonInput placeholder="Search influencers..." icon={<Search />} />
-
-        <Button
-          variant="outline"
-          className="border-gray-700 text-gray-300 hover:text-white w-full lg:w-auto"
-        >
-          <Filter className="w-4 h-4 mr-2" />
-          Filter
-        </Button>
+    <div className="p-6 bg-black-500 !min-h-[calc(100vh-120px)]  rounded-lg">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-white">Influencers Rank</h2>
+      </div>
+      <div >
+        <FiltersBar
+          filters={filters}
+          selectedFilters={selectedFilters}
+          onFilterChange={handleFilterChange}
+          searchable
+          search={search}
+          onSearchChange={(val) => {
+            setSearch(val);
+            // reset page if pagination
+          }}
+        />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {influencers.map((influencer) => (
+          <InfluencerCard
+            key={influencer.id}
+            {...influencer}
+            onEdit={() => {
+              setSelectedInfluencers(influencer);
+              // setEditOpen(true)
+            }}
+            onDelete={() => {
+              setSelectedInfluencers(influencer);
+              setDeleteOpen(true);
+            }}
+          />
+        ))}
       </div>
 
-      <Card className="bg-dashboard-card border-gray-800">
-        <CardHeader>
-          <CardTitle className="text-white">Influencer Management</CardTitle>
-          <CardDescription className="text-gray-400">
-            Manage influencer profiles and applications
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-12 text-gray-400">
-            <UserCheck className="w-12 h-12 mx-auto mb-4 text-gray-600" />
-            <p>Influencer management interface will be implemented here</p>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Delete Modal */}
+      <DeleteConfirmModal
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        onConfirm={handleDelete}
+        title="Delete Influencer"
+        description={`Are you sure you want to delete "${selectedInfluencers?.title}"? This action cannot be undone.`}
+      />
     </div>
   );
-}
+};
+
+export default InfluencersRank;

@@ -72,7 +72,7 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        "relative z-50 max-h-60 min-w-[8rem] overflow-hidden rounded-lg border border-black-300 bg-black-600 text-gray-200 shadow-md",
+        "relative z-50 max-h-60 w-[var(--radix-select-trigger-width)] overflow-hidden rounded-lg border border-black-300 bg-black-600 text-gray-200 shadow-md",
         "data-[state=open]:animate-in data-[state=closed]:animate-out",
         "data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2",
         className

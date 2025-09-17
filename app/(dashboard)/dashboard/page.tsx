@@ -42,14 +42,14 @@ const columns = [
     label: "Actions",
     render: (row: any) => (
       <div className="flex justify-center gap-3">
-        <button className="p-1 hover:text-white">
+        <button className="p-1 border border-black-600">
           <Eye size={16} />
         </button>
-        <button className="p-1 hover:text-blue-400">
+        <button className="p-1 border border-black-600">
           <Edit size={16} />
         </button>
-        <button className="p-1 hover:text-red-400">
-          <Trash2 size={16} />
+        <button className="p-1 rounded-md  bg-red-600">
+          <Trash2 size={16}  />
         </button>
       </div>
     ),

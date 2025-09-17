@@ -1,15 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, ReactNode } from "react";
-import { Search, ChevronLeft, ChevronRight } from "lucide-react";
-import CommonInput from "../input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../select";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   Table,
   TableHeader,
@@ -18,6 +10,7 @@ import {
   TableCell,
   TableHead,
 } from "./table";
+import FiltersBar from "../commonComponent/FiltersBar"; 
 
 export interface Column<T> {
   key: keyof T | string;
@@ -106,78 +99,63 @@ export function CommonTable<T extends { [key: string]: any }>({
         </div>
       )}
 
-      {/* Filters & Search */}
-      <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-wrap gap-3">
-          {filters.map((filter) => (
-            <Select
-              key={filter.key}
-              value={selectedFilters[filter.key] || ""}
-              onValueChange={(val) => handleFilterChange(filter.key, val)}
-            >
-              <SelectTrigger className="w-[160px]">
-                <SelectValue placeholder={filter.label} />
-              </SelectTrigger>
-              <SelectContent>
-                {filter.options.map((opt) => (
-                  <SelectItem key={opt} value={opt}>
-                    {opt}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ))}
-        </div>
-
-        {searchable && (
-          <CommonInput
-            type="search"
-            placeholder="Search"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            icon={<Search />}
-            className="border-black-200 md:w-64"
-          />
-        )}
-      </div>
-
-      {/* Table (old responsive rendering) */}
-     <div className="w-full overflow-x-auto">
-  <Table className="w-full border-collapse text-sm">
-    <TableHeader>
-      <TableRow className="text-left border-b border-black-500">
-        {columns.map((col) => (
-          <TableHead key={col.key as string} className="py-3 px-4 whitespace-nowrap">
-            {col.label}
-          </TableHead>
-        ))}
-      </TableRow>
-    </TableHeader>
-    <TableBody>
-      {paginated.length > 0 ? (
-        paginated.map((row, idx) => (
-          <TableRow key={idx} className="border-b border-black-500">
-            {columns.map((col) => (
-              <TableCell key={col.key as string} className="py-3 px-4 whitespace-nowrap">
-                {col.render ? col.render(row) : row[col.key]}
-              </TableCell>
-            ))}
-          </TableRow>
-        ))
-      ) : (
-        <TableRow>
-          <TableCell colSpan={columns.length} className="py-6 text-center">
-            No data found
-          </TableCell>
-        </TableRow>
+      {/* ✅ Reusable FiltersBar */}
+      {(filters.length > 0 || searchable) && (
+        <FiltersBar
+          filters={filters}
+          selectedFilters={selectedFilters}
+          onFilterChange={handleFilterChange}
+          searchable={searchable}
+          search={search}
+          onSearchChange={(val) => {
+            setSearch(val);
+            setPage(1);
+          }}
+        />
       )}
-    </TableBody>
-  </Table>
-</div>
 
+      {/* Table */}
+      <div className="w-full overflow-x-auto">
+        <Table className="w-full border-collapse text-sm">
+          <TableHeader>
+            <TableRow className="text-left border-b border-black-500">
+              {columns.map((col) => (
+                <TableHead
+                  key={col.key as string}
+                  className="py-3 px-4 whitespace-nowrap"
+                >
+                  {col.label}
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginated.length > 0 ? (
+              paginated.map((row, idx) => (
+                <TableRow key={idx} className="border-b border-black-500">
+                  {columns.map((col) => (
+                    <TableCell
+                      key={col.key as string}
+                      className="py-3 px-4 whitespace-nowrap"
+                    >
+                      {col.render ? col.render(row) : row[col.key]}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="py-6 text-center"
+                >
+                  No data found
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       {/* Pagination */}
       <div className="mt-4 flex items-center justify-between gap-2">
@@ -220,5 +198,3 @@ export function CommonTable<T extends { [key: string]: any }>({
     </div>
   );
 }
-
-
