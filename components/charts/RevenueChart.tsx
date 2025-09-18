@@ -9,7 +9,14 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { Select,SelectTrigger,SelectValue,SelectGroup,SelectItem,SelectContent } from "../ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectGroup,
+  SelectItem,
+  SelectContent,
+} from "../ui/select";
 
 const data = [
   { month: "Jun", revenue: 15000 },
@@ -38,23 +45,24 @@ export default function RevenueChart() {
   return (
     <div className="w-full h-[450px] bg-black-500 rounded-2xl p-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-white text-lg font-semibold mb-4">
-          Revenue Generated
-        </h2>
-           <Select defaultValue="January" onValueChange={(value) => console.log("Selected month:", value)}>
-         <SelectTrigger className="w-[160px]">
-           <SelectValue placeholder="Month" />
-         </SelectTrigger>
-         <SelectContent className="w-[160px]">
-           <SelectGroup>
-             {months.map((month) => (
-               <SelectItem key={month} value={month}>
-                 {month}
-               </SelectItem>
-             ))}
-           </SelectGroup>
-         </SelectContent>
-       </Select>
+        <h2 className="text-white text-lg font-semibold ">Revenue Generated</h2>
+        <Select
+          defaultValue="January"
+          onValueChange={(value) => console.log("Selected month:", value)}
+        >
+          <SelectTrigger className="w-[160px]">
+            <SelectValue placeholder="Month" />
+          </SelectTrigger>
+          <SelectContent className="w-[160px]">
+            <SelectGroup>
+              {months.map((month) => (
+                <SelectItem key={month} value={month}>
+                  {month}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
       </div>
       <ResponsiveContainer width="100%" height={350}>
         <AreaChart
@@ -68,7 +76,7 @@ export default function RevenueChart() {
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
-          <XAxis dataKey="month" stroke="#888"/>
+          <XAxis dataKey="month" stroke="#888" />
           <YAxis
             stroke="#888"
             tickFormatter={(val) => `$${(val / 1000).toFixed(0)}K`}

@@ -10,7 +10,8 @@ import {
   TableCell,
   TableHead,
 } from "./table";
-import FiltersBar from "../commonComponent/FiltersBar"; 
+import FiltersBar from "../commonComponent/FiltersBar";
+import { Button } from "../button";
 
 export interface Column<T> {
   key: keyof T | string;
@@ -32,6 +33,7 @@ interface Props<T> {
   searchable?: boolean;
   title?: string;
   action?: React.ReactNode;
+  mobileView?: "scroll" | "card"; // ✅ new prop
 }
 
 export function CommonTable<T extends { [key: string]: any }>({
@@ -42,6 +44,7 @@ export function CommonTable<T extends { [key: string]: any }>({
   searchable = true,
   title,
   action,
+  mobileView = "scroll", // ✅ default = scrollable
 }: Props<T>) {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -90,7 +93,7 @@ export function CommonTable<T extends { [key: string]: any }>({
   }, [page, filteredData, rowsPerPage]);
 
   return (
-    <div className="w-[100vw] md:w-auto rounded-md bg-black-500 p-4 text-gray-100">
+    <div className="w-[100vw] md:w-auto rounded-md bg-black-500 p-2 text-white">
       {/* Title & Action */}
       {(title || action) && (
         <div className="mb-4 flex items-center justify-between">
@@ -114,47 +117,88 @@ export function CommonTable<T extends { [key: string]: any }>({
         />
       )}
 
-      {/* Table */}
-      <div className="w-full overflow-x-auto">
-        <Table className="w-full border-collapse text-sm">
-          <TableHeader>
-            <TableRow className="text-left border-b border-black-500">
-              {columns.map((col) => (
-                <TableHead
-                  key={col.key as string}
-                  className="py-3 px-4 whitespace-nowrap"
-                >
-                  {col.label}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paginated.length > 0 ? (
-              paginated.map((row, idx) => (
-                <TableRow key={idx} className="border-b border-black-500">
-                  {columns.map((col) => (
-                    <TableCell
+      {/* ✅ Card layout (mobile only, when mobileView = "card") */}
+      {mobileView === "card" && (
+        <div className="grid gap-4 sm:hidden">
+          {paginated.length > 0 ? (
+            paginated.map((row, idx) => (
+              <div
+                key={idx}
+                className="rounded-lg bg-black-300 p-4 shadow space-y-3"
+              >
+                {/* Info fields */}
+                {columns.map((col) => {
+                  // ✅ Skip actions & icons (if you have a column named "actions")
+                  if (col.key === "actions") return null;
+
+                  return (
+                    <div
                       key={col.key as string}
-                      className="py-3 px-4 whitespace-nowrap"
+                      className="flex justify-between text-sm"
                     >
-                      {col.render ? col.render(row) : row[col.key]}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="py-6 text-center"
-                >
-                  No data found
-                </TableCell>
+                      <span className="text-white">{col.label}</span>
+                      <span className="text-white">
+                        {col.render ? col.render(row) : row[col.key]}
+                      </span>
+                    </div>
+                  );
+                })}
+                {/* Action buttons */}
+                <div className="flex justify-between gap-3 w-full">
+                  <Button className="flex-1">Edit</Button>
+                  <Button variant="outline" className="flex-1">Suspend</Button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="p-6 text-center text-gray-400">No data found</div>
+          )}
+        </div>
+      )}
+
+      {/* ✅ Table (always on desktop, mobile only if not card view) */}
+      <div className={`${mobileView === "card" ? "hidden sm:block" : "block"}`}>
+        <div className="w-full overflow-x-auto">
+          <Table className="w-full border-collapse text-sm">
+            <TableHeader>
+              <TableRow className="text-left border-b border-black-500">
+                {columns.map((col) => (
+                  <TableHead
+                    key={col.key as string}
+                    className="py-3 px-4 whitespace-nowrap"
+                  >
+                    {col.label}
+                  </TableHead>
+                ))}
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {paginated.length > 0 ? (
+                paginated.map((row, idx) => (
+                  <TableRow key={idx} className="border-b border-black-500">
+                    {columns.map((col) => (
+                      <TableCell
+                        key={col.key as string}
+                        className="py-3 px-4 whitespace-nowrap"
+                      >
+                        {col.render ? col.render(row) : row[col.key]}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="py-6 text-center"
+                  >
+                    No data found
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       {/* Pagination */}
