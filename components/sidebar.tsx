@@ -13,6 +13,7 @@ import {
   Tags,
   X,
   ChevronDown,
+  Camera,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -22,17 +23,17 @@ import { useState } from "react";
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
   {
-    label: 'Master',
+    label: "Master",
     icon: Users,
     children: [
-      { label: 'Categories', href: '/master/categories' },
-      { label: 'Sub Categories', href: '/master/sub-category' },
-      { label: 'Countries', href: '/master/countries' },
-      { label: 'Influencers Rank', href: '/master/influencers-rank' },
+      { label: "Categories", href: "/master/categories" },
+      { label: "Sub Categories", href: "/master/sub-category" },
+      { label: "Countries", href: "/master/countries" },
+      { label: "Influencers Rank", href: "/master/influencers-rank" },
     ],
   },
   { icon: UserCheck, label: "Influencers", href: "/influencers" },
-  { icon: Building2, label: "Service Providers", href: "/service-providers" },
+  { icon: Camera, label: "Photographers", href: "/photographers" },
   { icon: Calendar, label: "Service Booking", href: "/service-booking" },
   { icon: Calendar, label: "Events Management", href: "/events" },
   { icon: Building2, label: "Business Owners", href: "/business-owners" },

@@ -27,10 +27,10 @@ const columns = [
       <span
         className={`rounded px-2 py-1 text-xs ${
           row.status === "Confirmed"
-            ? "bg-green-900/20 text-green-400 border border-green-500/30"
+            ? "text-green-400 border border-green-500/30"
             : row.status === "Canceled"
-            ? "bg-red-900/20 text-red-400 border border-red-500/30"
-            : "bg-blue-900/20 text-blue-400 border border-blue-500/30"
+            ? " text-red-400 border border-red-500/30"
+            : " text-blue-400 border border-blue-500/30"
         }`}
       >
         {row.status}
@@ -86,18 +86,24 @@ const data = [
   },
 ];
 const filters = [
+   { key: "month", label: "Month", options: ["January", "February", "March"] },
   {
     key: "status",
     label: "Status",
     options: ["Confirmed", "Pending", "Canceled"],
   },
+   {
+        key: "date",
+        label: "Date",
+        options: ["2025-09-15", "2025-09-20"],
+      },
   { key: "category", label: "Category", options: ["Music", "Tech", "Sports"] },
-  { key: "month", label: "Month", options: ["January", "February", "March"] },
+ 
 ];
 
 export default function DashboardPage() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <StatsCards />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
