@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Bell, User, Menu } from "lucide-react";
+import { Search, Bell, User, Menu, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import CommonInput from "./ui/input";
+import Image from "next/image";
 
 interface NavbarProps {
   onMenuClick?: () => void;
@@ -21,7 +22,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
   return (
     <header className="h-[78px] flex items-center justify-between px-4 lg:px-6 bg-black-500 border-b border-black-300">
       {/* Mobile Menu Button */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         {onMenuClick && (
           <Button
             variant="ghost"
@@ -32,11 +33,20 @@ export function Navbar({ onMenuClick }: NavbarProps) {
             <Menu className="h-5 w-5" />
           </Button>
         )}
+        <div className="lg:hidden">
+          <Image
+            src="/Logo.png"
+            alt="OSADO Logo"
+            width={110}
+            height={30}
+            className="object-contain"
+          />
+        </div>
       </div>
 
       {/* Search */}
-      <div className="flex items-center gap-4 flex-1 w-full">
-        <div className="relative w-full">
+      <div className="hidden lg:flex items-center gap-4 flex-1 w-full">
+        <div className="relative w-full hidden lg:block">
           <CommonInput
             placeholder="Search"
             className="border-black-200 w-full lg:w-[350px]"
@@ -46,7 +56,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
       </div>
 
       {/* Right Side */}
-      <div className="hidden lg:flex items-center">
+      <div className="flex items-center">
         {/* Notifications */}
         <Button
           // variant="ghost"
@@ -64,12 +74,20 @@ export function Navbar({ onMenuClick }: NavbarProps) {
               className="flex items-center gap-2 bg-transparent hover:bg-transparent text-white p-1 lg:p-2"
             >
               <span className="text-sm hidden lg:block">Sean Taylor</span>
-              <Avatar className="h-7 w-7 lg:h-9 lg:w-9">
-                <AvatarImage src="/avatar-placeholder.jpg" />
+              {/* Avatar */}
+              <Avatar className="h-9 w-9">
+                <AvatarImage src="https://randomuser.me/api/portraits/men/46.jpg" />
                 <AvatarFallback>ST</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
+          <Button
+            // variant="ghost"
+            size="icon"
+            className="text-white-100 bg-transparent hover:bg-transparent lg:hidden"
+          >
+            <LogOut className="h-5 w-5" />
+          </Button>
           <DropdownMenuContent
             align="end"
             className="w-56 bg-dashboard-card border-gray-700"

@@ -3,10 +3,10 @@
 import { Music, Dumbbell, Palette, Briefcase, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import AddCategoryModal from "../categories/AddCategoryForm";
-import EditCategoryModal from "../categories/EditCategoryForm";
 import DeleteConfirmModal from "@/components/ui/commonComponent/DeleteConfirmModal";
 import CategoryCard from "../categories/CategoryCard";
+import EditSubCategoryModal from "./EditSubcategoryForm";
+import AddSubCategoryModal from "./AddSubcategoryForm";
 
 const categories = [
   {
@@ -60,16 +60,14 @@ export default function SubCategories() {
 
   return (
     <div className="p-6 bg-black-500 !min-h-[calc(100vh-120px)]  rounded-lg">
-      
-        <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-white">Subcategories for Travel & Outdoor</h2>
-        <Button
-            onClick={() => setAddOpen(true)}
-            leftIcon={<Plus size={18} />}
-        > 
-            <span className="hidden md:inline">Add Subcategory</span>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-white">
+          Subcategories for Travel & Outdoor
+        </h2>
+        <Button onClick={() => setAddOpen(true)} leftIcon={<Plus size={18} />}>
+          <span className="hidden md:inline">Add Subcategory</span>
         </Button>
-        </div>
+      </div>
 
       {/* Responsive Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -88,15 +86,15 @@ export default function SubCategories() {
           />
         ))}
       </div>
-     {/* Add Modal */}
-       <AddCategoryModal
+      {/* Add Modal */}
+      <AddSubCategoryModal
         open={addOpen}
         setOpen={setAddOpen}
         onSave={handleAdd}
       />
 
       {/* Edit Modal */}
-      <EditCategoryModal
+      <EditSubCategoryModal
         open={editOpen}
         setOpen={setEditOpen}
         selectedCategory={selectedCategory}
@@ -108,7 +106,7 @@ export default function SubCategories() {
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         onConfirm={handleDelete}
-        title="Delete Category"
+        title="Delete Subcategory"
         description={`Are you sure you want to delete "${selectedCategory?.title}"? This action cannot be undone.`}
       />
     </div>

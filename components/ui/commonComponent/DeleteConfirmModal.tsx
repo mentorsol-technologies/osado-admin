@@ -3,8 +3,6 @@
 import { Button } from "../button";
 import Modal from "../Modal";
 
-
-
 interface DeleteConfirmModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -27,18 +25,12 @@ export default function DeleteConfirmModal({
   return (
     <Modal
       open={open}
+      size="md"
       onOpenChange={onOpenChange}
       title={title}
       description={description}
       footer={
         <div className="flex flex-col sm:flex-row  gap-3 w-full">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            className="flex-1"
-          >
-            {cancelText}
-          </Button>
           <Button
             onClick={() => {
               onConfirm();
@@ -48,9 +40,17 @@ export default function DeleteConfirmModal({
           >
             {confirmText}
           </Button>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="flex-1"
+          >
+            {cancelText}
+          </Button>
         </div>
       }
     >
+      <></>
     </Modal>
   );
 }

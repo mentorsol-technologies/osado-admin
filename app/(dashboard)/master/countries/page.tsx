@@ -25,7 +25,7 @@ const Countries = () => {
     },
     {
       key: "create-at",
-      label: "Create Date",
+      label: "Created Date",
       options: ["Active", "Inactive", "Pending"],
     },
   ];
@@ -104,7 +104,7 @@ const Countries = () => {
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         onConfirm={handleDelete}
-        title="Delete Category"
+        title="Delete Country"
         description={`Are you sure you want to delete "${selectedCountry?.title}"? This action cannot be undone.`}
       />
     </div>

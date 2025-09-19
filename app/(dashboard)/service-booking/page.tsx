@@ -15,8 +15,7 @@ export default function ServiceBookingPage() {
   const [refundOpen, setRefundOpen] = useState(false);
   const [suspendOpen, setSuspendOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
-    const [AddOpen, setAddOpen] = useState(false);
-
+  const [AddOpen, setAddOpen] = useState(false);
 
   const columns = [
     { key: "booking_id", label: "Booking ID" },
@@ -118,15 +117,16 @@ export default function ServiceBookingPage() {
 
   const filters = [
     {
+      key: "sort_by",
+      label: "Sort by",
+      options: ["Newest", "Oldest", "A–Z", "Z–A"],
+    },
+    {
       key: "status",
       label: "Status",
       options: ["Confirmed", "Pending", "Canceled"],
     },
-    {
-      key: "rank",
-      label: "Rank",
-      options: ["Gold", "Silver", "Bronze"],
-    },
+
     {
       key: "provider",
       label: "Provider",
@@ -145,7 +145,7 @@ export default function ServiceBookingPage() {
     setRefundOpen(false);
     setSuspendOpen(true);
   };
-    const handleEditSave = (data: any) => {
+  const handleEditSave = (data: any) => {
     console.log("Edited Booking Data:", data);
     setEditOpen(false);
   };
@@ -161,8 +161,11 @@ export default function ServiceBookingPage() {
         <h2 className="text-xl sm:text-2xl font-bold text-white">
           Service Booking
         </h2>
-        <Button leftIcon={<Plus size={18} />} className="w-full sm:w-auto"   onClick={() => setAddOpen(true)} 
->
+        <Button
+          leftIcon={<Plus size={18} />}
+          className="w-full sm:w-auto"
+          onClick={() => setAddOpen(true)}
+        >
           Add New Booking
         </Button>
       </div>
@@ -176,6 +179,14 @@ export default function ServiceBookingPage() {
           rowsPerPage={5}
           filters={filters}
           searchable
+          onSuspendClick={(row) => {
+            setSelectedBooking(row);
+            setSuspendOpen(true);
+          }}
+          onEditClick={(row) => {
+            setSelectedBooking(row);
+            setEditOpen(true);
+          }}
         />
       </div>
       {/* Modal for viewing booking */}
@@ -194,7 +205,7 @@ export default function ServiceBookingPage() {
           comment: "",
         }}
         onSave={handleRefundSubmit}
-        onCancelClick={() => setSuspendOpen(true)}
+        onCancelClick={() => setRefundOpen(false)}
       />
 
       {/* Suspended modal */}
@@ -203,22 +214,22 @@ export default function ServiceBookingPage() {
         setOpen={setSuspendOpen}
         onSave={handleSuspendSubmit}
       />
-        {/* Add new Booking Modal */}
-     <AddBookingModal
-  open={AddOpen}
-  setOpen={setAddOpen}
-  selectedBooking={{
-    bookingId: "",
-    serviceName: "",
-    amount: "",
-    status: "Confirmed",
-  }}
-  onSave={(data: any) => {
-    console.log("New Booking Data:", data);
-    setAddOpen(false); // close modal after save
-  }}
-/>
-         {/* Edit Modal */}
+      {/* Add new Booking Modal */}
+      <AddBookingModal
+        open={AddOpen}
+        setOpen={setAddOpen}
+        selectedBooking={{
+          bookingId: "",
+          serviceName: "",
+          amount: "",
+          status: "Confirmed",
+        }}
+        onSave={(data: any) => {
+          console.log("New Booking Data:", data);
+          setAddOpen(false); // close modal after save
+        }}
+      />
+      {/* Edit Modal */}
       <EditBookingModal
         open={editOpen}
         setOpen={setEditOpen}

@@ -133,7 +133,7 @@ const Photographers = () => {
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         onConfirm={handleDelete}
-        title="Delete Influencer"
+        title="Delete Photographer"
         description={`Are you sure you want to delete "${selectedInfluencers?.title}"? This action cannot be undone.`}
       />
     </div>
