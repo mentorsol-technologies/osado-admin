@@ -73,7 +73,7 @@ export default function EditRankModal({
       footer={
         <div className="flex flex-col sm:flex-row gap-3 w-full">
           <Button onClick={handleSubmit(onSubmit)} className="flex-1">
-            Save
+            Submit
           </Button>
           <Button
             variant="outline"

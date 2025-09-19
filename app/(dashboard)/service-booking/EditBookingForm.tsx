@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import CommonInput from "@/components/ui/input";
 import Modal from "@/components/ui/Modal";
-import { Briefcase, Dumbbell, Utensils, Plus } from "lucide-react";
+import { Briefcase, Dumbbell, Utensils, Plus, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 const schema = z.object({
@@ -89,28 +89,37 @@ export default function EditBookingModal({
       }
     >
       {/* Top user section */}
-      <div className="flex flex-col lg:flex-row gap-3 justify-between lg:items-center mb-6">
-        <div className="flex items-center gap-3">
-          <img
-            src="https://randomuser.me/api/portraits/women/30.jpg"
-            alt="Provider"
-            className="w-12 h-12 rounded-full"
-          />
-          <div>
-            <p className="font-semibold">Emily Carter</p>
-            <p className="text-xs text-gray-400">Photographer</p>
+      <div className="flex flex-col lg:flex-row lg:justify-between gap-6 mb-6">
+        {/* Provider */}
+        <div className="flex justify-between items-center w-full gap-3">
+          <div className="flex items-center gap-3">
+            <img
+              src="https://randomuser.me/api/portraits/women/30.jpg"
+              alt="Provider"
+              className="w-12 h-12 rounded-full object-cover"
+            />
+            <div>
+              <p className="font-semibold text-white">Emily Carter</p>
+              <p className="text-xs text-gray-400">Photographer</p>
+            </div>
           </div>
+          <RefreshCw className="h-5 w-5 text-white cursor-pointer" />
         </div>
-        <div className="flex items-center gap-3">
-          <img
-            src="https://randomuser.me/api/portraits/men/20.jpg"
-            alt="Customer"
-            className="w-12 h-12 rounded-full"
-          />
-          <div>
-            <p className="font-semibold">Keith White</p>
-            <p className="text-xs text-gray-400">Customer</p>
+
+        {/* Customer */}
+        <div className="flex justify-between items-center w-full gap-3">
+          <div className="flex items-center gap-3">
+            <img
+              src="https://randomuser.me/api/portraits/men/20.jpg"
+              alt="Customer"
+              className="w-12 h-12 rounded-full object-cover"
+            />
+            <div>
+              <p className="font-semibold text-white">Keith White</p>
+              <p className="text-xs text-gray-400">Customer</p>
+            </div>
           </div>
+          <RefreshCw className="h-5 w-5 text-white cursor-pointer" />
         </div>
       </div>
 
