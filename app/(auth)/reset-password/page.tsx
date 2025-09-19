@@ -13,22 +13,50 @@ const ForgetPassword = () => {
     {
       code: "+965",
       name: "Kuwait",
-      flag: <Image src={"/images/countryFlag.svg"} alt="KW Flag" width={24} height={24} />,
+      flag: (
+        <Image
+          src={"/images/countryFlag.svg"}
+          alt="KW Flag"
+          width={24}
+          height={24}
+        />
+      ),
     },
     {
       code: "+91",
       name: "India",
-      flag: <Image src={"/images/countryFlag.svg"} alt="IN Flag" width={24} height={24} />,
+      flag: (
+        <Image
+          src={"/images/countryFlag.svg"}
+          alt="IN Flag"
+          width={24}
+          height={24}
+        />
+      ),
     },
     {
       code: "+96",
       name: "UAE",
-      flag: <Image src={"/images/countryFlag.svg"} alt="AE Flag" width={24} height={24} />,
+      flag: (
+        <Image
+          src={"/images/countryFlag.svg"}
+          alt="AE Flag"
+          width={24}
+          height={24}
+        />
+      ),
     },
     {
       code: "+92",
       name: "Pakistan",
-      flag: <Image src={"/images/countryFlag.svg"} alt="PK Flag" width={24} height={24} />,
+      flag: (
+        <Image
+          src={"/images/countryFlag.svg"}
+          alt="PK Flag"
+          width={24}
+          height={24}
+        />
+      ),
     },
   ];
 
@@ -79,7 +107,7 @@ const ForgetPassword = () => {
           <div className="pt-[110px]">
             <Button
               type="submit"
-              onClick={() => router.push("/verify-account")}
+              onClick={() => router.push("/create-password")}
               className="w-full text-white-100 bg-red-600 rounded-xl py-6 hover:bg-red-700"
             >
               Continue
