@@ -79,7 +79,7 @@ export default function EditCountryModal({
       {/* Two-column row */}
       <div className="flex flex-col sm:flex-row gap-3 w-full">
         <div className="flex-1 flex-col sm:flex-row ">
-          <label className="block text-sm mb-1">Category Name</label>
+          <label className="block text-sm mb-1">Country Name</label>
           <CommonInput placeholder="Category Name" {...register("title")} />
           {errors.title && (
             <p className="text-xs text-red-500 mt-1">{errors.title.message}</p>
