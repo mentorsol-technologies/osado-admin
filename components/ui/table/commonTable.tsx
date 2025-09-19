@@ -149,8 +149,7 @@ export function CommonTable<T extends { [key: string]: any }>({
                 })}
                 {/* Action buttons */}
                 <div className="flex justify-between gap-3 w-full">
-                  <Button className="flex-1"     onClick={() => onEditClick(row)}
->Edit</Button>
+                  <Button className="flex-1" onClick={() => onEditClick?.(row)}>Edit</Button>
                   <Button
                     variant="outline"
                     className="flex-1"

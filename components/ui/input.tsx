@@ -5,6 +5,12 @@ import { Eye } from "lucide-react";
 import { Label } from "./label";
 import Image from "next/image";
 
+export type Country = {
+  code: string;
+  name: string;
+  flag: ReactNode;
+};
+
 type CommonInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label?: string;
   placeholder?: string;

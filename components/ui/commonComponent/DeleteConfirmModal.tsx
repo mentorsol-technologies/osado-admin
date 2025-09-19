@@ -49,6 +49,8 @@ export default function DeleteConfirmModal({
           </Button>
         </div>
       }
-    ></Modal>
+    >
+      <></>
+    </Modal>
   );
 }
