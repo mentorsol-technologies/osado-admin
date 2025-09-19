@@ -129,7 +129,7 @@ export default function EditRankModal({
             onValueChange={(val) => setValue("visited_events", val)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Number of visited events" />
+              <SelectValue placeholder="Select Number of visited events" />
             </SelectTrigger>
             <SelectContent>
               {[1, 2, 3, 4, 5].map((num) => (
@@ -156,7 +156,7 @@ export default function EditRankModal({
             onValueChange={(val) => setValue("positive_reviews", val)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Number of positive reviews" />
+              <SelectValue placeholder="Select Number of positive reviews" />
             </SelectTrigger>
             <SelectContent>
               {[1, 2, 3, 4, 5].map((num) => (

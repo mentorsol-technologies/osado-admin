@@ -26,7 +26,7 @@ const InfluencersRank = () => {
     },
     {
       key: "create-at",
-      label: "Create Date",
+      label: "Created Date",
       options: ["Active", "Inactive", "Pending"],
     },
   ];

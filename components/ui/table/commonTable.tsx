@@ -33,7 +33,9 @@ interface Props<T> {
   searchable?: boolean;
   title?: string;
   action?: React.ReactNode;
-  mobileView?: "scroll" | "card"; // ✅ new prop
+  mobileView?: "scroll" | "card"; 
+  onSuspendClick?: (row: T) => void;
+  onEditClick?:(row:T)=> void;
 }
 
 export function CommonTable<T extends { [key: string]: any }>({
@@ -44,7 +46,9 @@ export function CommonTable<T extends { [key: string]: any }>({
   searchable = true,
   title,
   action,
-  mobileView = "scroll", // ✅ default = scrollable
+  mobileView = "scroll", 
+  onSuspendClick,
+  onEditClick,
 }: Props<T>) {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -145,8 +149,15 @@ export function CommonTable<T extends { [key: string]: any }>({
                 })}
                 {/* Action buttons */}
                 <div className="flex justify-between gap-3 w-full">
-                  <Button className="flex-1">Edit</Button>
-                  <Button variant="outline" className="flex-1">Suspend</Button>
+                  <Button className="flex-1"     onClick={() => onEditClick(row)}
+>Edit</Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => onSuspendClick?.(row)}
+                  >
+                    Suspend
+                  </Button>
                 </div>
               </div>
             ))

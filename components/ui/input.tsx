@@ -33,6 +33,10 @@ type CommonInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   error?: boolean;
   errorMessage?: string;
   maxLength?: number;
+  countries?: Country[];
+  selectedCountry?: Country;
+  onCountryChange?: (country: Country) => void;
+  showCountryDropdown?: boolean;
 };
 
 const CommonInput: React.FC<CommonInputProps> = ({
@@ -50,11 +54,16 @@ const CommonInput: React.FC<CommonInputProps> = ({
   errorMessage = "",
   autoComplete = "off",
   maxLength,
+  countries,
+  selectedCountry,
+  onCountryChange,
+  showCountryDropdown = false,
   ...rest
 }) => {
   const inputId = name || `input-${label?.toLowerCase().replace(/\s+/g, "-")}`;
 
   const [showPassword, setShowPassword] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const isPasswordType = type === "password";
   const actualType = isPasswordType
     ? showPassword
@@ -75,6 +84,38 @@ const CommonInput: React.FC<CommonInputProps> = ({
       <div
         className={`flex items-center min-h-[51px] w-full rounded-[14px] border border-black-300 bg-black-500 px-[14px] gap-2 ${className}`}
       >
+         {/* Country Dropdown */}
+        {showCountryDropdown && countries && selectedCountry && (
+          <div className="relative">
+            <button
+              type="button"
+              className="flex items-center gap-2 text-white-100 text-sm font-medium pr-2"
+              onClick={() => setIsDropdownOpen((prev) => !prev)}
+            >
+              {selectedCountry.flag}
+              {selectedCountry.code}
+            </button>
+
+            {isDropdownOpen && (
+              <div className="absolute top-full left-0 mt-2 bg-black-600 border border-black-300 rounded-lg shadow-lg z-10 w-[120px]">
+                {countries.map((country, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      onCountryChange?.(country);
+                      setIsDropdownOpen(false);
+                    }}
+                    className="flex items-center gap-2 px-3 py-2 w-full text-left text-white-100 hover:bg-black-400"
+                  >
+                    {country.flag}
+                    {country.code}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
         {icon && !prefix && <span className="text-white-100">{icon}</span>}
         {icon && prefix && (
           <span className="flex items-center gap-2 text-white-100 text-sm font-medium pr-2">
@@ -82,11 +123,11 @@ const CommonInput: React.FC<CommonInputProps> = ({
             {prefix}
           </span>
         )}
-        {!icon && prefix && (
+        {/* {!icon && prefix && (
           <span className="text-[#484A4C] text-sm font-medium pr-2">
             {prefix}
           </span>
-        )}
+        )} */}
 
         <input
           id={inputId}
@@ -109,7 +150,7 @@ const CommonInput: React.FC<CommonInputProps> = ({
             className="text-gray-500 focus:outline-none cursor-pointer"
           >
             {showPassword ? (
-              <Eye size={22}  color="white" />
+              <Eye size={22} color="white" />
             ) : (
               <Image
                 src={"/images/streamline_invisible-2.png"}
