@@ -3,7 +3,6 @@
 import * as React from "react";
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { buttonVariants } from "@/components/ui/button";
 
 interface PaginationProps {
   totalPages: number;
@@ -18,67 +17,102 @@ const Pagination: React.FC<PaginationProps> = ({
   onPageChange,
   className,
 }) => {
-  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+  const renderPages = () => {
+    const pages: (number | string)[] = [];
+
+    if (totalPages <= 5) {
+      // Show all if few pages
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Always show first page
+      pages.push(1);
+
+      if (currentPage > 3) {
+        pages.push("...");
+      }
+
+      // Middle pages
+      for (
+        let i = Math.max(2, currentPage - 1);
+        i <= Math.min(totalPages - 1, currentPage + 1);
+        i++
+      ) {
+        pages.push(i);
+      }
+
+      if (currentPage < totalPages - 2) {
+        pages.push("...");
+      }
+
+      // Always show last page
+      pages.push(totalPages);
+    }
+
+    return pages;
+  };
 
   return (
-    <nav
+    <section
       role="navigation"
       aria-label="pagination"
-      className={cn("flex items-center justify-center gap-2", className)}
+      className={cn("flex items-center justify-between gap-2", className)}
     >
+      {/* Left: Previous + Pages */}
+
       {/* Previous */}
       <button
         onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
-        className={cn(
-          buttonVariants({ variant: "ghost", size: "icon" }),
-          "rounded-md"
-        )}
         disabled={currentPage === 1}
+        className={cn(
+          "flex h-9 w-9 items-center justify-center rounded-lg border border-gray-700 text-white transition hover:bg-gray-800 disabled:opacity-40 cursor-pointer"
+        )}
       >
         <ChevronLeft className="h-4 w-4" />
       </button>
 
       {/* Page Numbers */}
-      {pages.map((page) => (
-        <button
-          key={page}
-          onClick={() => onPageChange(page)}
-          aria-current={currentPage === page ? "page" : undefined}
-          className={cn(
-            buttonVariants({
-              variant: currentPage === page ? "default" : "ghost",
-              size: "icon",
-            }),
-            currentPage === page
-              ? "bg-red-600 text-white hover:bg-red-700"
-              : "hover:bg-gray-800"
-          )}
-        >
-          {page}
-        </button>
-      ))}
+      <div className="flex items-center gap-2">
+        {renderPages().map((page, i) =>
+          page === "..." ? (
+            <span
+              key={i}
+              className="flex h-9 w-9 items-center justify-center text-gray-500"
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </span>
+          ) : (
+            <button
+              key={i}
+              onClick={() => onPageChange(Number(page))}
+              aria-current={currentPage === page ? "page" : undefined}
+              className={cn(
+                "flex h-9 w-9 items-center justify-center rounded-lg border text-sm transition cursor-pointer",
+                currentPage === page
+                  ? "bg-red-600 text-white border-red-600 hover:bg-red-700"
+                  : "border-gray-700 text-gray-300 hover:bg-gray-800"
+              )}
+            >
+              {page}
+            </button>
+          )
+        )}
+      </div>
 
-      {/* Ellipsis (optional if many pages) */}
-      {totalPages > 5 && currentPage < totalPages - 2 && (
-        <span className="flex h-9 w-9 items-center justify-center">
-          <MoreHorizontal className="h-4 w-4" />
-        </span>
-      )}
-
-      {/* Next */}
+      {/* Right: Next */}
       <button
         onClick={() =>
           currentPage < totalPages && onPageChange(currentPage + 1)
         }
-        className={cn(
-          buttonVariants({ variant: "ghost", size: "icon" }),
-          "rounded-md"
-        )}
         disabled={currentPage === totalPages}
+        className={cn(
+          "flex h-9 w-9 items-center justify-center rounded-lg border border-gray-700 text-white  transition hover:bg-gray-800 disabled:opacity-40"
+        )}
       >
         <ChevronRight className="h-4 w-4" />
       </button>
-    </nav>
+    </section>
   );
 };
 

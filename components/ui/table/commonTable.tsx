@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useMemo, ReactNode } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   Table,
   TableHeader,
@@ -12,6 +11,7 @@ import {
 } from "./table";
 import FiltersBar from "../commonComponent/FiltersBar";
 import { Button } from "../button";
+import Pagination from "../pagination";
 
 export interface Column<T> {
   key: keyof T | string;
@@ -33,9 +33,10 @@ interface Props<T> {
   searchable?: boolean;
   title?: string;
   action?: React.ReactNode;
-  mobileView?: "scroll" | "card"; 
+  mobileView?: "scroll" | "card";
   onSuspendClick?: (row: T) => void;
-  onEditClick?:(row:T)=> void;
+  onEditClick?: (row: T) => void;
+  renderCardActions?: (row: T) => ReactNode;
 }
 
 export function CommonTable<T extends { [key: string]: any }>({
@@ -46,9 +47,10 @@ export function CommonTable<T extends { [key: string]: any }>({
   searchable = true,
   title,
   action,
-  mobileView = "scroll", 
+  mobileView = "scroll",
   onSuspendClick,
   onEditClick,
+  renderCardActions,
 }: Props<T>) {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -106,7 +108,7 @@ export function CommonTable<T extends { [key: string]: any }>({
         </div>
       )}
 
-      {/* ✅ Reusable FiltersBar */}
+      {/* FiltersBar */}
       {(filters.length > 0 || searchable) && (
         <FiltersBar
           filters={filters}
@@ -121,7 +123,7 @@ export function CommonTable<T extends { [key: string]: any }>({
         />
       )}
 
-      {/* ✅ Card layout (mobile only, when mobileView = "card") */}
+      {/* Mobile Card Layout */}
       {mobileView === "card" && (
         <div className="grid gap-4 sm:hidden">
           {paginated.length > 0 ? (
@@ -130,11 +132,8 @@ export function CommonTable<T extends { [key: string]: any }>({
                 key={idx}
                 className="rounded-lg bg-black-300 p-4 shadow space-y-3"
               >
-                {/* Info fields */}
                 {columns.map((col) => {
-                  // ✅ Skip actions & icons (if you have a column named "actions")
                   if (col.key === "actions") return null;
-
                   return (
                     <div
                       key={col.key as string}
@@ -147,16 +146,26 @@ export function CommonTable<T extends { [key: string]: any }>({
                     </div>
                   );
                 })}
-                {/* Action buttons */}
                 <div className="flex justify-between gap-3 w-full">
-                  <Button className="flex-1" onClick={() => onEditClick?.(row)}>Edit</Button>
-                  <Button
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => onSuspendClick?.(row)}
-                  >
-                    Suspend
-                  </Button>
+                  {renderCardActions ? (
+                    renderCardActions(row)
+                  ) : (
+                    <>
+                      <Button
+                        className="flex-1"
+                        onClick={() => onEditClick?.(row)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => onSuspendClick?.(row)}
+                      >
+                        Suspend
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             ))
@@ -166,9 +175,12 @@ export function CommonTable<T extends { [key: string]: any }>({
         </div>
       )}
 
-      {/* ✅ Table (always on desktop, mobile only if not card view) */}
-      <div className={`${mobileView === "card" ? "hidden sm:block" : "block"}`}>
-        <div className="w-full overflow-x-auto">
+      {/* Desktop Table Layout */}
+      <div
+        className={`${mobileView === "card" ? "hidden sm:block" : "block"} relative h-[610px]`}
+      >
+        {/* Scrollable table body */}
+        <div className="overflow-y-auto h-full">
           <Table className="w-full border-collapse text-sm">
             <TableHeader>
               <TableRow className="text-left border-b border-black-500">
@@ -209,44 +221,14 @@ export function CommonTable<T extends { [key: string]: any }>({
             </TableBody>
           </Table>
         </div>
-      </div>
 
-      {/* Pagination */}
-      <div className="mt-4 flex items-center justify-between gap-2">
-        <div>
-          <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="rounded bg-gray-800 p-2 disabled:opacity-40"
-          >
-            <ChevronLeft size={18} />
-          </button>
-        </div>
-
-        <div className="flex gap-1 overflow-x-auto">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button
-              key={i}
-              onClick={() => setPage(i + 1)}
-              className={`rounded px-3 py-1 whitespace-nowrap ${
-                page === i + 1
-                  ? "bg-red-600 text-white"
-                  : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-              }`}
-            >
-              {i + 1}
-            </button>
-          ))}
-        </div>
-
-        <div>
-          <button
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-            className="rounded bg-gray-800 p-2 disabled:opacity-40"
-          >
-            <ChevronRight size={18} />
-          </button>
+        {/* Fixed Pagination */}
+        <div className="absolute bottom-0 left-0 w-full bg-black-500 py-3 border-t border-black-400">
+          <Pagination
+            totalPages={totalPages || 1}
+            currentPage={page}
+            onPageChange={setPage}
+          />
         </div>
       </div>
     </div>

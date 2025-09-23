@@ -2,12 +2,30 @@
 import FiltersBar from "@/components/ui/commonComponent/FiltersBar";
 import React, { useState } from "react";
 import EventCard from "./EventCard";
+import EventInfoModal from "./EventInfoModalForm";
+import SuspendedEventModal from "./SuspendEventModal";
+import EditEventModal from "./EditEventForm";
 
 const EventsManagement = () => {
   const [selectedFilters, setSelectedFilters] = useState<{
     [key: string]: string;
   }>({});
   const [search, setSearch] = useState("");
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [suspendOpen, setSuspendOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const handleCardClick = (eventData: any) => {
+    setSelectedEvent(eventData);
+    setOpenModal(true);
+  };
+  const handleSuspendSubmit = (data: any) => {
+    console.log("Suspended Booking Reason:", data);
+  };
+  const handleEditSave = (data: any) => {
+    console.log("Edited Event Data:", data);
+    // ✅ Update your events list or send API call here
+  };
   const filters = [
     {
       key: "sort_by",
@@ -83,11 +101,37 @@ const EventsManagement = () => {
           <EventCard
             key={idx}
             {...event}
-            onEdit={() => console.log("Edit:", event.title)}
-            onSuspend={() => console.log("Suspend:", event.title)}
+            onClick={() => handleCardClick(event)}
+            onEdit={() => {
+              setSelectedEvent(event);
+              setEditOpen(true); // ✅ open edit modal
+            }}
+            onSuspend={() => {
+              setSelectedEvent(event);
+              setSuspendOpen(true);
+            }}
           />
         ))}
       </div>
+      {/* Event Info Modal */}
+      {selectedEvent && (
+        <EventInfoModal open={openModal} onOpenChange={setOpenModal} />
+      )}
+      <SuspendedEventModal
+        open={suspendOpen}
+        setOpen={setSuspendOpen}
+        onSave={handleSuspendSubmit}
+      />
+            {/* ✅ Edit Modal */}
+      {selectedEvent && (
+        <EditEventModal
+          open={editOpen}
+          setOpen={setEditOpen}
+          selectedEvent={selectedEvent}
+          onSave={handleEditSave}
+        />
+      )}
+
     </div>
   );
 };
