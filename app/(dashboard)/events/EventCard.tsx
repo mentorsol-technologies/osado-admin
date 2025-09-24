@@ -16,6 +16,7 @@ interface EventCardProps {
   price: string;
   onEdit?: () => void;
   onSuspend?: () => void;
+  onClick?: () => void;
 }
 
 export default function EventCard({
@@ -29,11 +30,15 @@ export default function EventCard({
   price,
   onEdit,
   onSuspend,
+  onClick,
 }: EventCardProps) {
   return (
-    <div className="rounded-xl bg-black-500 border border-black-200 text-white shadow-lg overflow-hidden flex flex-col">
+    <div
+      className="rounded-xl bg-black-500 border border-black-200 text-white shadow-lg overflow-hidden flex flex-col cursor-pointer"
+      
+    >
       {/* Image */}
-      <div className="relative h-48 w-full">
+      <div className="relative h-48 w-full " onClick={onClick}>
         <Image src={image} alt={title} fill className="object-cover" />
 
         {/* Date badge on top-left */}
@@ -47,10 +52,10 @@ export default function EventCard({
       {/* Card Body */}
       <div className="p-4 flex flex-col gap-3 flex-1">
         {/* Price Badge */}
-        <div className="flex justify-between">
-          <h3 className="text-lg font-semibold">{title}</h3>
-          <Badge>{price}</Badge>
-        </div>
+       <div className="flex items-center justify-between gap-2">
+       <h3 className="lg:text-lg font-semibold">{title}</h3>
+       <Badge className="w-fit sm:w-auto">{price}</Badge>
+       </div>
 
         {/* Category Badge */}
         <Badge className="flex items-center gap-1 w-fit">
@@ -93,7 +98,11 @@ export default function EventCard({
         <Button variant="default" onClick={onEdit} className="flex-1">
           Edit
         </Button>
-        <Button variant="outline" onClick={onSuspend} className="flex-1">
+        <Button variant="outline"    onClick={(e) => {
+            e.stopPropagation();
+            onSuspend?.();
+          }}     
+     className="flex-1">
           Suspend
         </Button>
       </div>

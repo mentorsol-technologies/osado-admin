@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode, useState } from "react";
-import { Eye } from "lucide-react";
+import { Eye,ChevronDown } from "lucide-react";
 import { Label } from "./label";
 import Image from "next/image";
 
@@ -100,6 +100,13 @@ const CommonInput: React.FC<CommonInputProps> = ({
             >
               {selectedCountry.flag}
               {selectedCountry.code}
+          <ChevronDown
+      size={18}
+      className={`text-white-100 transition-transform ${
+        isDropdownOpen ? "rotate-180" : "rotate-0"
+      }`}
+    
+        />
             </button>
 
             {isDropdownOpen && (

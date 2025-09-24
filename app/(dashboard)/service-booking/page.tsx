@@ -172,22 +172,29 @@ export default function ServiceBookingPage() {
 
       {/* Make it responsive */}
       <div className="w-full">
-        <CommonTable
+       <CommonTable
           mobileView="card"
           data={data}
           columns={columns}
           rowsPerPage={5}
           filters={filters}
           searchable
-          onSuspendClick={(row) => {
-            setSelectedBooking(row);
-            setSuspendOpen(true);
-          }}
-          onEditClick={(row) => {
-            setSelectedBooking(row);
-            setEditOpen(true);
-          }}
+          renderCardActions={(row) => (
+            <div className="flex gap-2 w-full">
+              <Button className="flex-1" onClick={() => { setSelectedBooking(row); setEditOpen(true); }}>
+                Edit
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => { setSelectedBooking(row); setSuspendOpen(true); }}
+              >
+                Suspend
+              </Button>
+            </div>
+          )}
         />
+
       </div>
       {/* Modal for viewing booking */}
       <BookingViewForm
