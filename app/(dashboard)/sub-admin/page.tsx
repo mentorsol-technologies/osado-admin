@@ -1,51 +1,199 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+"use client";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, Filter, UserCog } from "lucide-react";
-import CommonInput from "@/components/ui/input";
+import { CommonTable } from "@/components/ui/table/commonTable";
+import { Plus, Eye, Edit, Trash2 } from "lucide-react";
+import AddSubAdminModal from "./AddSubAdminForm";
+import EditSubAdminModal from "./EditSubAdminForm";
+import DeleteConfirmModal from "@/components/ui/commonComponent/DeleteConfirmModal";
+import SuspendedSubAdminModal from "./SuspendedSubAdminModal";
 
 export default function SubAdminPage() {
-  return (
-    <div className="space-y-6">
-       <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-white">Sub Admin</h2>
-                    <Button
-                        leftIcon={<Plus size={18} />}
-                    > 
-                        <span className="hidden md:inline">Add New sub admin</span>
-                    </Button>
-                    </div>
+  const [selectedAdmin, setSelectedAdmin] = useState<any>(null);
+  const [suspendOpen, setSuspendOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
-      <div className="flex flex-col lg:flex-row gap-4">
-        <CommonInput placeholder="Search sub admins..." icon={<Search />} />
-        <Button
-          variant="outline"
-          className="border-gray-700 text-gray-300 hover:text-white w-full lg:w-auto"
+  const columns = [
+    { key: "id", label: "ID" },
+    { key: "full_name", label: "Full Name" },
+    { key: "email", label: "Email" },
+    { key: "date_added", label: "Date Added" },
+    {
+      key: "status",
+      label: "Status",
+      render: (row: any) => (
+        <span
+          className={`rounded px-2 py-1 text-xs ${
+            row.status === "Active"
+              ? "text-green-400 border border-green-500/30"
+              : "text-red-400 border border-red-500/30"
+          }`}
         >
-          <Filter className="w-4 h-4 mr-2" />
-          Filter
+          {row.status}
+        </span>
+      ),
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      render: (row: any) => (
+        <div className="flex justify-center gap-3">
+          <button
+            className="p-1 border border-black-600"
+            onClick={() => {
+              setSelectedAdmin(row);
+              setEditOpen(true);
+            }}
+          >
+            <Edit size={16} />
+          </button>
+          <button
+            className="p-1 rounded-md bg-red-600 text-white"
+            onClick={() => {
+              setSelectedAdmin(row);
+              setDeleteOpen(true);
+            }}
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
+      ),
+    },
+  ];
+
+  const data = [
+    {
+      id: "10121",
+      full_name: "Keith White",
+      email: "keith.white@example.com",
+      date_added: "2025/09/15",
+      status: "Active",
+    },
+    {
+      id: "2212",
+      full_name: "Sarah Johnson",
+      email: "sarah.j@example.com",
+      date_added: "2025/09/20",
+      status: "Suspended",
+    },
+    {
+      id: "32112",
+      full_name: "Michael Smith",
+      email: "michael.smith@example.com",
+      date_added: "2025/09/21",
+      status: "Active",
+    },
+  ];
+
+  const filters = [
+    {
+      key: "sort_by",
+      label: "Sort by",
+      options: ["Newest", "Oldest", "A–Z", "Z–A"],
+    },
+    {
+      key: "status",
+      label: "Status",
+      options: ["Confirmed", "Pending", "Cancelled"],
+    },
+    {
+      key: "type",
+      label: "Type",
+      options: ["Credit", "Debit"],
+    },
+  ];
+
+  const handleDelete = () => {
+    console.log("Sub Admin deleted:", selectedAdmin);
+    setDeleteOpen(false);
+  };
+
+  const handleSuspendSubmit = (data: any) => {
+    console.log("Suspended Sub Admin Reason:", data);
+  };
+
+  return (
+    <div className="p-4 bg-black-500 !min-h-[calc(100vh-120px)] rounded-lg">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
+        <h2 className="text-xl sm:text-2xl font-bold text-white">Sub Admin</h2>
+        <Button
+          leftIcon={<Plus size={18} />}
+          className="w-full sm:w-auto"
+          onClick={() => setAddOpen(true)}
+        >
+          Add Sub Admin
         </Button>
       </div>
 
-      <Card className="bg-dashboard-card border-gray-800">
-        <CardHeader>
-          <CardTitle className="text-white">Sub Admin Management</CardTitle>
-          <CardDescription className="text-gray-400">
-            Manage sub administrators and their permissions
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-12 text-gray-400">
-            <UserCog className="w-12 h-12 mx-auto mb-4 text-gray-600" />
-            <p>Sub admin management interface will be implemented here</p>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Table */}
+      <div className="w-full">
+        <CommonTable
+          mobileView="card"
+          data={data}
+          columns={columns}
+          rowsPerPage={5}
+          filters={filters}
+          searchable
+          renderCardActions={(row) => (
+            <div className="flex gap-2 w-full">
+              <Button
+                className="flex-1"
+                onClick={() => {
+                  setSelectedAdmin(row);
+                  setEditOpen(true);
+                }}
+              >
+                Edit
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  setSelectedAdmin(row);
+                  setSuspendOpen(true);
+                }}
+              >
+                Suspend
+              </Button>
+            </div>
+          )}
+        />
+      </div>
+
+      {/* Add Modal */}
+      <AddSubAdminModal
+        open={addOpen}
+        setOpen={setAddOpen}
+        onSave={(data) => {
+          console.log("New Sub Admin Data:", data);
+        }}
+      />
+
+      {/* Edit Modal */}
+      <EditSubAdminModal
+        open={editOpen}
+        setOpen={setEditOpen}
+        onSave={(data) => console.log("Edited:", data)}
+        selectedAdmin={selectedAdmin}
+      />
+
+      {/* Delete Modal */}
+      <DeleteConfirmModal
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        onConfirm={handleDelete}
+        title="Delete Sub Admin"
+        description={`Are you sure you want to delete "${selectedAdmin?.full_name}"? This action cannot be undone.`}
+      />
+
+      {/* Suspend Modal */}
+      <SuspendedSubAdminModal
+        open={suspendOpen}
+        setOpen={setSuspendOpen}
+        onSave={handleSuspendSubmit}
+      />
     </div>
   );
 }
