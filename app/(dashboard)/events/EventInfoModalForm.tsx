@@ -11,8 +11,6 @@ import weddingPackage from "/public/images/578ac720e49fcbf44cbc003fd2428e7c56e15
 interface EventInfoModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  className: string;
-  size: string;
 }
 
 export default function EventInfoModal({
@@ -180,7 +178,7 @@ function Section({
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-white">{title}</h3>
           {showViewAll && (
-            <Button variant="link" size="xs" className="p-0 text-red-600">
+            <Button variant="link" className="p-0 text-red-600">
               View all
             </Button>
           )}
