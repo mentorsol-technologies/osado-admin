@@ -123,14 +123,14 @@ export default function ServiceBookingPage() {
       options: ["Newest", "Oldest", "A–Z", "Z–A"],
     },
     {
-      key: "status",
-      label: "Status",
-      options: ["Confirmed", "Pending", "Canceled"],
-    },
-    {
       key: "kyc_status",
       label: "KYC Status",
       options: ["Verified", "Pending", "Rejected"],
+    },
+    {
+      key: "status",
+      label: "Status",
+      options: ["Confirmed", "Pending", "Canceled"],
     },
     {
       key: "total_events",
@@ -150,7 +150,7 @@ export default function ServiceBookingPage() {
           className="w-full sm:w-auto"
           onClick={() => setAddOpen(true)}
         >
-          Add Business owners
+          Add Business owner
         </Button>
       </div>
 
@@ -163,7 +163,6 @@ export default function ServiceBookingPage() {
           rowsPerPage={5}
           filters={filters}
           searchable
-  
           renderCardActions={(row) => (
             <div className="flex gap-2 w-full">
               <Button
@@ -173,7 +172,7 @@ export default function ServiceBookingPage() {
                   setSuspendOpen(true);
                 }}
               >
-                Suspended
+                Suspend
               </Button>
               <Button
                 variant="outline"

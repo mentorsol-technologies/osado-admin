@@ -37,7 +37,14 @@ const menuItems = [
   { icon: Calendar, label: "Service Booking", href: "/service-booking" },
   { icon: Calendar, label: "Events Management", href: "/events" },
   { icon: Building2, label: "Business Owners", href: "/business-owners" },
-  { icon: CreditCard, label: "Finance Module", href: "/finance" },
+  {
+    label: "Finance Module",
+    icon: CreditCard,
+    children: [
+      { label: "Transactions", href: "/finance/transaction" },
+      { label: "Payouts", href: "/finance/payout" },
+    ],
+  },
   { icon: UserCog, label: "Sub Admin", href: "/sub-admin" },
   { icon: Shield, label: "Subscription Manager", href: "/subscription" },
   { icon: Tags, label: "Banners Manager", href: "/banners" },

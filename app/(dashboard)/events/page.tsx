@@ -26,28 +26,35 @@ const EventsManagement = () => {
     console.log("Edited Event Data:", data);
     // ✅ Update your events list or send API call here
   };
-  const filters = [
-    {
-      key: "sort_by",
-      label: "Sort by",
-      options: ["Newest", "Oldest", "A–Z", "Z–A"],
-    },
-    {
-      key: "location",
-      label: "Location",
-      options: ["USA", "UK", "Canada", "UAE", "Pakistan"],
-    },
-    {
-      key: "status",
-      label: "Status",
-      options: ["Active", "Inactive", "Pending"],
-    },
-    {
-      key: "sort_by",
-      label: "Sort by",
-      options: ["Newest", "Oldest", "A–Z", "Z–A"],
-    },
-  ];
+const filters = [
+  {
+    key: "sort_by",
+    label: "Sort by",
+    options: ["Newest", "Oldest", "A–Z", "Z–A"], 
+  },
+  {
+    key: "categories",
+    label: "Categories",
+    options: ["Photography", "Fashion", "Music", "Sports", "Technology"], 
+  },
+  {
+    key: "location",
+    label: "Location",
+    options: ["USA", "UK", "Canada", "UAE", "Pakistan"],
+  },
+  {
+    key: "date",
+    label: "Date",
+    options: [
+      "Today",
+      "This Week",
+      "This Month",
+      "Last Month",
+      "This Year",
+    ], 
+  },
+];
+
 
   const handleFilterChange = (key: string, value: string) => {
     setSelectedFilters((prev) => ({ ...prev, [key]: value }));
@@ -122,7 +129,7 @@ const EventsManagement = () => {
         setOpen={setSuspendOpen}
         onSave={handleSuspendSubmit}
       />
-            {/* ✅ Edit Modal */}
+      {/* ✅ Edit Modal */}
       {selectedEvent && (
         <EditEventModal
           open={editOpen}
@@ -131,7 +138,6 @@ const EventsManagement = () => {
           onSave={handleEditSave}
         />
       )}
-
     </div>
   );
 };

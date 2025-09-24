@@ -17,7 +17,7 @@ import Modal from "@/components/ui/Modal";
 import CommonInput from "@/components/ui/input";
 import Upload from "@/components/ui/upload";
 import { Badge } from "@/components/ui/badge";
-import { Bell, LifeBuoy, Utensils } from "lucide-react";
+import { Bell, LifeBuoy, Utensils, Trash2 } from "lucide-react";
 
 const schema = z.object({
   title: z.string().min(2, "Event title is required"),
@@ -133,20 +133,7 @@ export default function EditEventModal({
                   className="absolute inset-0 flex items-center justify-center z-20"
                 >
                   <div className="bg-red-600 hover:bg-red-700 rounded-full p-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6 text-white"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
+                    <Trash2 size={25} />
                   </div>
                 </button>
               </div>

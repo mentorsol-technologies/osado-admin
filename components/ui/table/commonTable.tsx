@@ -151,7 +151,7 @@ export function CommonTable<T extends { [key: string]: any }>({
                     renderCardActions(row)
                   ) : (
                     <>
-                      <Button
+                      {/* <Button
                         className="flex-1"
                         onClick={() => onEditClick?.(row)}
                       >
@@ -163,7 +163,7 @@ export function CommonTable<T extends { [key: string]: any }>({
                         onClick={() => onSuspendClick?.(row)}
                       >
                         Suspend
-                      </Button>
+                      </Button> */}
                     </>
                   )}
                 </div>
@@ -184,16 +184,26 @@ export function CommonTable<T extends { [key: string]: any }>({
           <Table className="w-full border-collapse text-sm">
             <TableHeader>
               <TableRow className="text-left border-b border-black-500">
-                {columns.map((col) => (
-                  <TableHead
-                    key={col.key as string}
-                    className="py-3 px-4 whitespace-nowrap"
-                  >
-                    {col.label}
-                  </TableHead>
-                ))}
+                {columns.map((col) => {
+                  if (col.key === "actions")
+                    return (
+                      <TableHead
+                        key={col.key as string}
+                        className="py-3 px-4 whitespace-nowrap"
+                      />
+                    ); 
+                  return (
+                    <TableHead
+                      key={col.key as string}
+                      className="py-3 px-4 whitespace-nowrap"
+                    >
+                      {col.label}
+                    </TableHead>
+                  );
+                })}
               </TableRow>
             </TableHeader>
+
             <TableBody>
               {paginated.length > 0 ? (
                 paginated.map((row, idx) => (
