@@ -61,7 +61,7 @@ export default function PaymentsChart() {
         <PieChart>
           <Pie
             data={data}
-            innerRadius={90}
+            innerRadius={85}
             outerRadius={100}
             paddingAngle={2}
             dataKey="value"
@@ -77,13 +77,13 @@ export default function PaymentsChart() {
               value="Total Payments"
               position="center"
               dy={-10}
-              className="text-white text-sm"
+              style={{ fill: "#ffffff", fontSize: "14px" }}
             />
             <Label
               value={total.toLocaleString()}
               position="center"
               dy={15}
-              className="text-white text-xl font-semibold"
+              style={{ fill: "#ffffff", fontSize: "18px", fontWeight: "600" }}
             />
           </Pie>
         </PieChart>

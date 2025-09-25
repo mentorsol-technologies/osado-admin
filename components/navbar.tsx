@@ -90,23 +90,21 @@ export function Navbar({ onMenuClick }: NavbarProps) {
           </Button>
           <DropdownMenuContent
             align="end"
-            className="w-56 bg-dashboard-card border-gray-700"
+            className="w-56 bg-black-400 border-black-300"
           >
             <DropdownMenuLabel className="text-white">
               My Account
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-gray-700" />
-            <DropdownMenuItem className="text-gray-300 hover:text-white hover:bg-gray-700">
+            <DropdownMenuItem className="text-white">
               <User className="mr-2 h-4 w-4" />
               Profile
             </DropdownMenuItem>
-            <DropdownMenuItem className="text-gray-300 hover:text-white hover:bg-gray-700">
+            <DropdownMenuItem className="text-white ">
               Settings
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-gray-700" />
-            <DropdownMenuItem className="text-red-400 hover:text-red-300 hover:bg-gray-700">
-              Log out
-            </DropdownMenuItem>
+            <DropdownMenuItem className="text-white">Log out</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

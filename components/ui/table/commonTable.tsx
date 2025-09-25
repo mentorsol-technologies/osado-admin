@@ -207,7 +207,7 @@ export function CommonTable<T extends { [key: string]: any }>({
             <TableBody>
               {paginated.length > 0 ? (
                 paginated.map((row, idx) => (
-                  <TableRow key={idx} className="border-b border-black-500">
+                  <TableRow key={idx} className="border-b border-black-300">
                     {columns.map((col) => (
                       <TableCell
                         key={col.key as string}

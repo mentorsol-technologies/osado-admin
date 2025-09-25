@@ -1,67 +1,21 @@
 "use client";
+import { useCountries } from "@/components/ui/CountryPicker";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import CommonInput, { Country } from "@/components/ui/input";
-import Image from "next/image";
+import CommonInput from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import { Country } from "@/components/ui/CountryPicker";
 
 const ForgetPassword = () => {
   const router = useRouter();
+  const countries: Country[] = useCountries();
 
-  const countries: Country[] = [
-    {
-      code: "+965",
-      name: "Kuwait",
-      flag: (
-        <Image
-          src={"/images/countryFlag.svg"}
-          alt="KW Flag"
-          width={24}
-          height={24}
-        />
-      ),
-    },
-    {
-      code: "+91",
-      name: "India",
-      flag: (
-        <Image
-          src={"/images/countryFlag.svg"}
-          alt="IN Flag"
-          width={24}
-          height={24}
-        />
-      ),
-    },
-    {
-      code: "+96",
-      name: "UAE",
-      flag: (
-        <Image
-          src={"/images/countryFlag.svg"}
-          alt="AE Flag"
-          width={24}
-          height={24}
-        />
-      ),
-    },
-    {
-      code: "+92",
-      name: "Pakistan",
-      flag: (
-        <Image
-          src={"/images/countryFlag.svg"}
-          alt="PK Flag"
-          width={24}
-          height={24}
-        />
-      ),
-    },
-  ];
-
+  // default to first country in the list
+  const [selectedCountry, setSelectedCountry] = useState<Country | null>(
+    countries[0] || null
+  );
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [selectedCountry, setSelectedCountry] = useState<Country>(countries[0]);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPhoneNumber(e.target.value);
@@ -73,7 +27,7 @@ const ForgetPassword = () => {
 
   const handleResetPassword = (e: React.FormEvent) => {
     e.preventDefault();
-    // Add your authentication logic here
+    // 🔑 Add your OTP / password reset logic here
   };
 
   return (
@@ -87,23 +41,27 @@ const ForgetPassword = () => {
           to reset your password.
         </p>
       </CardHeader>
+
       <CardContent>
         <form onSubmit={handleResetPassword} className="space-y-4">
           <div className="space-y-2">
-            <CommonInput
-              label="Phone Number"
-              type="tel"
-              value={phoneNumber}
-              onChange={handlePhoneChange}
-              countries={countries}
-              selectedCountry={selectedCountry}
-              onCountryChange={handleCountryChange}
-              showCountryDropdown={true}
-              // auto-update prefix based on selected country
-              prefix={selectedCountry.code}
-              maxLength={8}
-            />
+            {selectedCountry && (
+              <CommonInput
+                label="Phone Number"
+                type="tel"
+                value={phoneNumber}
+                onChange={handlePhoneChange}
+                countries={countries}
+                selectedCountry={selectedCountry}
+                onCountryChange={handleCountryChange}
+                showCountryDropdown={true}
+                // prefix updates with selected country dial code
+                prefix={selectedCountry.code}
+                maxLength={15}
+              />
+            )}
           </div>
+
           <div className="pt-[110px]">
             <Button
               type="submit"

@@ -46,9 +46,9 @@ const menuItems = [
     ],
   },
   { icon: UserCog, label: "Sub Admin", href: "/sub-admin" },
-  { icon: Shield, label: "Subscription Manager", href: "/subscription" },
+  // { icon: Shield, label: "Subscription Manager", href: "/subscription" },
   { icon: Tags, label: "Banners Manager", href: "/banners" },
-  { icon: Settings, label: "Settings", href: "/settings" },
+  // { icon: Settings, label: "Settings", href: "/settings" },
 ];
 
 interface SidebarProps {
