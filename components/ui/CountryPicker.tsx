@@ -12,8 +12,9 @@ export type Country = {
 
 export function useCountries(): Country[] {
   return useMemo(() => {
-    return countryList() // countryList() already returns the array
-      .map((c) => {
+    return (countryList() as any)
+      .getData()
+      .map((c: { value: string; label: string }) => {
         const dial =
           callingCode.find((d) => d.isoCode2 === c.value)?.countryCodes[0] ||
           "";
@@ -24,6 +25,6 @@ export function useCountries(): Country[] {
           iso: c.value.toLowerCase(),
         };
       })
-      .filter((c) => c.code); // only keep countries with dialing codes
+      .filter((c: Country) => c.code); // only keep countries with dialing codes
   }, []);
 }
