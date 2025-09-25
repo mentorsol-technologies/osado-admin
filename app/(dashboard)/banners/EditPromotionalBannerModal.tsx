@@ -92,15 +92,12 @@ export default function EditPromotionalBannerModal({
       title="Edit Promotional Banner"
       footer={
         <div className="flex flex-col sm:flex-row gap-3 w-full">
-          <Button
-            onClick={handleSubmit(onSubmit)}
-            className="flex-1 bg-red-600 hover:bg-red-700"
-          >
+          <Button onClick={handleSubmit(onSubmit)} className="flex-1 ">
             Submit
           </Button>
           <Button
             variant="outline"
-            className="flex-1 border-gray-600 text-gray-300"
+            className="flex-1 "
             onClick={() => setOpen(false)}
           >
             Cancel

@@ -5,74 +5,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import CommonInput, { Country } from "@/components/ui/input";
+import CommonInput from "@/components/ui/input";
+import { useCountries } from "@/components/ui/CountryPicker";
+import { Country } from "@/components/ui/CountryPicker";
+
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
+
+  const countries = useCountries();
+  const [selectedCountry, setSelectedCountry] = useState<Country | null>(
+    countries.length > 0 ? countries[0] : null
+  );
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Add your authentication logic here
     router.push("/dashboard");
   };
-  const countries: Country[] = [
-    {
-      code: "+965",
-      name: "",
-      flag: (
-        <Image
-          src={"/images/countryFlag.svg"}
-          alt="US Flag"
-          width={24}
-          height={24}
-        />
-      ),
-    },
-    {
-      code: "+91",
-      name: "",
-      flag: (
-        <Image
-          src={"/images/countryFlag.svg"}
-          alt="UK Flag"
-          width={24}
-          height={24}
-        />
-      ),
-    },
-    {
-      code: "+96",
-      name: "",
-      flag: (
-        <Image
-          src={"/images/countryFlag.svg"}
-          alt="UK Flag"
-          width={24}
-          height={24}
-        />
-      ),
-    },
-    {
-      code: "+92",
-      name: "",
-      flag: (
-        <Image
-          src={"/images/countryFlag.svg"}
-          alt="UK Flag"
-          width={24}
-          height={24}
-        />
-      ),
-    },
-  ];
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [selectedCountry, setSelectedCountry] = useState(countries[0]);
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPhoneNumber(e.target.value);
-  };
-  const handleCountryChange = (country: (typeof countries)[0]) => {
-    setSelectedCountry(country);
-  };
+
   return (
     <Card className="w-full bg-transparent md:bg-black-600 rounded-[18px] border-0 max-w-[450px]">
       <CardHeader>
@@ -82,73 +33,58 @@ export default function LoginPage() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleLogin} className="space-y-4">
-          <div className="space-y-2">
-            <CommonInput
-              label="Phone Number"
-              type="tel"
-              placeholder=""
-              value={phoneNumber}
-              onChange={handlePhoneChange}
-              prefix="+965"
-              maxLength={8}
-              countries={countries}
-              selectedCountry={selectedCountry}
-              onCountryChange={handleCountryChange}
-              showCountryDropdown={true}
-            />
+          {/* Phone Number */}
+          <CommonInput
+            label="Phone Number"
+            type="tel"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            maxLength={15}
+            countries={countries}
+            selectedCountry={selectedCountry || undefined}
+            onCountryChange={setSelectedCountry}
+            showCountryDropdown
+          />
+
+          {/* Password */}
+          <CommonInput
+            name="password"
+            label="Password"
+            placeholder="Write password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          <div className="text-right pb-2">
+            <Link
+              href="/reset-password"
+              className="text-sm text-white-100 hover:underline"
+            >
+              Forgot Password?
+            </Link>
           </div>
-          <div className="space-y-2">
-            <CommonInput
-              name="password"
-              label="Password"
-              placeholder="Write password"
-              autoComplete="new-password"
-              onChange={() => {}}
-              type="password"
-            />
-            <div className="text-right pb-2">
-              <Link
-                href="/reset-password"
-                className="text-sm text-white-100 hover:underline"
-              >
-                Forgot Password?
-              </Link>
-            </div>
-          </div>
+
+          {/* Submit */}
           <Button
             type="submit"
             className="w-full text-white-100 bg-red-600 rounded-xl py-6 hover:bg-red-700"
           >
             Continue
           </Button>
+
           <div className="flex items-center justify-center gap-2 text-sm text-white-100">
-            {" "}
             Don&apos;t have an account?
-            <Link
-              href="/"
-              className="text-sm text-white-100 hover:underline"
-            >
+            <Link href="/" className="hover:underline">
               Sign Up
             </Link>
           </div>
         </form>
+
+        {/* Social logins */}
         <div className="mt-6 flex justify-center items-center gap-5">
-          <Image
-            src="/images/Google.png"
-            className="cursor-pointer"
-            alt="OSADO Logo"
-            width={58}
-            height={58}
-            priority
-          />
-          <Image
-            src="/images/Apple.png"
-            alt="OSADO Logo"
-            width={58}
-            className="cursor-pointer"
-            height={58}
-            priority
-          />
+          <Image src="/images/Google.png" alt="Google" width={58} height={58} />
+          <Image src="/images/Apple.png" alt="Apple" width={58} height={58} />
         </div>
       </CardContent>
     </Card>
