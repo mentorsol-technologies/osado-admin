@@ -15,13 +15,30 @@ import {
   ChevronDown,
   Camera,
 } from "lucide-react";
+import { TbPhotoEdit } from "react-icons/tb";
+import { RiShieldUserFill } from "react-icons/ri";
+import { FaChartColumn } from "react-icons/fa6";
+import { FaUserAlt } from "react-icons/fa";
+import { BiSolidCalendarAlt } from "react-icons/bi";
+import { FaPollH } from "react-icons/fa";
+import { PiUsersThreeFill } from "react-icons/pi";
+import { FaCamera } from "react-icons/fa";
+import { RiDashboardFill } from "react-icons/ri";
+
+
+
+
+
+
+
+
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
+  { icon: RiDashboardFill, label: "Dashboard", href: "/dashboard" },
   {
     label: "Master",
     icon: Users,
@@ -32,22 +49,23 @@ const menuItems = [
       { label: "Influencers Rank", href: "/master/influencers-rank" },
     ],
   },
-  { icon: UserCheck, label: "Influencers", href: "/influencers" },
-  { icon: Camera, label: "Photographers", href: "/photographers" },
-  { icon: Calendar, label: "Service Booking", href: "/service-booking" },
-  { icon: Calendar, label: "Events Management", href: "/events" },
-  { icon: Building2, label: "Business Owners", href: "/business-owners" },
+  { icon: PiUsersThreeFill, label: "Influencers", href: "/influencers" },
+  { icon: FaCamera, label: "Photographers", href: "/photographers" },
+  { icon: FaPollH , label: "Service Booking", href: "/service-booking" },
+  { icon: BiSolidCalendarAlt, label: "Events Management", href: "/events" },
+  { icon: FaUserAlt, label: "Business Owners", href: "/business-owners" },
   {
     label: "Finance Module",
-    icon: CreditCard,
+    icon: FaChartColumn,
     children: [
       { label: "Transactions", href: "/finance/transaction" },
       { label: "Payouts", href: "/finance/payout" },
     ],
   },
-  { icon: UserCog, label: "Sub Admin", href: "/sub-admin" },
+  { icon: RiShieldUserFill , label: "Sub Admin", href: "/sub-admin" },
   // { icon: Shield, label: "Subscription Manager", href: "/subscription" },
-  { icon: Tags, label: "Banners Manager", href: "/banners" },
+  { icon: TbPhotoEdit
+, label: "Banners Manager", href: "/banners" },
   // { icon: Settings, label: "Settings", href: "/settings" },
 ];
 
@@ -117,7 +135,9 @@ export function Sidebar({ onClose }: SidebarProps) {
                               href={sub.href}
                               onClick={onClose}
                               className={`sidebar-item text-sm ${
-                                subActive ? "active" : ""
+                                subActive
+                                  ? "bg-black-400"
+                                  : "text-gray-300 hover:text-white"
                               }`}
                             >
                               {sub.label}

@@ -30,7 +30,7 @@ export default function BannersPage() {
   const handleAddBanner = (data: any) => {
     console.log("New banner data:", data);
   };
-    const handleUpdateBanner = (data: any) => {
+  const handleUpdateBanner = (data: any) => {
     console.log("Updated banner:", data);
   };
   // 👇 handler when suspended booking is submitted
@@ -97,8 +97,8 @@ export default function BannersPage() {
   return (
     <div className="p-6 bg-black-500 !min-h-[calc(100vh-120px)]  rounded-lg">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
-        <h2 className="text-xl sm:text-2xl font-bold text-white">
-          Banner Manager
+        <h2 className="lg:text-3xl text-xl  font-medium text-white">
+          Banners Manager
         </h2>
         <Button
           leftIcon={<Plus size={18} />}
@@ -155,7 +155,7 @@ export default function BannersPage() {
         setOpen={setAddOpen}
         onSave={handleAddBanner}
       />
-       {/* Edit Banner Modal */}
+      {/* Edit Banner Modal */}
       <EditPromotionalBannerModal
         open={editOpen}
         setOpen={setEditOpen}

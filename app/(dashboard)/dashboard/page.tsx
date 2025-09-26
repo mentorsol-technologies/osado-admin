@@ -4,6 +4,8 @@ import RevenueChart from "@/components/charts/RevenueChart";
 import { StatsCards } from "@/components/dashboard/stats-cards";
 import { CommonTable } from "@/components/ui/table/commonTable";
 import { Edit, Eye, Trash2 } from "lucide-react";
+import { MdOutlineEdit } from "react-icons/md";
+
 
 const columns = [
   { key: "influencer", label: "Influencer" },
@@ -46,7 +48,7 @@ const columns = [
           <Eye size={16} />
         </button>
         <button className="p-1 border border-black-600">
-          <Edit size={16} />
+          <MdOutlineEdit size={16} />
         </button>
         <button className="p-1 rounded-md  bg-red-600">
           <Trash2 size={16}  />

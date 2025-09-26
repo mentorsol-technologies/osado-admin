@@ -7,6 +7,9 @@ import AddSubAdminModal from "./AddSubAdminForm";
 import EditSubAdminModal from "./EditSubAdminForm";
 import DeleteConfirmModal from "@/components/ui/commonComponent/DeleteConfirmModal";
 import SuspendedSubAdminModal from "./SuspendedSubAdminModal";
+import { BiStop } from "react-icons/bi";
+import { MdOutlineEdit } from "react-icons/md";
+
 
 export default function SubAdminPage() {
   const [selectedAdmin, setSelectedAdmin] = useState<any>(null);
@@ -47,7 +50,16 @@ export default function SubAdminPage() {
               setEditOpen(true);
             }}
           >
-            <Edit size={16} />
+            <MdOutlineEdit size={16} />
+          </button>
+          <button
+            className="p-1 border border-black-600"
+            // onClick={() => {
+            //   setSelectedAdmin(row);
+            //   setEditOpen(true);
+            // }}
+          >
+            <BiStop size={16} />
           </button>
           <button
             className="p-1 rounded-md bg-red-600 text-white"
@@ -89,9 +101,9 @@ export default function SubAdminPage() {
 
   const filters = [
     {
-      key: "sort_by",
-      label: "Sort by",
-      options: ["Newest", "Oldest", "A–Z", "Z–A"],
+      key: "type",
+      label: "Type",
+      options: ["Credit", "Debit"],
     },
     {
       key: "status",
@@ -99,9 +111,9 @@ export default function SubAdminPage() {
       options: ["Confirmed", "Pending", "Cancelled"],
     },
     {
-      key: "type",
-      label: "Type",
-      options: ["Credit", "Debit"],
+      key: "sort_by",
+      label: "Sort by",
+      options: ["Newest", "Oldest", "A–Z", "Z–A"],
     },
   ];
 
@@ -117,7 +129,7 @@ export default function SubAdminPage() {
   return (
     <div className="p-4 bg-black-500 !min-h-[calc(100vh-120px)] rounded-lg">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
-        <h2 className="text-xl sm:text-2xl font-bold text-white">Sub Admin</h2>
+        <h2 className="lg:text-3xl text-xl  font-medium text-white">Sub Admin</h2>
         <Button
           leftIcon={<Plus size={18} />}
           className="w-full sm:w-auto"

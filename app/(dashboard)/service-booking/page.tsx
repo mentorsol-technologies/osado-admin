@@ -3,6 +3,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CommonTable } from "@/components/ui/table/commonTable";
 import { Plus, Eye, Edit, Trash2 } from "lucide-react";
+import { MdOutlineEdit } from "react-icons/md";
+import { BiStop } from "react-icons/bi";
 import BookingViewForm from "./BookingViewForm";
 import RefundBookingModal from "./RefundBookingForm";
 import SuspendedBookingModal from "./SuspendedBookingForm";
@@ -72,10 +74,10 @@ export default function ServiceBookingPage() {
               setEditOpen(true);
             }}
           >
-            <Edit size={16} />
+            <MdOutlineEdit size={16} />
           </button>
           <button className="p-1 rounded-md  bg-red-600">
-            <Trash2 size={16} />
+             <BiStop size={16} />
           </button>
         </div>
       ),
@@ -158,7 +160,7 @@ export default function ServiceBookingPage() {
   return (
     <div className="p-4 bg-black-500 !min-h-[calc(100vh-120px)] rounded-lg">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
-        <h2 className="text-xl sm:text-2xl font-bold text-white">
+        <h2 className="lg:text-3xl text-xl  font-medium text-white">
           Service Booking
         </h2>
         <Button

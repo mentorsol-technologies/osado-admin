@@ -37,7 +37,7 @@ export default function PaymentsChart() {
   return (
     <div className="w-full h-[450px] bg-black-500 rounded-2xl p-4 ">
       <div className="flex justify-between items-center">
-        <h3 className="text-white text-lg font-semibold">Payments</h3>
+        <h3 className="text-white text-2xl font-semibold">Payments</h3>
         <Select
           defaultValue="January"
           onValueChange={(value) => console.log("Selected month:", value)}
