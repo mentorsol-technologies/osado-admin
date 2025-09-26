@@ -103,7 +103,7 @@ export function CommonTable<T extends { [key: string]: any }>({
       {/* Title & Action */}
       {(title || action) && (
         <div className="mb-4 flex items-center justify-between">
-          {title && <h3 className="text-lg font-semibold">{title}</h3>}
+          {title && <h3 className="text-2xl font-semibold">{title}</h3>}
           {action && <div>{action}</div>}
         </div>
       )}
@@ -191,11 +191,11 @@ export function CommonTable<T extends { [key: string]: any }>({
                         key={col.key as string}
                         className="py-3 px-4 whitespace-nowrap"
                       />
-                    ); 
+                    );
                   return (
                     <TableHead
                       key={col.key as string}
-                      className="py-3 px-4 whitespace-nowrap"
+                      className="py-3 px-4 font-normal whitespace-nowrap"
                     >
                       {col.label}
                     </TableHead>

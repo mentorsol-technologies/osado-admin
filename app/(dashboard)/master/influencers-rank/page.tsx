@@ -63,7 +63,7 @@ const InfluencersRank = () => {
   return (
     <div className="p-6 bg-black-500 !min-h-[calc(100vh-120px)]  rounded-lg">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-white">Influencers Rank</h2>
+        <h2 className="lg:text-3xl text-xl  font-medium text-white">Influencers Rank</h2>
         <Button onClick={() => setAddOpen(true)} leftIcon={<Plus size={18} />}>
           <span className="hidden md:inline">Create Rank</span>
         </Button>

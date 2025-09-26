@@ -96,7 +96,9 @@ const Photographers = () => {
   return (
     <div className="p-6 bg-black-500 !min-h-[calc(100vh-120px)]  rounded-lg">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-white">Photographers</h2>
+        <h2 className="lg:text-3xl text-xl  font-medium text-white">
+          Photographers
+        </h2>
       </div>
       <div>
         <FiltersBar

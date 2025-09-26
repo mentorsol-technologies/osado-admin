@@ -121,7 +121,7 @@ export default function TransactionPage() {
   return (
     <div className="p-4 bg-black-500 !min-h-[calc(100vh-120px)] rounded-lg">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
-        <h2 className="text-xl sm:text-2xl font-bold text-white">
+        <h2 className="lg:text-3xl text-xl  font-medium text-white">
           Transactions
         </h2>
         <Button

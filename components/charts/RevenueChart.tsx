@@ -45,7 +45,9 @@ export default function RevenueChart() {
   return (
     <div className="w-full h-[450px] bg-black-500 rounded-2xl p-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-white text-lg font-semibold ">Revenue Generated</h2>
+        <h2 className="text-white text-2xl font-semibold ">
+          Revenue Generated
+        </h2>
         <Select
           defaultValue="January"
           onValueChange={(value) => console.log("Selected month:", value)}
@@ -87,7 +89,7 @@ export default function RevenueChart() {
                 const { revenue, growth } = payload[0].payload;
                 return (
                   <div className="bg-black-400 px-3 py-2 rounded-lg text-white text-sm shadow-lg">
-                    <p className="font-medium">Revenue Generated</p>
+                    <p className="font-normal">Revenue Generated</p>
                     <p className="text-lg font-semibold">
                       KWD {revenue.toLocaleString()}
                     </p>
