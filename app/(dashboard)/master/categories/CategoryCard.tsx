@@ -15,7 +15,7 @@ interface CategoryCardProps {
   status: string;
   onEdit?: () => void;
   onDelete?: () => void;
-  isLoading?: boolean; // <-- add this prop
+  isLoading?: boolean;
 }
 
 export default function CategoryCard({

@@ -7,7 +7,7 @@ import CommonInput from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { passwordRules } from "@/lib/utils";
 import { useAuthMutations } from "@/hooks/useAuthMutations";
-import { toast } from "@/hooks/use-toast";
+import { toast } from 'react-toastify';
 import { useAuthStore } from "@/app/store/authStore";
 
 const ChangePassword = () => {
@@ -40,30 +40,18 @@ const ChangePassword = () => {
 
   const handleSubmit = () => {
     if (!password || !confirmPassword) {
-      toast({
-        variant: "error",
-        title: "Error",
-        description: "Please fill both fields.",
-      });
+      toast.error("Please fill both fields.");
       return;
     }
 
     if (password !== confirmPassword) {
-      toast({
-        variant: "error",
-        title: "Error",
-        description: "Passwords do not match.",
-      });
+      toast.error("Passwords do not match.");
       return;
     }
 
     // if any rule fails, prevent submission
     if (rulesChecked.some((r) => !r)) {
-      toast({
-        variant: "error",
-        title: "Weak Password",
-        description: "Please meet all password requirements.",
-      });
+      toast.error("Please meet all password requirements.");
       return;
     }
 
@@ -76,19 +64,11 @@ const ChangePassword = () => {
       { ...payload, token: accessToken }, // pass token
       {
         onSuccess: () => {
-          toast({
-            title: "Success",
-            description: "Password reset successfully.",
-          });
+          toast.success("Password reset successfully.");
           router.push("/login");
         },
         onError: (err: any) => {
-          toast({
-            variant: "error",
-            title: "Error",
-            description:
-              err?.response?.data?.message || "Failed to reset password.",
-          });
+          toast.error("Failed to reset password.");
         },
       }
     );

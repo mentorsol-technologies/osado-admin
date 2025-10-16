@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import OneTimePassword from "@/components/ui/otpInput";
 import { useAuthMutations } from "@/hooks/useAuthMutations";
-import { toast } from "@/hooks/use-toast";
+import { toast } from 'react-toastify';
 import { useAuthStore } from "@/app/store/authStore";
 
 const RESEND_INTERVAL = 60; // seconds
@@ -34,37 +34,24 @@ const VerifyAccount = () => {
 
   const handleVerifyOtp = () => {
     if (otp.length !== 6) {
-      toast({
-        title: "Invalid OTP",
-        description: "Please enter the 6-digit OTP sent to your phone.",
-        variant: "error",
-      });
+      toast.error("Please enter the 6-digit OTP sent to your phone.");
       return;
     }
 
     verifyOtpMutation.mutate(
-      { otpCode: Number(otp), userId },
+      { otpCode: Number(otp), userId: userId ?? "" },
       {
         onSuccess: (res) => {
-           const token = res?.accessToken;
+          const token = res?.data.accessToken;
           if (token) {
             useAuthStore.getState().setAccessToken(token);
-  }
-          toast({
-            title: "OTP Verified",
-            description: "You can now set your new password.",
-            variant: "success",
-          });
+          }
+          toast.success("You can now set your new password.");
           // Navigate to create password page
           router.push("/create-password");
         },
         onError: (err: any) => {
-          toast({
-            title: "Verification failed",
-            description:
-              err?.response?.data?.message || "Failed to verify OTP",
-            variant: "error",
-          });
+          toast.error("Verification failed");
         },
       }
     );
@@ -109,9 +96,9 @@ const VerifyAccount = () => {
             type="submit"
             onClick={handleVerifyOtp}
             className="w-full text-white-100 bg-red-600 rounded-xl py-6 hover:bg-red-700"
-            disabled={verifyOtpMutation.isLoading}
+            disabled={verifyOtpMutation.isPending}
           >
-            {verifyOtpMutation.isLoading ? "Verifying..." : "Continue"}
+            {verifyOtpMutation.isPending ? "Verifying..." : "Continue"}
           </Button>
         </div>
       </CardContent>
