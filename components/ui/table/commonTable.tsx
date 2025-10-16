@@ -64,7 +64,7 @@ export function CommonTable<T extends { [key: string]: any }>({
   };
 
   const filteredData = useMemo(() => {
-    return data.filter((row) => {
+    return data?.filter((row) => {
       if (
         search &&
         !Object.values(row)
@@ -91,11 +91,11 @@ export function CommonTable<T extends { [key: string]: any }>({
     });
   }, [data, search, selectedFilters]);
 
-  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+  const totalPages = Math.ceil(filteredData?.length / rowsPerPage);
 
   const paginated = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
-    return filteredData.slice(start, start + rowsPerPage);
+    return filteredData?.slice(start, start + rowsPerPage);
   }, [page, filteredData, rowsPerPage]);
 
   return (
@@ -109,7 +109,7 @@ export function CommonTable<T extends { [key: string]: any }>({
       )}
 
       {/* FiltersBar */}
-      {(filters.length > 0 || searchable) && (
+      {(filters?.length > 0 || searchable) && (
         <FiltersBar
           filters={filters}
           selectedFilters={selectedFilters}
@@ -126,7 +126,7 @@ export function CommonTable<T extends { [key: string]: any }>({
       {/* Mobile Card Layout */}
       {mobileView === "card" && (
         <div className="grid gap-4 sm:hidden">
-          {paginated.length > 0 ? (
+          {paginated?.length > 0 ? (
             paginated.map((row, idx) => (
               <div
                 key={idx}
@@ -205,7 +205,7 @@ export function CommonTable<T extends { [key: string]: any }>({
             </TableHeader>
 
             <TableBody>
-              {paginated.length > 0 ? (
+              {paginated?.length > 0 ? (
                 paginated.map((row, idx) => (
                   <TableRow key={idx} className="border-b border-black-300">
                     {columns.map((col) => (
@@ -221,7 +221,7 @@ export function CommonTable<T extends { [key: string]: any }>({
               ) : (
                 <TableRow>
                   <TableCell
-                    colSpan={columns.length}
+                    colSpan={columns?.length}
                     className="py-6 text-center"
                   >
                     No data found
@@ -233,7 +233,7 @@ export function CommonTable<T extends { [key: string]: any }>({
         </div>
 
         {/* Fixed Pagination */}
-        <div className="absolute bottom-0 left-0 w-full bg-black-500 py-3 border-t border-black-400">
+        <div className="absolute bottom-[-30px] left-0 w-full bg-black-500 py-3 border-t border-black-400">
           <Pagination
             totalPages={totalPages || 1}
             currentPage={page}

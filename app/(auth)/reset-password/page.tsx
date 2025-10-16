@@ -6,6 +6,9 @@ import CommonInput from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { Country } from "@/components/ui/CountryPicker";
+import { useAuthMutations } from "@/hooks/useAuthMutations";
+import { toast } from "@/hooks/use-toast";
+import { useAuthStore } from "@/app/store/authStore";
 
 const ForgetPassword = () => {
   const router = useRouter();
@@ -16,6 +19,7 @@ const ForgetPassword = () => {
     countries[0] || null
   );
   const [phoneNumber, setPhoneNumber] = useState("");
+  const { forgotPasswordMutation } = useAuthMutations();
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPhoneNumber(e.target.value);
@@ -25,9 +29,50 @@ const ForgetPassword = () => {
     setSelectedCountry(country);
   };
 
+  // ✅ Submit handler for Forgot Password
   const handleResetPassword = (e: React.FormEvent) => {
     e.preventDefault();
-    // 🔑 Add your OTP / password reset logic here
+
+    if (!selectedCountry || !phoneNumber) {
+      toast({
+        title: "Missing information",
+        description: "Please enter your phone number and select a country.",
+        variant: "error",
+      });
+      return;
+    }
+
+
+    const payload = {
+      callingCode: selectedCountry.code,
+      phoneNumber,
+    };
+
+    forgotPasswordMutation.mutate(payload, {
+      onSuccess: (response) => {
+        console.log("Forgot password response:", response);
+        toast({
+          title: "OTP Sent!",
+          description: "Please check your phone for the verification code.",
+          variant: "success",
+          position: "top-right",
+        });
+
+        const userId = response?.userId;
+        useAuthStore.getState().setUserId(userId);
+        router.push("/verify-otp");
+      },
+      onError: (error: any) => {
+        toast({
+          title: "Failed to send OTP",
+          description:
+            error?.response?.data?.message ||
+            "Something went wrong. Please try again.",
+          variant: "error",
+          position: "top-right",
+        });
+      },
+    });
   };
 
   return (
@@ -65,7 +110,6 @@ const ForgetPassword = () => {
           <div className="pt-[110px]">
             <Button
               type="submit"
-              onClick={() => router.push("/create-password")}
               className="w-full text-white-100 bg-red-600 rounded-xl py-6 hover:bg-red-700"
             >
               Continue

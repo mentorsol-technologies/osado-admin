@@ -13,12 +13,25 @@ import {
 } from "@/components/ui/dropdown-menu";
 import CommonInput from "./ui/input";
 import Image from "next/image";
+import { useAuthStore } from "@/app/store/authStore";
+import { useRouter } from "next/navigation";
+import { toast } from 'react-toastify';
+
 
 interface NavbarProps {
   onMenuClick?: () => void;
 }
 
 export function Navbar({ onMenuClick }: NavbarProps) {
+  const router = useRouter();
+  const { user, logout } = useAuthStore();
+  const handleLogout = () => {
+    logout();
+    toast.success("Logout Successfully")
+    router.push("/login");
+    router.refresh(); // ✅ ensures no stale auth state remains
+  };
+
   return (
     <header className="h-[78px] flex items-center justify-between px-4 lg:px-6 bg-black-500 border-b border-black-300">
       {/* Mobile Menu Button */}
@@ -104,7 +117,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
               Settings
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-gray-700" />
-            <DropdownMenuItem className="text-white">Log out</DropdownMenuItem>
+            <DropdownMenuItem className="text-white" onClick={handleLogout}>Log out</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

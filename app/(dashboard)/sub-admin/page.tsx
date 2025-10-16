@@ -9,6 +9,8 @@ import DeleteConfirmModal from "@/components/ui/commonComponent/DeleteConfirmMod
 import SuspendedSubAdminModal from "./SuspendedSubAdminModal";
 import { BiStop } from "react-icons/bi";
 import { MdOutlineEdit } from "react-icons/md";
+import { useDeleteSubAdminMutation, useGetSubAdminsQuery } from "@/hooks/useSubAdminMutations";
+import { formatDate } from "@/lib/utils";
 
 
 export default function SubAdminPage() {
@@ -17,22 +19,41 @@ export default function SubAdminPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const { data, isLoading, isError } = useGetSubAdminsQuery();
+  const { mutate: deleteSubAdmin, isPending } = useDeleteSubAdminMutation();
+
+
+  const handleDelete = () => {
+    if (!selectedAdmin?.id) return;
+
+    deleteSubAdmin(selectedAdmin.id, {
+      onSuccess: () => {
+        setDeleteOpen(false);
+        setSelectedAdmin(null);
+      },
+    });
+  };
+
 
   const columns = [
     { key: "id", label: "ID" },
-    { key: "full_name", label: "Full Name" },
+    { key: "name", label: "Full Name" },
     { key: "email", label: "Email" },
-    { key: "date_added", label: "Date Added" },
+    {
+      key: "updatedAt",
+      label: "Date Added",
+      render: (row: any) => <span>{formatDate(row.updatedAt)}</span>,
+    },
+
     {
       key: "status",
       label: "Status",
       render: (row: any) => (
         <span
-          className={`rounded px-2 py-1 text-xs ${
-            row.status === "Active"
-              ? "text-green-400 border border-green-500/30"
-              : "text-red-400 border border-red-500/30"
-          }`}
+          className={`rounded px-4 py-1 text-sm ${row.status === "active"
+            ? "text-green-400 border border-green-500/30"
+            : "text-red-400 border border-red-500/30"
+            }`}
         >
           {row.status}
         </span>
@@ -54,10 +75,10 @@ export default function SubAdminPage() {
           </button>
           <button
             className="p-1 border border-black-600"
-            // onClick={() => {
-            //   setSelectedAdmin(row);
-            //   setEditOpen(true);
-            // }}
+          // onClick={() => {
+          //   setSelectedAdmin(row);
+          //   setEditOpen(true);
+          // }}
           >
             <BiStop size={16} />
           </button>
@@ -74,31 +95,6 @@ export default function SubAdminPage() {
       ),
     },
   ];
-
-  const data = [
-    {
-      id: "10121",
-      full_name: "Keith White",
-      email: "keith.white@example.com",
-      date_added: "2025/09/15",
-      status: "Active",
-    },
-    {
-      id: "2212",
-      full_name: "Sarah Johnson",
-      email: "sarah.j@example.com",
-      date_added: "2025/09/20",
-      status: "Suspended",
-    },
-    {
-      id: "32112",
-      full_name: "Michael Smith",
-      email: "michael.smith@example.com",
-      date_added: "2025/09/21",
-      status: "Active",
-    },
-  ];
-
   const filters = [
     {
       key: "type",
@@ -117,10 +113,7 @@ export default function SubAdminPage() {
     },
   ];
 
-  const handleDelete = () => {
-    console.log("Sub Admin deleted:", selectedAdmin);
-    setDeleteOpen(false);
-  };
+
 
   const handleSuspendSubmit = (data: any) => {
     console.log("Suspended Sub Admin Reason:", data);
@@ -178,9 +171,9 @@ export default function SubAdminPage() {
       <AddSubAdminModal
         open={addOpen}
         setOpen={setAddOpen}
-        onSave={(data) => {
-          console.log("New Sub Admin Data:", data);
-        }}
+        // onSave={(data) => {
+        //   console.log("New Sub Admin Data:", data);
+        // }}
       />
 
       {/* Edit Modal */}
@@ -197,7 +190,7 @@ export default function SubAdminPage() {
         onOpenChange={setDeleteOpen}
         onConfirm={handleDelete}
         title="Delete Sub Admin"
-        description={`Are you sure you want to delete "${selectedAdmin?.full_name}"? This action cannot be undone.`}
+        description={`Are you sure you want to delete "${selectedAdmin?.name}"? This action cannot be undone.`}
       />
 
       {/* Suspend Modal */}

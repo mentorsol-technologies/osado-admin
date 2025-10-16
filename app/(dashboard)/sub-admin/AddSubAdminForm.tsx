@@ -7,6 +7,9 @@ import Modal from "@/components/ui/Modal";
 import CommonInput from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useCreateSubAdminMutation } from "@/hooks/useSubAdminMutations";
+import { useState } from "react";
+import { Country, useCountries } from "@/components/ui/CountryPicker";
 
 const schema = z.object({
   fullName: z.string().min(1, "Full name is required"),
@@ -21,7 +24,6 @@ type FormData = z.infer<typeof schema>;
 interface AddSubAdminModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  onSave: (data: FormData) => void;
   selectedAdmin?: FormData;
 }
 
@@ -39,15 +41,17 @@ const permissionsList = [
 export default function AddSubAdminModal({
   open,
   setOpen,
-  onSave,
   selectedAdmin,
 }: AddSubAdminModalProps) {
+
+
   const {
     register,
     handleSubmit,
     setValue,
     watch,
     formState: { errors },
+    reset,
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -58,10 +62,36 @@ export default function AddSubAdminModal({
       permissions: selectedAdmin?.permissions || [],
     },
   });
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const countries = useCountries();
+  const [selectedCountry, setSelectedCountry] = useState<Country | null>(
+    countries.length > 0 ? countries[0] : null
+  );
 
+
+  // 🔹 React Query mutation
+  const { mutate: createSubAdmin, isPending } = useCreateSubAdminMutation();
+
+  // 🔹 Submission handler
   const onSubmit = (data: FormData) => {
-    onSave(data);
-    setOpen(false);
+    const payload = {
+      name: data.fullName,
+      surName: data.surname,
+      email: data.email,
+      password: data.password,
+      permissions: data.permissions || [],
+      phoneNumber,
+      callingCode: selectedCountry?.code || "+965",
+      countryCode: selectedCountry?.iso3 || "KWT",
+      roleId: "a75721e5-3d79-46d7-9da1-91d896409e9a",
+      status: "active",
+    };
+    createSubAdmin(payload, {
+      onSuccess: () => {
+        reset();
+        setOpen(false);
+      },
+    });
   };
 
   const selectedPermissions = watch("permissions") || [];
@@ -84,8 +114,9 @@ export default function AddSubAdminModal({
           <Button
             onClick={handleSubmit(onSubmit)}
             className="flex-1"
+            disabled={isPending}
           >
-            Submit
+            {isPending ? "Submitting..." : "Submit"}
           </Button>
           <Button
             variant="outline"
@@ -114,7 +145,20 @@ export default function AddSubAdminModal({
           )}
         </div>
       </div>
-
+      {/* Phone Number  */}
+      <div>
+        <label className="block text-sm mb-1">Phone Number</label>
+        <CommonInput
+          type="tel"
+          value={phoneNumber}
+          onChange={(e) => setPhoneNumber(e.target.value)}
+          maxLength={15}
+          countries={countries}
+          selectedCountry={selectedCountry || undefined}
+          onCountryChange={setSelectedCountry}
+          showCountryDropdown
+        />
+      </div>
       {/* Email + Password */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div>

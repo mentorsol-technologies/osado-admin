@@ -1,27 +1,28 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card"; 
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { LucideIcon } from "lucide-react";
+import { Flag, LucideIcon } from "lucide-react";
+import Image from "next/image";
 
 interface CountryCardProps {
-  icon: LucideIcon;
-  title: string;
-  id: string;
-  createdDate: string;
-  activeEvents: number;
+  iconURL?: string | null;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+  activeEventsCount?: number;
+  activeServiceCount?: number;
   status: string;
   onEdit?: () => void;
   onDelete?: () => void;
 }
 
 export default function CountryCard({
-  icon: Icon,
-  title,
-  id,
-  createdDate,
-  activeEvents,
+  iconURL,
+  name,
+  updatedAt,
+  createdAt,
+  activeEventsCount,
   status,
   onEdit,
   onDelete,
@@ -31,12 +32,24 @@ export default function CountryCard({
       <CardContent className="p-4 space-y-3">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-red-700 rounded-lg">
-            <Icon className="text-white h-6 w-6" />
-          </div>
+          {iconURL ? (
+            <Image
+              src={iconURL}
+              alt={name}
+              width={30}
+              height={30}
+              className="object-contain rounded"
+            />
+          ) : (
+            <div className="p-3 bg-red-700 rounded-lg">
+              <Flag className="text-white h-6 w-6" />
+            </div>
+          )}
           <div>
-            <h3 className="text-lg font-semibold">{title}</h3>
-            <p className="text-xs text-gray-400">ID: {id}</p>
+            <h3 className="text-lg font-semibold">{name}</h3>
+            <p className="text-xs ">
+              Last Updated at :  {new Date(updatedAt).toLocaleDateString()}
+            </p>
           </div>
         </div>
 
@@ -44,15 +57,15 @@ export default function CountryCard({
         <div className="text-sm space-y-1 text-gray-300">
           <p className="flex justify-between">
             <span className="font-semibold">Date added</span>
-            <span>{createdDate}</span> 
+            <span>{new Date(createdAt).toLocaleDateString()}</span>
           </p>
           <p className="flex justify-between">
-            <span className="font-semibold">Active Events/Services</span>{" "}
-           <span> {activeEvents}</span>
+            <span className="font-semibold">Active Events/Services</span>
+            <span>{activeEventsCount || 0}</span>
           </p>
           <p className="flex justify-between">
-            <span className="font-semibold">Status</span>{" "}
-            <span >{status}</span>
+            <span className="font-semibold">Status</span>
+            <span>{status}</span>
           </p>
         </div>
 
@@ -66,7 +79,7 @@ export default function CountryCard({
           </Button>
           <Button
             variant="outline"
-            className="border-black-200 ronded-xl text-white hover:bg-black-800 flex-1"
+            className="border-black-200 rounded-xl text-white hover:bg-black-800 flex-1"
             onClick={onDelete}
           >
             Delete

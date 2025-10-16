@@ -15,12 +15,20 @@ import {
 import Modal from "@/components/ui/Modal";
 import CommonInput from "@/components/ui/input";
 import Upload from "@/components/ui/upload";
+import {
+  useUpdateInfluencerRankMutation,
+  useUploadInfluencerRankFileMutation,
+} from "@/hooks/useInfluencersRankMutations";
+import { useEffect, useState } from "react";
+import { toast } from 'react-toastify';
 
+
+// ✅ Validation Schema
 const schema = z.object({
-  title: z.string().min(2, "title is required"),
+  title: z.string().min(2, "Title is required"),
   status: z.enum(["Active", "Inactive"]),
-  visited_events: z.string().min(1, "Visited events is required"),
-  positive_reviews: z.string().min(1, "Positive reviews is required"),
+  noOfEventsVisited: z.string().min(1, "Visited events is required"),
+  noOfReviews: z.string().min(1, "Positive reviews is required"),
   image: z.any().optional(),
 });
 
@@ -30,10 +38,11 @@ interface EditRankModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   selectedInfluencers?: {
+    id?: string;
     title: string;
-    status: "Active" | "Inactive";
-    visited_events?: string;
-    positive_reviews?: string;
+    status: string; // backend sends "active" or "inactive"
+    noOfEventsVisited?: number;
+    noOfReviews?: number;
     image?: string;
   };
   onSave: (data: FormData) => void;
@@ -45,24 +54,74 @@ export default function EditRankModal({
   selectedInfluencers,
   onSave,
 }: EditRankModalProps) {
+  const { mutate: updateInfluencersRank, isPending } =
+    useUpdateInfluencerRankMutation();
+  const { mutateAsync: uploadInfluencersRankFile, isPending: isUploading } =
+    useUploadInfluencerRankFileMutation();
+
+  const [uploadId, setUploadId] = useState<string>("");
+
   const {
     register,
     handleSubmit,
     setValue,
+    reset,
+    watch,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      title: selectedInfluencers?.title || "",
-      status: selectedInfluencers?.status || "Active",
-      visited_events: selectedInfluencers?.visited_events || "",
-      positive_reviews: selectedInfluencers?.positive_reviews || "",
+      title: "",
+      status: "Active",
+      noOfEventsVisited: "",
+      noOfReviews: "",
     },
   });
 
+  // ✅ Populate form when editing
+  useEffect(() => {
+    if (selectedInfluencers) {
+      console.log("selected Influencers", selectedInfluencers)
+      reset({
+        title: selectedInfluencers.title || "",
+        status:
+          selectedInfluencers.status?.toLowerCase() === "active"
+            ? "Active"
+            : "Inactive",
+        noOfEventsVisited: selectedInfluencers.noOfEventsVisited
+          ? String(selectedInfluencers.noOfEventsVisited)
+          : "",
+        noOfReviews: selectedInfluencers.noOfReviews
+          ? String(selectedInfluencers.noOfReviews)
+          : "",
+        image: selectedInfluencers.image || undefined,
+      });
+    }
+  }, [selectedInfluencers, reset]);
+
+  // ✅ Submit handler
   const onSubmit = (data: FormData) => {
-    onSave(data);
-    setOpen(false);
+    if (!selectedInfluencers?.id) return;
+
+    const payload = {
+      title: data.title,
+      status: data.status.toLowerCase(), // convert back for backend
+      noOfEventsVisited: Number(data.noOfEventsVisited),
+      noOfReviews: Number(data.noOfReviews),
+      iconId: uploadId || undefined,
+    };
+
+    updateInfluencersRank(
+      { rankId: selectedInfluencers.id, data: payload },
+      {
+        onSuccess: () => {
+          toast.success("Influencer Rank updated successfully!")
+          reset();
+          setOpen(false);
+          onSave?.(data);
+        },
+      }
+    );
   };
 
   return (
@@ -72,8 +131,12 @@ export default function EditRankModal({
       title="Edit Rank"
       footer={
         <div className="flex flex-col sm:flex-row gap-3 w-full">
-          <Button onClick={handleSubmit(onSubmit)} className="flex-1">
-            Submit
+          <Button
+            onClick={handleSubmit(onSubmit)}
+            className="flex-1"
+            disabled={isPending || isUploading}
+          >
+            {isPending ? "Updating..." : "Submit"}
           </Button>
           <Button
             variant="outline"
@@ -85,10 +148,10 @@ export default function EditRankModal({
         </div>
       }
     >
-      {/* Two-column row */}
+      {/* Title + Status */}
       <div className="flex flex-col sm:flex-row gap-3 w-full">
-        {/* Category Name */}
-        <div className="flex-1 flex-col sm:flex-row">
+        {/* Title */}
+        <div className="flex-1">
           <label className="block text-sm mb-1">Title</label>
           <CommonInput placeholder="Write title" {...register("title")} />
           {errors.title && (
@@ -97,18 +160,18 @@ export default function EditRankModal({
         </div>
 
         {/* Status */}
-        <div className="flex-1 flex-col sm:flex-row">
+        <div className="flex-1">
           <label className="block text-sm mb-1">Status</label>
           <Select
-            defaultValue={selectedInfluencers?.status || "Active"}
+            value={watch("status")}
             onValueChange={(val) =>
               setValue("status", val as "Active" | "Inactive")
             }
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select Status" />
+              <SelectValue placeholder="Select status" />
             </SelectTrigger>
-            <SelectContent className="w-[var(--radix-select-trigger-width)]">
+            <SelectContent>
               <SelectItem value="Active">Active</SelectItem>
               <SelectItem value="Inactive">Inactive</SelectItem>
             </SelectContent>
@@ -119,56 +182,54 @@ export default function EditRankModal({
         </div>
       </div>
 
-      {/* Dropdowns for Events & Reviews */}
+      {/* Events & Reviews */}
       <div className="flex flex-col sm:flex-row gap-3 w-full mt-4">
-        {/* Visited Events */}
-        <div className="flex-1 flex-col sm:flex-row">
+        {/* No. of Events */}
+        <div className="flex-1">
           <label className="block text-sm mb-1">Number of visited events</label>
           <Select
-            defaultValue={selectedInfluencers?.visited_events || ""}
-            onValueChange={(val) => setValue("visited_events", val)}
+            value={watch("noOfEventsVisited")}
+            onValueChange={(val) => setValue("noOfEventsVisited", val)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select Number of visited events" />
             </SelectTrigger>
             <SelectContent>
-              {[1, 2, 3, 4, 5].map((num) => (
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                 <SelectItem key={num} value={num.toString()}>
                   {num}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          {errors.visited_events && (
+          {errors.noOfEventsVisited && (
             <p className="text-xs text-red-500 mt-1">
-              {errors.visited_events.message}
+              {errors.noOfEventsVisited.message}
             </p>
           )}
         </div>
 
-        {/* Positive Reviews */}
-        <div className="flex-1 flex-col sm:flex-row">
-          <label className="block text-sm mb-1">
-            Number of positive reviews
-          </label>
+        {/* No. of Reviews */}
+        <div className="flex-1">
+          <label className="block text-sm mb-1">Number of positive reviews</label>
           <Select
-            defaultValue={selectedInfluencers?.positive_reviews || ""}
-            onValueChange={(val) => setValue("positive_reviews", val)}
+            value={watch("noOfReviews")}
+            onValueChange={(val) => setValue("noOfReviews", val)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select Number of positive reviews" />
             </SelectTrigger>
             <SelectContent>
-              {[1, 2, 3, 4, 5].map((num) => (
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                 <SelectItem key={num} value={num.toString()}>
                   {num}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          {errors.positive_reviews && (
+          {errors.noOfReviews && (
             <p className="text-xs text-red-500 mt-1">
-              {errors.positive_reviews.message}
+              {errors.noOfReviews.message}
             </p>
           )}
         </div>
@@ -178,13 +239,32 @@ export default function EditRankModal({
       <div className="mt-4">
         <Upload
           label="Upload Badge"
-          onFileSelect={(file) => {
+          onFileSelect={async (file) => {
             if (file) {
-              console.log("Selected File:", file);
-              setValue("image", file);
+              try {
+                const result = await uploadInfluencersRankFile(file);
+                setUploadId(result?.uploadId || "");
+                setValue("image", file);
+              } catch (err) {
+                console.error("File upload failed:", err);
+              }
             }
           }}
         />
+        {isUploading && (
+          <p className="text-sm text-blue-500 mt-1">Uploading...</p>
+        )}
+
+        {/* Existing Image Preview */}
+        {selectedInfluencers?.image && (
+          <div className="mt-2">
+            <img
+              src={selectedInfluencers.image}
+              alt="Current Badge"
+              className="w-16 h-16 rounded-md border"
+            />
+          </div>
+        )}
       </div>
     </Modal>
   );

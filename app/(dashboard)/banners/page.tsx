@@ -16,6 +16,9 @@ import DeleteConfirmModal from "@/components/ui/commonComponent/DeleteConfirmMod
 import SuspendedBannerModal from "./SuspendedBannerModal";
 import AddPromotionalBannerModal from "./AddPromotionalBannerModal";
 import EditPromotionalBannerModal from "./EditPromotionalBannerModal";
+import { useDeleteBannersMutation, useGetBannersQuery, useSuspendBannerMutation } from "@/hooks/useBannersMutations";
+import { toast } from "react-toastify";
+
 
 export default function BannersPage() {
   const [selectedFilters, setSelectedFilters] = useState<{
@@ -27,6 +30,13 @@ export default function BannersPage() {
   const [suspendOpen, setSuspendOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+
+  const { data, isLoading, isError } = useGetBannersQuery();
+  const { mutate: deleteBanner, isPending } = useDeleteBannersMutation();
+  const { mutate: suspendBanner } = useSuspendBannerMutation();
+
+
+
   const handleAddBanner = (data: any) => {
     console.log("New banner data:", data);
   };
@@ -34,11 +44,32 @@ export default function BannersPage() {
     console.log("Updated banner:", data);
   };
   // 👇 handler when suspended booking is submitted
-  const handleSuspendSubmit = (data: any) => {
-    console.log("Suspended Booking Reason:", data);
+  const handleSuspendSubmit = (reason: string) => {
+    if (!selectedBanner?.id) return;
+
+    suspendBanner(
+      { id: selectedBanner.id, data: { status: "suspended", reason } },
+      {
+        onSuccess: () => {
+          setSuspendOpen(false);
+          setSelectedBanner(null);
+        },
+        onError: (error: any) => {
+        },
+      }
+    );
   };
+
   const handleDelete = () => {
-    console.log("Banner deleted:", selectedBanner);
+    if (!selectedBanner?.id) return;
+
+    deleteBanner(selectedBanner.id, {
+      onSuccess: () => {
+        toast.error("category deleted Successfully!")
+        setDeleteOpen(false);
+        setSelectedBanner(null);
+      },
+    });
   };
   const filters = [
     {
@@ -58,38 +89,7 @@ export default function BannersPage() {
       options: ["Newest", "Oldest", "A–Z", "Z–A"],
     },
   ];
-  const banners = [
-    {
-      image:
-        "https://images.unsplash.com/photo-1598970434795-0c54fe7c0648?q=80&w=1000&auto=format&fit=crop", // business people cheers
-      title: "Book Your Photographer Today",
-      id: "BN-1024",
-      startDate: "01/09/2025",
-      endDate: "30/09/2025",
-      targetAudience: "All the users",
-      status: "Active",
-    },
-    {
-      image:
-        "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Marathon_Runners.jpg/1024px-Marathon_Runners.jpg",
-      title: "Summer Sale – Flat 50% Off",
-      id: "BN-1025",
-      startDate: "05/09/2025",
-      endDate: "25/09/2025",
-      targetAudience: "Premium users",
-      status: "Pending",
-    },
-    {
-      image:
-        "https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Party_crowd_KMN_Gang_%E2%80%93_splash%21_Festival_20_%282017%29.jpg/1024px-Party_crowd_KMN_Gang_%E2%80%93_splash%21_Festival_20_%282017%29.jpg",
-      title: "Summer Sale – Flat 50% Off",
-      id: "BN-1025",
-      startDate: "05/09/2025",
-      endDate: "25/09/2025",
-      targetAudience: "Premium users",
-      status: "Pending",
-    },
-  ];
+
 
   const handleFilterChange = (key: string, value: string) => {
     setSelectedFilters((prev) => ({ ...prev, [key]: value }));
@@ -123,15 +123,15 @@ export default function BannersPage() {
       </div>
       {/* Render Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {banners.map((banner) => (
+        {data?.map((banner: any) => (
           <BannerCard
             key={banner.id}
-            image={banner.image}
-            title={banner.title}
-            id={banner.id}
-            startDate={banner.startDate}
-            endDate={banner.endDate}
-            targetAudience={banner.targetAudience}
+            image={banner.photoURL}
+            bannerTitle={banner.bannerTitle}
+            bannerId={banner.bannerId}
+            startDate={new Date(banner.startDate).toLocaleDateString()}
+            endDate={new Date(banner.endDate).toLocaleDateString()}
+            displayCategories={banner.displayCategories}
             status={banner.status}
             onEdit={() => {
               setSelectedBanner(banner);
@@ -141,6 +141,7 @@ export default function BannersPage() {
               setSelectedBanner(banner);
               setSuspendOpen(true);
             }}
+
             onDelete={() => {
               setSelectedBanner(banner);
               setDeleteOpen(true);
@@ -168,7 +169,7 @@ export default function BannersPage() {
         onOpenChange={setDeleteOpen}
         onConfirm={handleDelete}
         title="Delete Banner"
-        description={`Are you sure you want to delete "${selectedBanner?.title}"? This action cannot be undone.`}
+        description={`Are you sure you want to delete "${selectedBanner?.bannerTitle}"? This action cannot be undone.`}
       />
       {/* Suspended modal */}
       <SuspendedBannerModal

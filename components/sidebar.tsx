@@ -24,14 +24,6 @@ import { FaPollH } from "react-icons/fa";
 import { PiUsersThreeFill } from "react-icons/pi";
 import { FaCamera } from "react-icons/fa";
 import { RiDashboardFill } from "react-icons/ri";
-
-
-
-
-
-
-
-
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";

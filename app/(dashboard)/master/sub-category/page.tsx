@@ -4,50 +4,20 @@ import { Music, Dumbbell, Palette, Briefcase, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import DeleteConfirmModal from "@/components/ui/commonComponent/DeleteConfirmModal";
-import CategoryCard from "../categories/CategoryCard";
 import EditSubCategoryModal from "./EditSubcategoryForm";
 import AddSubCategoryModal from "./AddSubcategoryForm";
-
-const categories = [
-  {
-    icon: Music,
-    title: "Music & Concerts",
-    id: "32456",
-    createdDate: "12/03/2024",
-    subcategories: 1,
-    status: "Active",
-  },
-  {
-    icon: Dumbbell,
-    title: "Sports & Fitness",
-    id: "32457",
-    createdDate: "12/03/2024",
-    subcategories: 3,
-    status: "Active",
-  },
-  {
-    icon: Palette,
-    title: "Arts & Culture",
-    id: "32458",
-    createdDate: "12/03/2024",
-    subcategories: 5,
-    status: "Active",
-  },
-  {
-    icon: Briefcase,
-    title: "Business & Networking",
-    id: "32459",
-    createdDate: "12/03/2024",
-    subcategories: 0,
-    status: "Active",
-  },
-];
+import SubCategoryCard from "./SubCategoryCard";
+import { useDeleteSubCategoryMutation, useSubCategoriesQuery } from "@/hooks/useSubCategoriesMutations";
+import { toast } from 'react-toastify';
 
 export default function SubCategories() {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
   const [addOpen, setAddOpen] = useState(false);
+  const { data, isLoading, isError } = useSubCategoriesQuery();
+  const { mutate: deleteSubCategory, isPending } = useDeleteSubCategoryMutation();
+
 
   const handleAdd = (data: any) => {
     console.log("New category added:", data);
@@ -55,7 +25,15 @@ export default function SubCategories() {
   };
 
   const handleDelete = () => {
-    console.log("Category deleted:", selectedCategory);
+    if (!selectedCategory?.id) return;
+
+    deleteSubCategory(selectedCategory.id, {
+      onSuccess: () => {
+        toast.error("subcategory deleted successfully !")
+        setDeleteOpen(false);
+        setSelectedCategory(null);
+      },
+    });
   };
 
   return (
@@ -71,10 +49,19 @@ export default function SubCategories() {
 
       {/* Responsive Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {categories.map((cat) => (
-          <CategoryCard
-            key={cat.id}
-            {...cat}
+        {isLoading
+          ? Array.from({ length: 6 }).map((_, i) => (
+              <SubCategoryCard key={i} isLoading />
+            ))
+          :data?.map((cat: any) => (
+          <SubCategoryCard
+             key={cat.id}
+            iconUrl={cat.iconUrl}
+            name={cat.name}
+            subCategoryID={cat.subCategoryID}
+            createdDate={cat.createdAt}
+            subCategoriesCount={cat.subCategoriesCount}
+            status={cat.status}
             onEdit={() => {
               setSelectedCategory(cat);
               setEditOpen(true);
