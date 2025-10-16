@@ -110,3 +110,4 @@ html body * {
     @apply bg-dashboard-card border border-black-400 rounded-lg p-3 lg:p-6 hover:border-black-200 transition-colors;
   }
 }
+

@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,12 +16,15 @@ import {
 import Modal from "@/components/ui/Modal";
 import CommonInput from "@/components/ui/input";
 import Upload from "@/components/ui/upload";
+import { useCreateInfluencerRankMutation, useUploadInfluencerRankFileMutation } from "@/hooks/useInfluencersRankMutations";
+import { toast } from 'react-toastify';
+
 
 const schema = z.object({
-  title: z.string().min(2, "title is required"),
+  title: z.string().min(2, "Title is required"),
   status: z.enum(["Active", "Inactive"]),
-  visited_events: z.string().min(1, "Visited events is required"),
-  positive_reviews: z.string().min(1, "Positive reviews is required"),
+  noOfEventsVisited: z.string().min(1, "Visited events is required"),
+  noOfReviews: z.string().min(1, "Positive reviews is required"),
   image: z.any().optional(),
 });
 
@@ -32,8 +36,8 @@ interface AddRankModalProps {
   selectedInfluencers?: {
     title: string;
     status: "Active" | "Inactive";
-    visited_events?: string;
-    positive_reviews?: string;
+    noOfEventsVisited?: number;
+    noOfReviews?: number;
     image?: string;
   };
   onSave: (data: FormData) => void;
@@ -45,6 +49,10 @@ export default function AddRankModal({
   selectedInfluencers,
   onSave,
 }: AddRankModalProps) {
+  const { mutate: createInfluencersRank, isPending } = useCreateInfluencerRankMutation();
+  const { mutateAsync: uploadInfluencersRankFile, isPending: isUploading } = useUploadInfluencerRankFileMutation();
+  const [uploadId, setUploadId] = useState<string>("");
+
   const {
     register,
     handleSubmit,
@@ -55,14 +63,37 @@ export default function AddRankModal({
     defaultValues: {
       title: selectedInfluencers?.title || "",
       status: selectedInfluencers?.status || "Active",
-      visited_events: selectedInfluencers?.visited_events || "",
-      positive_reviews: selectedInfluencers?.positive_reviews || "",
+      noOfEventsVisited: selectedInfluencers?.noOfEventsVisited?.toString() || "",
+      noOfReviews: selectedInfluencers?.noOfReviews?.toString() || "",
     },
   });
 
-  const onSubmit = (data: FormData) => {
-    onSave(data);
-    setOpen(false);
+  const onSubmit = async (data: FormData) => {
+    try {
+      const payload = {
+        title: data.title,
+        status: data.status.toLowerCase(),
+        noOfEventsVisited: Number(data.noOfEventsVisited),
+        noOfReviews: Number(data.noOfReviews),
+        iconId: uploadId || undefined,
+
+      };
+
+      createInfluencersRank(payload, {
+        onSuccess: (res) => {
+          toast.success("Influencer Rank created successfully!");
+          onSave(data);
+          setOpen(false);
+        },
+        onError: (error: any) => {
+          console.error("Error creating influencer rank:", error);
+          toast.error(error?.message || "Failed to create influencer rank");
+        },
+      });
+    } catch (error) {
+      console.error("Submission error:", error);
+      toast.error("An unexpected error occurred");
+    }
   };
 
   return (
@@ -72,61 +103,57 @@ export default function AddRankModal({
       title="Create Rank"
       footer={
         <div className="flex flex-col sm:flex-row gap-3 w-full">
-          <Button onClick={handleSubmit(onSubmit)} className="flex-1">
-            Submit
+          <Button onClick={handleSubmit(onSubmit)} className="flex-1" disabled={isPending || isUploading}>
+            {isPending ? "Submitting..." : "Submit"}
           </Button>
           <Button
             variant="outline"
             className="flex-1"
             onClick={() => setOpen(false)}
+            disabled={isPending}
           >
             Cancel
           </Button>
         </div>
       }
     >
-      {/* Two-column row */}
+      {/* Title & Status */}
       <div className="flex flex-col sm:flex-row gap-3 w-full">
-        {/* Category Name */}
-        <div className="flex-1 flex-col sm:flex-row">
+        <div className="flex-1">
           <label className="block text-sm mb-1">Title</label>
           <CommonInput placeholder="Write title" {...register("title")} />
-          {errors.title && (
-            <p className="text-xs text-red-500 mt-1">{errors.title.message}</p>
-          )}
+          {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title.message}</p>}
         </div>
 
-        {/* Status */}
-        <div className="flex-1 flex-col sm:flex-row">
+        <div className="flex-1">
           <label className="block text-sm mb-1">Status</label>
           <Select
             defaultValue={selectedInfluencers?.status || "Active"}
-            onValueChange={(val) =>
-              setValue("status", val as "Active" | "Inactive")
-            }
+            onValueChange={(val) => setValue("status", val as "Active" | "Inactive")}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select Status" />
             </SelectTrigger>
-            <SelectContent className="w-[var(--radix-select-trigger-width)]">
+            <SelectContent>
               <SelectItem value="Active">Active</SelectItem>
               <SelectItem value="Inactive">Inactive</SelectItem>
             </SelectContent>
           </Select>
-          {errors.status && (
-            <p className="text-xs text-red-500 mt-1">{errors.status.message}</p>
-          )}
+          {errors.status && <p className="text-xs text-red-500 mt-1">{errors.status.message}</p>}
         </div>
       </div>
 
-      {/* Dropdowns for Events & Reviews */}
+      {/* Visited Events & Reviews */}
       <div className="flex flex-col sm:flex-row gap-3 w-full mt-4">
-        {/* Visited Events */}
-        <div className="flex-1 flex-col sm:flex-row">
+        <div className="flex-1">
           <label className="block text-sm mb-1">Number of visited events</label>
           <Select
-            defaultValue={selectedInfluencers?.visited_events || ""}
-            onValueChange={(val) => setValue("visited_events", val)}
+            defaultValue={
+              selectedInfluencers?.noOfEventsVisited
+                ? selectedInfluencers.noOfEventsVisited.toString()
+                : ""
+            }
+            onValueChange={(val) => setValue("noOfEventsVisited", val)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select Number of visited events" />
@@ -139,21 +166,17 @@ export default function AddRankModal({
               ))}
             </SelectContent>
           </Select>
-          {errors.visited_events && (
-            <p className="text-xs text-red-500 mt-1">
-              {errors.visited_events.message}
-            </p>
-          )}
+          {errors.noOfEventsVisited && <p className="text-xs text-red-500 mt-1">{errors.noOfEventsVisited.message}</p>}
         </div>
 
-        {/* Positive Reviews */}
-        <div className="flex-1 flex-col sm:flex-row">
-          <label className="block text-sm mb-1">
-            Number of positive reviews
-          </label>
+        <div className="flex-1">
+          <label className="block text-sm mb-1">Number of positive reviews</label>
           <Select
-            defaultValue={selectedInfluencers?.positive_reviews || ""}
-            onValueChange={(val) => setValue("positive_reviews", val)}
+            defaultValue={
+              selectedInfluencers?.noOfReviews
+                ? selectedInfluencers.noOfReviews.toString()
+                : ""
+            } onValueChange={(val) => setValue("noOfReviews", val)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select Number of positive reviews" />
@@ -166,25 +189,29 @@ export default function AddRankModal({
               ))}
             </SelectContent>
           </Select>
-          {errors.positive_reviews && (
-            <p className="text-xs text-red-500 mt-1">
-              {errors.positive_reviews.message}
-            </p>
-          )}
+          {errors.noOfReviews && <p className="text-xs text-red-500 mt-1">{errors.noOfReviews.message}</p>}
         </div>
       </div>
 
-      {/* File Upload */}
+      {/* Upload */}
       <div className="mt-4">
         <Upload
           label="Upload Badge"
-          onFileSelect={(file) => {
+          onFileSelect={async (file) => {
             if (file) {
-              console.log("Selected File:", file);
-              setValue("image", file);
+              try {
+                const result = await uploadInfluencersRankFile(file);
+                setUploadId(result?.uploadId || "");
+                setValue("image", file);
+                toast.success("File uploaded successfully");
+              } catch (error) {
+                console.error("File upload failed:", error);
+                toast.error("File upload failed");
+              }
             }
           }}
         />
+        {isUploading && <p className="text-sm text-blue-500 mt-1">Uploading...</p>}
       </div>
     </Modal>
   );

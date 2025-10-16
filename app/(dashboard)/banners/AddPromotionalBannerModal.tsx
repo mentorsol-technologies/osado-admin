@@ -16,6 +16,9 @@ import Modal from "@/components/ui/Modal";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import Upload from "@/components/ui/upload";
+import { useCreateBannersMutation } from "@/hooks/useBannersMutations";
+import { uploadToS3 } from "@/lib/s3Upload";
+import { getBannerUploadLink } from "@/services/banners/bannersService";
 
 const schema = z.object({
   image: z.any().optional(),
@@ -41,6 +44,12 @@ export default function AddPromotionalBannerModal({
   setOpen,
   onSave,
 }: AddPromotionalBannerModalProps) {
+  const [uploadId, setUploadId] = useState<string>("");
+
+
+  const { mutate: createBanner, isPending } = useCreateBannersMutation();
+
+
   const {
     register,
     handleSubmit,
@@ -70,11 +79,34 @@ export default function AddPromotionalBannerModal({
     setSelectedCategories(updated);
     setValue("category", updated);
   };
-
-  const onSubmit = (data: FormData) => {
-    onSave({ ...data, category: selectedCategories });
-    setOpen(false);
+  const handleFileUpload = async (file: File) => {
+    try {
+      const { url, fields, uploadId } = await getBannerUploadLink(file.type);
+      setUploadId(uploadId);
+      setValue("image", file);
+      await uploadToS3(file, url, fields);
+    } catch (error) {
+      console.error("File upload failed:", error);
+    }
   };
+
+ const onSubmit = (data: FormData) => {
+      const payload = {
+    bannerTitle: data.bannerTitle,
+    startDate: new Date(data.startDate).toISOString(),
+    endDate: new Date(data.endDate).toISOString(),
+    photoId: uploadId,
+    displayCategories: selectedCategories,
+    status: data.status.toLowerCase(), // convert to "active"/"inactive"
+  };
+
+    createBanner(payload, {
+      onSuccess: () => {
+        setOpen(false);
+      },
+    });
+  };
+
 
   return (
     <Modal
@@ -102,13 +134,17 @@ export default function AddPromotionalBannerModal({
       <div className="max-h-[70vh] overflow-y-auto pr-2">
         {/* Upload Image */}
         <div className="mb-4">
-          <label className="block text-sm mb-1">Upload Image</label>
           <Upload
-            onFileSelect={(file) => {
-              if (file) {
-                const url = URL.createObjectURL(file);
-                setPreview(url);
-                setValue("image", file);
+            label="Upload Icon/Image"
+            onFileSelect={async (file) => {
+              if (!file) return;
+              console.log("Uploading file:", file);
+
+              try {
+                // ✅ Use your service + reusable S3 upload
+                await handleFileUpload(file);
+              } catch (error) {
+                console.error("File upload failed:", error);
               }
             }}
           />
@@ -203,11 +239,10 @@ export default function AddPromotionalBannerModal({
               <Badge
                 key={cat}
                 onClick={() => toggleCategory(cat)}
-                className={`cursor-pointer px-4 py-1 ${
-                  selectedCategories.includes(cat)
-                    ? "bg-red-600 text-white"
-                    : "bg-gray-700 text-gray-300"
-                }`}
+                className={`cursor-pointer px-4 py-1 ${selectedCategories.includes(cat)
+                  ? "bg-red-600 text-white"
+                  : "bg-gray-700 text-gray-300"
+                  }`}
               >
                 {cat}
               </Badge>

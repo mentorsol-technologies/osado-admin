@@ -8,6 +8,8 @@ export type Country = {
   code: string;
   name: string;
   iso: string; // just store ISO code
+  iso3: string;
+  callingCode?: string;
 };
 
 export function useCountries(): Country[] {
@@ -15,14 +17,17 @@ export function useCountries(): Country[] {
     return (countryList() as any)
       .getData()
       .map((c: { value: string; label: string }) => {
-        const dial =
-          callingCode.find((d) => d.isoCode2 === c.value)?.countryCodes[0] ||
-          "";
+        const countryData = callingCode.find(
+          (d) => d.isoCode2 === c.value
+        );
+        const dial = countryData?.countryCodes[0] || "";
+        const iso3 = countryData?.isoCode3 || "";
 
         return {
           code: dial ? `+${dial}` : "",
           name: c.label,
           iso: c.value.toLowerCase(),
+          iso3: iso3.toUpperCase(),
         };
       })
       .filter((c: Country) => c.code); // only keep countries with dialing codes

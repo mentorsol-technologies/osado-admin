@@ -1,27 +1,29 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card"; 
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { LucideIcon } from "lucide-react";
+import { Crown, LucideIcon } from "lucide-react";
+import Image from "next/image";
+
 
 interface InfluencersRankCardProps {
-  icon: LucideIcon;
+  iconURL?: string | null;
   title: string;
-  id: string;
-  createdDate: string;
-  influencersTagged: number;
+  noOfEventsVisited: string;
+  createdAt: string;
+  influencerTaggedCount: number;
   status: string;
   onEdit?: () => void;
   onDelete?: () => void;
 }
 
 export default function InfluencersRankCard({
-  icon: Icon,
+  iconURL,
   title,
-  id,
-  createdDate,
-  influencersTagged,
+  noOfEventsVisited,
+  createdAt,
+  influencerTaggedCount,
   status,
   onEdit,
   onDelete,
@@ -31,12 +33,22 @@ export default function InfluencersRankCard({
       <CardContent className="p-4 space-y-3">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-red-700 rounded-lg">
-            <Icon className="text-white h-6 w-6" />
-          </div>
+          {iconURL ? (
+            <Image
+              src={iconURL}
+              alt={title}
+              width={30}
+              height={30}
+              className="object-contain rounded"
+            />
+          ) : (
+            <div className="p-3 bg-red-700 rounded-lg">
+              <Crown className="text-white h-6 w-6" />
+            </div>
+          )}
           <div>
             <h3 className="text-lg font-semibold">{title}</h3>
-            <p className="text-xs text-gray-400">ID: {id}</p>
+            <p className="text-xs text-gray-400">Min.{noOfEventsVisited} events</p>
           </div>
         </div>
 
@@ -44,11 +56,11 @@ export default function InfluencersRankCard({
         <div className="text-sm space-y-1 text-gray-300">
           <p className="flex justify-between">
             <span className="font-semibold">Created Date</span>
-            <span>{createdDate}</span> 
+            <span>{new Date(createdAt).toLocaleDateString()}</span>
           </p>
           <p className="flex justify-between">
-            <span className="font-semibold">Active Events/Services</span>{" "}
-           <span> {influencersTagged}</span>
+            <span className="font-semibold">Influencers Tagged</span>{" "}
+            <span> {influencerTaggedCount}</span>
           </p>
           <p className="flex justify-between">
             <span className="font-semibold">Status</span>{" "}

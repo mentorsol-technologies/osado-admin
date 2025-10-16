@@ -6,6 +6,9 @@ import React, { useState } from "react";
 import CountryCard from "./CountryCard";
 import DeleteConfirmModal from "@/components/ui/commonComponent/DeleteConfirmModal";
 import EditCountryModal from "./EditCountryForm";
+import AddCountryModal from "./AddCountryForm";
+import { useCountryQuery, useDeleteCountryMutation } from "@/hooks/useCountryMutations";
+import { toast } from 'react-toastify';
 
 const Countries = () => {
   const [selectedFilters, setSelectedFilters] = useState<{
@@ -15,6 +18,11 @@ const Countries = () => {
   const [selectedCountry, setSelectedCountry] = useState<any>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const { data, isLoading, isError } = useCountryQuery();
+  const { mutate: deleteCountry, isPending } = useDeleteCountryMutation();
+  console.log("countries listing", data)
+
 
   const filters = [
     { key: "sort-by", label: "Sort by", options: ["Admin", "User", "Manager"] },
@@ -33,34 +41,30 @@ const Countries = () => {
   const handleFilterChange = (key: string, value: string) => {
     setSelectedFilters((prev) => ({ ...prev, [key]: value }));
   };
-  const handleDelete = () => {
-    console.log("Country deleted:", selectedCountry);
+  const handleAddCountry = (formData: any) => {
+    console.log("New Country Added:", formData);
+    setAddOpen(false);
+    // ✅ You can later replace this with your mutation:
+    // createCountryMutation.mutate(formData);
   };
+  const handleDelete = () => {
+    if (!selectedCountry?.id) return;
 
-  const countries = [
-    {
-      icon: Flag,
-      title: "United States",
-      id: "32456",
-      createdDate: "12/03/2024",
-      activeEvents: 1,
-      status: "Active",
-    },
-    {
-      icon: Flag,
-      title: "United States",
-      id: "32456",
-      createdDate: "12/03/2024",
-      activeEvents: 1,
-      status: "Active",
-    },
-  ];
+    deleteCountry(selectedCountry.id, {
+      onSuccess: () => {
+        toast.error("Country deleted Successfully !")
+        setDeleteOpen(false);
+        setSelectedCountry(null);
+      },
+    });
+  }
+
   return (
     <div className="p-6 bg-black-500 !min-h-[calc(100vh-120px)]  rounded-lg">
       <div className="flex justify-between items-center mb-6">
         <h2 className="lg:text-3xl text-xl  font-medium text-white">Countries</h2>
         <Button leftIcon={<Plus size={18} />}>
-          <span className="hidden md:inline">Add Country</span>
+          <span className="hidden md:inline" onClick={() => setAddOpen(true)}>Add Country</span>
         </Button>
       </div>
       <div className="hidden lg:block">
@@ -78,7 +82,7 @@ const Countries = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-        {countries.map((country) => (
+        {data?.map((country: any) => (
           <CountryCard
             key={country.id}
             {...country}
@@ -93,6 +97,14 @@ const Countries = () => {
           />
         ))}
       </div>
+
+      {/* Modals */}
+      <AddCountryModal
+        open={addOpen}
+        setOpen={setAddOpen}
+        onSave={handleAddCountry}
+      />
+
       <EditCountryModal
         open={editOpen}
         setOpen={setEditOpen}

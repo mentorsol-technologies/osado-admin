@@ -7,6 +7,9 @@ import Modal from "@/components/ui/Modal";
 import CommonInput from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useUpdateSubAdminMutation } from "@/hooks/useSubAdminMutations";
+import { useEffect, useState } from "react";
+import { Country, useCountries } from "@/components/ui/CountryPicker";
 
 const schema = z.object({
   fullName: z.string().min(1, "Full name is required"),
@@ -21,8 +24,8 @@ type FormData = z.infer<typeof schema>;
 interface EditSubAdminModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  onSave: (data: FormData) => void;
-  selectedAdmin?: FormData; // Pre-fill values
+  onSave?: (data: FormData) => void;
+  selectedAdmin?: any; // your sub admin object
 }
 
 const permissionsList = [
@@ -42,27 +45,48 @@ export default function EditSubAdminModal({
   onSave,
   selectedAdmin,
 }: EditSubAdminModalProps) {
+  const { mutate: updateSubAdmin, isPending } = useUpdateSubAdminMutation();
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const countries = useCountries();
+  const [selectedCountry, setSelectedCountry] = useState<Country | null>(
+    countries.length > 0 ? countries[0] : null
+  );
   const {
     register,
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      fullName: selectedAdmin?.fullName || "",
-      surname: selectedAdmin?.surname || "",
-      email: selectedAdmin?.email || "",
-      password: selectedAdmin?.password || "",
-      permissions: selectedAdmin?.permissions || [],
-    },
   });
 
-  const onSubmit = (data: FormData) => {
-    onSave(data);
-    setOpen(false);
-  };
+  // 🔹 Update form when selectedAdmin changes
+  useEffect(() => {
+    if (selectedAdmin) {
+      reset({
+        fullName: selectedAdmin.name || "",
+        surname: selectedAdmin.surName || "",
+        email: selectedAdmin.email || "",
+        password: selectedAdmin.password || "",
+        permissions: selectedAdmin.permissions || [],
+      });
+
+      // Set phone number
+      setPhoneNumber(selectedAdmin.phoneNumber || "");
+
+      // Match country from calling code (if available)
+      if (selectedAdmin.callingCode) {
+        const found = countries.find(
+          (c) => c.callingCode === selectedAdmin.callingCode
+        );
+        setSelectedCountry(found || countries[0]);
+      } else {
+        setSelectedCountry(countries[0]);
+      }
+    }
+  }, [selectedAdmin, reset, countries]);
 
   const selectedPermissions = watch("permissions") || [];
 
@@ -74,6 +98,28 @@ export default function EditSubAdminModal({
     setValue("permissions", updated, { shouldValidate: true });
   };
 
+  const onSubmit = (data: FormData) => {
+    if (!selectedAdmin) return;
+
+    const payload = {
+      name: data.fullName,
+      surName: data.surname,
+      email: data.email,
+      password: data.password,
+      phoneNumber,
+      callingCode: selectedCountry?.callingCode || "+965",
+      countryCode: selectedCountry?.iso3 || "KWT",
+      permissions: data.permissions || [],
+      // roleId: selectedAdmin.roleId,
+    };
+    updateSubAdmin(
+      { id: selectedAdmin.id, data: payload },
+      {
+        onSuccess: () => setOpen(false),
+      }
+    );
+  };
+
   return (
     <Modal
       open={open}
@@ -81,23 +127,11 @@ export default function EditSubAdminModal({
       title="Edit Sub Admin"
       footer={
         <div className="flex flex-col sm:flex-row gap-3 w-full">
-          <Button onClick={handleSubmit(onSubmit)} className="flex-1">
-            Save
+          <Button onClick={handleSubmit(onSubmit)} className="flex-1" disabled={isPending}>
+            {isPending ? "Saving..." : "Save"}
           </Button>
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => setOpen(false)}
-          >
+          <Button variant="outline" className="flex-1" onClick={() => setOpen(false)}>
             Cancel
-          </Button>
-
-           <Button
-            variant="outline"
-            className="flex-1 block sm:hidden"
-            onClick={() => setOpen(false)}
-          >
-            Delete Sub Admin
           </Button>
         </div>
       }
@@ -107,40 +141,41 @@ export default function EditSubAdminModal({
         <div>
           <label className="block text-sm mb-1">Full Name</label>
           <CommonInput placeholder="Write full name" {...register("fullName")} />
-          {errors.fullName && (
-            <p className="text-xs text-red-500">{errors.fullName.message}</p>
-          )}
+          {errors.fullName && <p className="text-xs text-red-500">{errors.fullName.message}</p>}
         </div>
         <div>
           <label className="block text-sm mb-1">Surname</label>
           <CommonInput placeholder="Write your surname" {...register("surname")} />
-          {errors.surname && (
-            <p className="text-xs text-red-500">{errors.surname.message}</p>
-          )}
+          {errors.surname && <p className="text-xs text-red-500">{errors.surname.message}</p>}
         </div>
       </div>
-
+      {/* Phone Number  */}
+      <div>
+        <label className="block text-sm mb-1">Phone Number</label>
+        <CommonInput
+          type="tel"
+          value={phoneNumber}
+          onChange={(e) => setPhoneNumber(e.target.value)}
+          maxLength={15}
+          countries={countries}
+          selectedCountry={selectedCountry || undefined}
+          onCountryChange={setSelectedCountry}
+          showCountryDropdown
+        />
+      </div>
+      {/* Email + Password */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div>
           <label className="block text-sm mb-1">Email Address</label>
           <CommonInput placeholder="Write email address" {...register("email")} />
-          {errors.email && (
-            <p className="text-xs text-red-500">{errors.email.message}</p>
-          )}
+          {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
         </div>
         <div>
           <label className="block text-sm mb-1">Password</label>
-          <CommonInput
-            type="password"
-            placeholder="Write password"
-            {...register("password")}
-          />
-          {errors.password && (
-            <p className="text-xs text-red-500">{errors.password.message}</p>
-          )}
+          <CommonInput type="password" placeholder="Write password" {...register("password")} />
+          {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
         </div>
       </div>
-
 
       {/* Permissions */}
       <div className="mb-4">

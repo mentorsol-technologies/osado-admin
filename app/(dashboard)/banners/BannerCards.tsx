@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 
 interface BannerCardProps {
   image: string;
-  title: string;
-  id: string;
+  bannerTitle: string;
+  bannerId: string;
   startDate: string;
   endDate: string;
-  targetAudience: string;
+  displayCategories: string;
   status: string;
   onEdit?: () => void;
   onSuspend?: () => void;
@@ -18,11 +18,11 @@ interface BannerCardProps {
 
 export default function BannerCard({
   image,
-  title,
-  id,
+  bannerTitle,
+  bannerId,
   startDate,
   endDate,
-  targetAudience,
+  displayCategories,
   status,
   onEdit,
   onSuspend,
@@ -32,17 +32,17 @@ export default function BannerCard({
     <div className="rounded-xl bg-black-500 border border-black-200 text-white shadow-lg overflow-hidden flex flex-col">
       {/* Image */}
       <div className="relative h-52 w-full">
-        <Image src={image} alt={title} fill className="object-cover" />
+        <Image src={image} alt={bannerTitle} fill className="object-cover" />
       </div>
 
       {/* Card Body */}
       <div className="p-5 flex flex-col gap-3 flex-1">
-        <h3 className="text-lg">{title}</h3>
+        <h3 className="text-lg">{bannerTitle}</h3>
 
         <div className="flex flex-col gap-2 text-sm">
           <div className="flex justify-between">
             <span className="text-white">ID</span>
-            <span>{id}</span>
+            <span>{bannerId}</span>
           </div>
 
           <div className="flex justify-between">
@@ -57,7 +57,7 @@ export default function BannerCard({
 
           <div className="flex justify-between">
             <span className="text-white">Target Audience</span>
-            <span>{targetAudience}</span>
+            <span>{displayCategories}</span>
           </div>
 
           <div className="flex justify-between">
