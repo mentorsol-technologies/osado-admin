@@ -25,7 +25,6 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  runtime: 'experimental-edge',
   matcher: [
     /*
       Protect all routes except for _next and static files

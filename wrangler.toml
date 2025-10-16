@@ -5,3 +5,5 @@ pages_build_output_dir = ".vercel/output/static"
 
 [build.environment]
 NODE_VERSION = "18"
+NODE_OPTIONS = --no-warnings
+NEXT_PRIVATE_SKIP_MIDDLEWARE_CHECK = 1
