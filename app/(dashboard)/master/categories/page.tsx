@@ -52,30 +52,25 @@ export default function Categories() {
 
       {/* Responsive Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {isLoading
-          ? Array.from({ length: 6 }).map((_, i) => (
-            <CategoryCard key={i} isLoading />
-          ))
-          : data?.map((cat: any) => (
-            <CategoryCard
-              key={cat.id}
-              iconUrl={cat.iconUrl}
-              name={cat.name}
-              categoryID={cat.categoryID}
-              createdDate={cat.createdAt}
-              subCategoriesCount={cat.subCategoriesCount}
-              status={cat.status}
-              onEdit={() => {
-                setSelectedCategory(cat);
-                setEditOpen(true);
-              }}
-              onDelete={() => {
-                setSelectedCategory(cat);
-                setDeleteOpen(true);
-              }}
-            />
-          ))}
-
+        {data?.map((cat: any) => (
+          <CategoryCard
+            key={cat.id}
+            iconUrl={cat.iconUrl}
+            name={cat.name}
+            categoryID={cat.categoryID}
+            createdDate={cat.createdAt}
+            subCategoriesCount={cat.subCategoriesCount}
+            status={cat.status}
+            onEdit={() => {
+              setSelectedCategory(cat);
+              setEditOpen(true);
+            }}
+            onDelete={() => {
+              setSelectedCategory(cat);
+              setDeleteOpen(true);
+            }}
+          />
+        ))}
       </div>
       {/* Add Modal */}
       <AddCategoryModal

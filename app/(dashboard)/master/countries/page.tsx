@@ -82,9 +82,7 @@ const Countries = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-        {isLoading
-    ? Array.from({ length: 6 }).map((_, i) => <CountryCard key={i} isLoading />)
-    : data?.map((country: any) => (
+        {data?.map((country: any) => (
         <CountryCard
           key={country.id}
           {...country}

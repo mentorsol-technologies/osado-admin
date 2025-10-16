@@ -94,7 +94,7 @@ export default function AddSubCategoryModal({
         onSave?.(data);
         reset({
           name: "",
-          status:"active",
+          status:"Active",
           description: "",
         });
         setOpen(false);
