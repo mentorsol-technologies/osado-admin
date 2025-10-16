@@ -82,6 +82,7 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.16",
     "@types/js-cookie": "^3.0.6",
     "prettier": "^3.6.2"
   }
