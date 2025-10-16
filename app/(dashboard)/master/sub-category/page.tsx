@@ -49,13 +49,9 @@ export default function SubCategories() {
 
       {/* Responsive Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {isLoading
-          ? Array.from({ length: 6 }).map((_, i) => (
-              <SubCategoryCard key={i} isLoading />
-            ))
-          :data?.map((cat: any) => (
+        {data?.map((cat: any) => (
           <SubCategoryCard
-             key={cat.id}
+            key={cat.id}
             iconUrl={cat.iconUrl}
             name={cat.name}
             subCategoryID={cat.subCategoryID}

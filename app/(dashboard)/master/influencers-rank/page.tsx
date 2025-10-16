@@ -23,7 +23,7 @@ const InfluencersRank = () => {
 
   const { data, isLoading, isError } = useInfluencerRankQuery();
   console.log("influencers ranked data", data)
-    const { mutate: deleteInfluencersRank, isPending } = useDeleteInfluencerRankMutation();
+  const { mutate: deleteInfluencersRank, isPending } = useDeleteInfluencerRankMutation();
 
 
   const filters = [
@@ -58,7 +58,7 @@ const InfluencersRank = () => {
       },
     });
   }
- 
+
   return (
     <div className="p-6 bg-black-500 !min-h-[calc(100vh-120px)]  rounded-lg">
       <div className="flex justify-between items-center mb-6">

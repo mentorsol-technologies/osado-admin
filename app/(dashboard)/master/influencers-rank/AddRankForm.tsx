@@ -63,8 +63,8 @@ export default function AddRankModal({
     defaultValues: {
       title: selectedInfluencers?.title || "",
       status: selectedInfluencers?.status || "Active",
-      noOfEventsVisited: selectedInfluencers?.noOfEventsVisited || "",
-      noOfReviews: selectedInfluencers?.noOfReviews || "",
+      noOfEventsVisited: selectedInfluencers?.noOfEventsVisited?.toString() || "",
+      noOfReviews: selectedInfluencers?.noOfReviews?.toString() || "",
     },
   });
 
@@ -148,7 +148,11 @@ export default function AddRankModal({
         <div className="flex-1">
           <label className="block text-sm mb-1">Number of visited events</label>
           <Select
-            defaultValue={selectedInfluencers?.noOfEventsVisited|| ""}
+            defaultValue={
+              selectedInfluencers?.noOfEventsVisited
+                ? selectedInfluencers.noOfEventsVisited.toString()
+                : ""
+            }
             onValueChange={(val) => setValue("noOfEventsVisited", val)}
           >
             <SelectTrigger>
@@ -168,8 +172,11 @@ export default function AddRankModal({
         <div className="flex-1">
           <label className="block text-sm mb-1">Number of positive reviews</label>
           <Select
-            defaultValue={selectedInfluencers?.noOfReviews || ""}
-            onValueChange={(val) => setValue("noOfReviews", val)}
+            defaultValue={
+              selectedInfluencers?.noOfReviews
+                ? selectedInfluencers.noOfReviews.toString()
+                : ""
+            } onValueChange={(val) => setValue("noOfReviews", val)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select Number of positive reviews" />

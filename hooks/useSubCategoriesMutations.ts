@@ -74,7 +74,7 @@ export const useDeleteSubCategoryMutation = () => {
 
 export const useUploadSubCategoryFileMutation = () => {
   return useMutation({
-    mutationFn: (file: File) => getSubCategoryUploadLink(file),
+    mutationFn: (file: File) => getSubCategoryUploadLink(file.type),
     onError: (error: any) => {
       const message =
         error?.response?.data?.message || "File upload failed!";

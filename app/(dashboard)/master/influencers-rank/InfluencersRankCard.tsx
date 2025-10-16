@@ -36,7 +36,7 @@ export default function InfluencersRankCard({
           {iconURL ? (
             <Image
               src={iconURL}
-              alt={name}
+              alt={title}
               width={30}
               height={30}
               className="object-contain rounded"

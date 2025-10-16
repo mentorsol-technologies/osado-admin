@@ -26,7 +26,7 @@ type FormData = z.infer<typeof schema>;
 interface AddCountryModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  onSave?: () => void;
+  onSave: (formData: any) => void;
 }
 
 export default function AddCountryModal({ open, setOpen, onSave }: AddCountryModalProps) {
@@ -57,11 +57,11 @@ export default function AddCountryModal({ open, setOpen, onSave }: AddCountryMod
         toast.success("Country created Successfully !");
         reset(
           {
-            name:"",
+            name: "",
           }
         );
         setOpen(false);
-        onSave?.();
+        onSave?.(payload);
       },
     });
   };

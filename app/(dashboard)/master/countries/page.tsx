@@ -47,7 +47,7 @@ const Countries = () => {
     // ✅ You can later replace this with your mutation:
     // createCountryMutation.mutate(formData);
   };
-   const handleDelete = () => {
+  const handleDelete = () => {
     if (!selectedCountry?.id) return;
 
     deleteCountry(selectedCountry.id, {
@@ -82,22 +82,20 @@ const Countries = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-        {isLoading
-    ? Array.from({ length: 6 }).map((_, i) => <CountryCard key={i} isLoading />)
-    : data?.map((country: any) => (
-        <CountryCard
-          key={country.id}
-          {...country}
-          onEdit={() => {
-            setSelectedCountry(country);
-            setEditOpen(true);
-          }}
-          onDelete={() => {
-            setSelectedCountry(country);
-            setDeleteOpen(true);
-          }}
-        />
-      ))}
+        {data?.map((country: any) => (
+          <CountryCard
+            key={country.id}
+            {...country}
+            onEdit={() => {
+              setSelectedCountry(country);
+              setEditOpen(true);
+            }}
+            onDelete={() => {
+              setSelectedCountry(country);
+              setDeleteOpen(true);
+            }}
+          />
+        ))}
       </div>
 
       {/* Modals */}

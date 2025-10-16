@@ -94,7 +94,7 @@ export default function AddSubCategoryModal({
         onSave?.(data);
         reset({
           name: "",
-          status:"active",
+          status: "Active",
           description: "",
         });
         setOpen(false);
@@ -113,7 +113,7 @@ export default function AddSubCategoryModal({
       },
     });
   };
-    const handleFileUpload = async (file: File) => {
+  const handleFileUpload = async (file: File) => {
     try {
       const { url, fields, uploadId } = await getSubCategoryUploadLink(file.type);
       setUploadId(uploadId);
@@ -223,7 +223,7 @@ export default function AddSubCategoryModal({
 
       {/* File Upload */}
       <div className="mt-4">
-     <Upload
+        <Upload
           label="Upload Icon/Image"
           onFileSelect={async (file) => {
             if (!file) return;

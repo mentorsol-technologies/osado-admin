@@ -35,7 +35,7 @@ interface EditCountryModalProps {
     countryCode?: string;
     image?: string;
   };
-  onSave?: () => void;
+  onSave?: (formData: any) => void;
 }
 
 export default function EditCountryModal({
@@ -44,7 +44,7 @@ export default function EditCountryModal({
   selectedCountry,
   onSave,
 }: EditCountryModalProps) {
-  const { mutate: updateCountry, status, isLoading } = useUpdateCountryMutation();
+  const { mutate: updateCountry, status, isPending } = useUpdateCountryMutation();
   const { mutateAsync: uploadCountryFile, isPending: isUploading } =
     useUploadCountryFileMutation();
 
@@ -94,7 +94,7 @@ export default function EditCountryModal({
           toast.success("Country updated Successfully !")
           reset();
           setOpen(false);
-          onSave?.();
+          onSave?.(payload);
         },
       }
     );
@@ -110,10 +110,10 @@ export default function EditCountryModal({
           <Button
             type="button"
             onClick={handleSubmit(onSubmit)}
-            disabled={isLoading}
+            disabled={isPending}
             className="flex-1"
           >
-            {isLoading ? "Saving..." : "Save"}
+            {isPending ? "Saving..." : "Save"}
           </Button>
           <Button
             variant="outline"

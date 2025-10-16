@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { Country } from "@/components/ui/CountryPicker";
 import { useAuthMutations } from "@/hooks/useAuthMutations";
-import { toast } from "@/hooks/use-toast";
+import { toast } from 'react-toastify';
 import { useAuthStore } from "@/app/store/authStore";
 
 const ForgetPassword = () => {
@@ -34,11 +34,7 @@ const ForgetPassword = () => {
     e.preventDefault();
 
     if (!selectedCountry || !phoneNumber) {
-      toast({
-        title: "Missing information",
-        description: "Please enter your phone number and select a country.",
-        variant: "error",
-      });
+      toast.error("Please enter your phone number and select a country.");
       return;
     }
 
@@ -51,26 +47,14 @@ const ForgetPassword = () => {
     forgotPasswordMutation.mutate(payload, {
       onSuccess: (response) => {
         console.log("Forgot password response:", response);
-        toast({
-          title: "OTP Sent!",
-          description: "Please check your phone for the verification code.",
-          variant: "success",
-          position: "top-right",
-        });
+        toast.error("Please check your phone for the verification code.");
 
-        const userId = response?.userId;
+        const userId = response?.data.userId;
         useAuthStore.getState().setUserId(userId);
         router.push("/verify-otp");
       },
       onError: (error: any) => {
-        toast({
-          title: "Failed to send OTP",
-          description:
-            error?.response?.data?.message ||
-            "Something went wrong. Please try again.",
-          variant: "error",
-          position: "top-right",
-        });
+        toast.error("Failed to send OTP. Please try again.");
       },
     });
   };
