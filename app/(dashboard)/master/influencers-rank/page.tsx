@@ -7,6 +7,9 @@ import InfluencersRankCard from "./InfluencersRankCard";
 import DeleteConfirmModal from "@/components/ui/commonComponent/DeleteConfirmModal";
 import AddRankModal from "./AddRankForm";
 import EditRankModal from "./EditRankForm";
+import { useDeleteInfluencerRankMutation, useInfluencerRankQuery } from "@/hooks/useInfluencersRankMutations";
+import { toast } from 'react-toastify';
+
 
 const InfluencersRank = () => {
   const [selectedFilters, setSelectedFilters] = useState<{
@@ -16,7 +19,12 @@ const InfluencersRank = () => {
   const [selectedInfluencers, setSelectedInfluencers] = useState<any>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
-    const [addOpen, setAddOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+
+  const { data, isLoading, isError } = useInfluencerRankQuery();
+  console.log("influencers ranked data", data)
+    const { mutate: deleteInfluencersRank, isPending } = useDeleteInfluencerRankMutation();
+
 
   const filters = [
     {
@@ -34,32 +42,23 @@ const InfluencersRank = () => {
   const handleFilterChange = (key: string, value: string) => {
     setSelectedFilters((prev) => ({ ...prev, [key]: value }));
   };
-  
-    const handleAdd = (data: any) => {
-      console.log("New category added:", data);
-      // call API here to save new category
-    };
-  const handleDelete = () => {
-    console.log("Influencer deleted:", selectedInfluencers);
+
+  const handleAdd = (data: any) => {
+    console.log("New category added:", data);
+    // call API here to save new category
   };
-  const influencers = [
-    {
-      icon: Crown,
-      title: "Standard",
-      id: "32456",
-      createdDate: "12/03/2024",
-      influencersTagged: 112,
-      status: "Active",
-    },
-    {
-      icon: Crown,
-      title: "High-rank",
-      id: "32456",
-      createdDate: "12/03/2024",
-      influencersTagged: 122,
-      status: "Active",
-    },
-  ];
+  const handleDelete = () => {
+    if (!selectedInfluencers?.id) return;
+
+    deleteInfluencersRank(selectedInfluencers.id, {
+      onSuccess: () => {
+        toast.error("Influencer Rank deleted successfully!")
+        setDeleteOpen(false);
+        setSelectedInfluencers(null);
+      },
+    });
+  }
+ 
   return (
     <div className="p-6 bg-black-500 !min-h-[calc(100vh-120px)]  rounded-lg">
       <div className="flex justify-between items-center mb-6">
@@ -82,7 +81,7 @@ const InfluencersRank = () => {
         />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-        {influencers.map((influencer) => (
+        {data?.map((influencer: any) => (
           <InfluencersRankCard
             key={influencer.id}
             {...influencer}
@@ -98,19 +97,19 @@ const InfluencersRank = () => {
         ))}
       </div>
       {/* Add Modal */}
-             <AddRankModal
-              open={addOpen}
-              setOpen={setAddOpen}
-              onSave={handleAdd}
-            />
-            {/* Edit Modal */}
-             <EditRankModal
-                     open={editOpen}
-                     setOpen={setEditOpen}
-                     selectedInfluencers={selectedInfluencers}
-                     onSave={(data) => console.log("Updated:", data)}
-                   />
-             {/* Delete Modal */}
+      <AddRankModal
+        open={addOpen}
+        setOpen={setAddOpen}
+        onSave={handleAdd}
+      />
+      {/* Edit Modal */}
+      <EditRankModal
+        open={editOpen}
+        setOpen={setEditOpen}
+        selectedInfluencers={selectedInfluencers}
+        onSave={(data) => console.log("Updated:", data)}
+      />
+      {/* Delete Modal */}
       <DeleteConfirmModal
         open={deleteOpen}
         onOpenChange={setDeleteOpen}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
@@ -16,6 +16,9 @@ import Modal from "@/components/ui/Modal";
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import Upload from "@/components/ui/upload";
+import { getBannerUploadLink } from "@/services/banners/bannersService";
+import { uploadToS3 } from "@/lib/s3Upload";
+import { useUpdateBannersMutation } from "@/hooks/useBannersMutations";
 
 const schema = z.object({
   image: z.any().optional(),
@@ -25,15 +28,15 @@ const schema = z.object({
   status: z.string().min(1, "Status is required"),
   startDate: z.string().min(1, "Start date required"),
   endDate: z.string().min(1, "End date required"),
-  category: z.array(z.string()).min(1, "Select at least one category"),
+  displayCategories: z.array(z.string()).min(1, "Select at least one category"),
 });
 
-type FormData = z.infer<typeof schema>;
+type FormData = z.infer<typeof schema> & { id?: string };
 
 interface EditPromotionalBannerModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  bannerData: FormData | null; // existing banner data to edit
+  bannerData: (FormData & { id?: string }) | null; // existing banner data to edit
   onUpdate: (data: FormData) => void;
 }
 
@@ -48,22 +51,60 @@ export default function EditPromotionalBannerModal({
     handleSubmit,
     setValue,
     reset,
+    watch,
+    control,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
+    defaultValues: {
+      bannerTitle: bannerData?.bannerTitle || "",
+      linkType: bannerData?.linkType || "external",
+      link: bannerData?.link || "",
+      status:
+        bannerData?.status === "active"
+          ? "Active"
+          : bannerData?.status === "inactive"
+            ? "Inactive"
+            : "",
+      startDate: bannerData?.startDate
+        ? new Date(bannerData.startDate).toISOString().split("T")[0]
+        : "",
+      endDate: bannerData?.endDate
+        ? new Date(bannerData.endDate).toISOString().split("T")[0]
+        : "",
+      displayCategories: bannerData?.displayCategories || ["All"],
+    },
   });
-
+  const { mutate: updateBanner, isPending } = useUpdateBannersMutation();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [preview, setPreview] = useState<string | null>(null);
+  const [uploadId, setUploadId] = useState<string>("");
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  // Load banner data when modal opens
   useEffect(() => {
     if (bannerData) {
-      reset(bannerData);
-      setSelectedCategories(bannerData.category);
-      setPreview(
-        typeof bannerData.image === "string" ? bannerData.image : null
-      );
+      console.log("Populating form with:", bannerData);
+      reset({
+        bannerTitle: bannerData?.bannerTitle || "",
+        linkType: bannerData?.linkType || "external",
+        link: bannerData?.link || "",
+        status:
+          bannerData?.status === "active"
+            ? "Active"
+            : bannerData?.status === "inactive"
+              ? "Inactive"
+              : "",
+        startDate: bannerData?.startDate
+          ? new Date(bannerData.startDate).toISOString().split("T")[0]
+          : "",
+        endDate: bannerData?.endDate
+          ? new Date(bannerData.endDate).toISOString().split("T")[0]
+          : "",
+        displayCategories: bannerData?.displayCategories || ["All"],
+      });
+      setSelectedCategories(bannerData?.displayCategories || ["All"]);
+      setPreview(bannerData?.image || null);
+      setUploadId(bannerData?.image || "");
     }
   }, [bannerData, reset]);
 
@@ -77,13 +118,43 @@ export default function EditPromotionalBannerModal({
         : [...selectedCategories.filter((c) => c !== "All"), cat];
     }
     setSelectedCategories(updated);
-    setValue("category", updated);
+    setValue("displayCategories", updated);
+  };
+  const handleFileUpload = async (file: File) => {
+    try {
+      const { url, fields, uploadId } = await getBannerUploadLink(file.type);
+      setUploadId(uploadId);
+      setValue("image", file);
+      await uploadToS3(file, url, fields);
+    } catch (error) {
+      console.error("File upload failed:", error);
+    }
+  };
+  const onSubmit = (data: FormData) => {
+    if (!bannerData?.id) {
+      console.error("Banner ID missing for update");
+      return;
+    }
+
+    const payload = {
+      bannerTitle: data.bannerTitle,
+      startDate: new Date(data.startDate).toISOString(),
+      endDate: new Date(data.endDate).toISOString(),
+      photoId: uploadId,
+      displayCategories: selectedCategories,
+      status: data.status.toLowerCase(),
+      linkType: data.linkType,
+      link: data.link,
+    };
+
+    updateBanner(
+      { id: bannerData.id, data: payload },
+      {
+        onSuccess: () => setOpen(false),
+      }
+    );
   };
 
-  const onSubmit = (data: FormData) => {
-    onUpdate({ ...data, category: selectedCategories });
-    setOpen(false);
-  };
 
   return (
     <Modal
@@ -92,8 +163,11 @@ export default function EditPromotionalBannerModal({
       title="Edit Promotional Banner"
       footer={
         <div className="flex flex-col sm:flex-row gap-3 w-full">
-          <Button onClick={handleSubmit(onSubmit)} className="flex-1 ">
-            Submit
+          <Button
+            onClick={handleSubmit(onSubmit)}
+            className="flex-1 bg-red-600 hover:bg-red-700"
+          >
+            Update
           </Button>
           <Button
             variant="outline"
@@ -109,13 +183,17 @@ export default function EditPromotionalBannerModal({
         {/* Upload Image */}
 
         <div className="mb-4">
-          <label className="block text-sm mb-1">Upload Image</label>
           <Upload
-            onFileSelect={(file) => {
-              if (file) {
-                const url = URL.createObjectURL(file);
-                setPreview(url);
-                setValue("image", file);
+            label="Upload Icon/Image"
+            onFileSelect={async (file) => {
+              if (!file) return;
+              console.log("Uploading file:", file);
+
+              try {
+                // ✅ Use your service + reusable S3 upload
+                await handleFileUpload(file);
+              } catch (error) {
+                console.error("File upload failed:", error);
               }
             }}
           />
@@ -163,15 +241,21 @@ export default function EditPromotionalBannerModal({
           </div>
           <div>
             <label className="block text-sm mb-1">Status</label>
-            <Select onValueChange={(val) => setValue("status", val)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Active">Active</SelectItem>
-                <SelectItem value="Inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
+            <Controller
+              name="status"
+              control={control}
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Active">Active</SelectItem>
+                    <SelectItem value="Inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
             {errors.status && (
               <p className="text-xs text-red-500">{errors.status.message}</p>
             )}
@@ -210,19 +294,18 @@ export default function EditPromotionalBannerModal({
               <Badge
                 key={cat}
                 onClick={() => toggleCategory(cat)}
-                className={`cursor-pointer px-4 py-1 ${
-                  selectedCategories?.includes(cat)
-                    ? "bg-red-600 text-white"
-                    : "bg-gray-700 text-gray-300"
-                }`}
+                className={`cursor-pointer px-4 py-1 ${selectedCategories?.includes(cat)
+                  ? "bg-red-600 text-white"
+                  : "bg-gray-700 text-gray-300"
+                  }`}
               >
                 {cat}
               </Badge>
             ))}
           </div>
-          {errors.category && (
+          {errors.displayCategories && (
             <p className="text-xs text-red-500 mt-1">
-              {errors.category.message}
+              {errors.displayCategories.message}
             </p>
           )}
         </div>

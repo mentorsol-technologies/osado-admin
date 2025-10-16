@@ -3,17 +3,24 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
-
 import Modal from "@/components/ui/Modal";
 import CommonInput from "@/components/ui/input";
 import Upload from "@/components/ui/upload";
+import { toast } from 'react-toastify';
 
+
+import {
+  useUpdateCountryMutation,
+  useUploadCountryFileMutation,
+} from "@/hooks/useCountryMutations";
+
+// ✅ Schema validation
 const schema = z.object({
-  title: z.string().min(2, "Category name is required"),
-  country_code: z.string().optional(),
-  description: z.string().optional(),
+  name: z.string().min(2, "Country name is required"),
+  countryCode: z.string().optional(),
   image: z.any().optional(),
 });
 
@@ -23,12 +30,12 @@ interface EditCountryModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   selectedCountry?: {
-    title: string;
-    country_code: string;
-    description?: string;
+    id: string;
+    name: string;
+    countryCode?: string;
     image?: string;
   };
-  onSave: (data: FormData) => void;
+   onSave?: (formData: any) => void;
 }
 
 export default function EditCountryModal({
@@ -37,23 +44,60 @@ export default function EditCountryModal({
   selectedCountry,
   onSave,
 }: EditCountryModalProps) {
+  const { mutate: updateCountry, status, isPending  } = useUpdateCountryMutation();
+  const { mutateAsync: uploadCountryFile, isPending: isUploading } =
+    useUploadCountryFileMutation();
+
+  const [uploadId, setUploadId] = useState<string>("");
+
   const {
     register,
     handleSubmit,
     setValue,
+    reset,
+    watch,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      title: selectedCountry?.title || "",
-      country_code: selectedCountry?.country_code,
-      description: selectedCountry?.description || "",
+      name: "",
+      countryCode: "",
+      image: undefined,
     },
   });
 
+  // ✅ Populate form when selectedCountry changes
+  useEffect(() => {
+    if (selectedCountry) {
+      console.log("Populating form with selectedCountry:", selectedCountry);
+      reset({
+        name: selectedCountry.name || "",
+        countryCode: selectedCountry.countryCode || "",
+        image: selectedCountry.image || undefined,
+      });
+    }
+  }, [selectedCountry, reset]);
+
   const onSubmit = (data: FormData) => {
-    onSave(data);
-    setOpen(false);
+    if (!selectedCountry) return;
+
+    const payload = {
+      name: data.name,
+      countryCode: data.countryCode,
+      iconId: uploadId || undefined,
+    };
+
+    updateCountry(
+      { countryId: selectedCountry.id, data: payload },
+      {
+        onSuccess: () => {
+          toast.success("Country updated Successfully !")
+          reset();
+          setOpen(false);
+          onSave?.(payload);
+        },
+      }
+    );
   };
 
   return (
@@ -63,51 +107,85 @@ export default function EditCountryModal({
       title="Edit Country"
       footer={
         <div className="flex flex-col sm:flex-row gap-3 w-full">
-          <Button onClick={handleSubmit(onSubmit)} className=" flex-1">
-            Save
+          <Button
+            type="button"
+            onClick={handleSubmit(onSubmit)}
+            disabled={isPending }
+            className="flex-1"
+          >
+            {isPending  ? "Saving..." : "Save"}
           </Button>
           <Button
             variant="outline"
             className="flex-1"
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              reset();
+              setOpen(false);
+            }}
           >
             Cancel
           </Button>
         </div>
       }
     >
-      {/* Two-column row */}
       <div className="flex flex-col sm:flex-row gap-3 w-full">
-        <div className="flex-1 flex-col sm:flex-row ">
+        {/* Country Name */}
+        <div className="flex-1">
           <label className="block text-sm mb-1">Country Name</label>
-          <CommonInput placeholder="Category Name" {...register("title")} />
-          {errors.title && (
-            <p className="text-xs text-red-500 mt-1">{errors.title.message}</p>
+          <CommonInput
+            placeholder="Country Name"
+            {...register("name")}
+          />
+          {errors.name && (
+            <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>
           )}
         </div>
 
-        <div className="flex-1 flex-col sm:flex-row">
-          <label className="block text-sm mb-1">Country code</label>
-          <CommonInput placeholder="+965" {...register("country_code")} />
-          {errors.country_code && (
+        {/* Country Code */}
+        <div className="flex-1">
+          <label className="block text-sm mb-1">Country Code</label>
+          <CommonInput
+            placeholder="+965"
+            {...register("countryCode")}
+          />
+          {errors.countryCode && (
             <p className="text-xs text-red-500 mt-1">
-              {errors.country_code.message}
+              {errors.countryCode.message}
             </p>
           )}
         </div>
       </div>
 
-      {/* File Upload */}
+      {/* Upload Flag */}
       <div className="mt-4">
         <Upload
           label="Upload Flag"
-          onFileSelect={(file) => {
+          onFileSelect={async (file) => {
             if (file) {
-              console.log("Selected File:", file);
-              setValue("image", file);
+              try {
+                const result = await uploadCountryFile(file);
+                setUploadId(result?.uploadId || "");
+                setValue("image", file);
+              } catch (err) {
+                console.error("File upload failed:", err);
+              }
             }
           }}
         />
+        {isUploading && (
+          <p className="text-sm text-blue-500 mt-1">Uploading...</p>
+        )}
+
+        {/* Existing Image Preview */}
+        {selectedCountry?.image && (
+          <div className="mt-2">
+            <img
+              src={selectedCountry.image}
+              alt="Current Flag"
+              className="w-16 h-16 rounded-md border"
+            />
+          </div>
+        )}
       </div>
     </Modal>
   );
