@@ -9,6 +9,7 @@ import { passwordRules } from "@/lib/utils";
 import { useAuthMutations } from "@/hooks/useAuthMutations";
 import { toast } from 'react-toastify';
 import { useAuthStore } from "@/app/store/authStore";
+import { redirectIfAuthenticated } from '@/lib/auth'
 
 const ChangePassword = () => {
   const router = useRouter();
@@ -23,11 +24,11 @@ const ChangePassword = () => {
   );
   useEffect(() => {
     const checks = [
-      password.length >= 8, // min 8 characters
-      /[A-Z]/.test(password), // at least one uppercase
-      /[a-z]/.test(password), // at least one lowercase
-      /[0-9]/.test(password), // at least one number
-      /[!@#$%^&*(),.?":{}|<>]/.test(password), // at least one special char
+      password.length >= 8,
+      /[A-Z]/.test(password),
+      /[a-z]/.test(password),
+      /[0-9]/.test(password),
+      /[!@#$%^&*(),.?":{}|<>]/.test(password),
     ];
 
     setRulesChecked(checks);

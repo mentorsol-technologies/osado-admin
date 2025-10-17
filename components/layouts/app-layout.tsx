@@ -1,8 +1,10 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { Sidebar } from "@/components/sidebar";
 import { Navbar } from "@/components/navbar";
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -10,6 +12,27 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    const token = Cookies.get('token');
+    if (!token) {
+      router.push('/login');
+    } else {
+      setIsAuthenticated(true);
+    }
+  }, [router]);
+
+  // Don't render content until auth check is complete
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-dashboard-bg flex items-center justify-center">
+        <div className="text-white-100">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-dashboard-bg flex">
@@ -33,7 +56,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           <Navbar onMenuClick={() => setSidebarOpen(true)} />
         </div>
 
-        <main className="p-4 lg:p-6  min-h-[calc(100vh-64px)]">{children}</main>
+        <main className="p-4 lg:p-6 min-h-[calc(100vh-64px)]">{children}</main>
       </div>
     </div>
   );
