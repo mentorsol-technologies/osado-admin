@@ -33,7 +33,6 @@ export default function LoginPage() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleLogin} className="space-y-4">
-          {/* Phone Number */}
           <CommonInput
             label="Phone Number"
             type="tel"
@@ -46,7 +45,6 @@ export default function LoginPage() {
             showCountryDropdown
           />
 
-          {/* Password */}
           <CommonInput
             name="password"
             label="Password"
