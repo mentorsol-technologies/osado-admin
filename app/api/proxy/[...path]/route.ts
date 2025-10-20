@@ -1,117 +1,91 @@
-import { NextRequest, NextResponse } from "next/server";
-export const runtime = 'edge';
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
+export const runtime = "edge";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { path: string[] } }
-) {
-  return proxyRequest(request, params.path, "GET");
-}
+const BACKEND_URL = "http://3.29.128.189";
 
 export async function POST(
-  request: NextRequest,
-  { params }: { params: { path: string[] } }
+  request: Request,
+  context: { params: { path: string[] } }
 ) {
-  return proxyRequest(request, params.path, "POST");
+  return handleRequest(request, context, "POST");
+}
+
+export async function GET(
+  request: Request,
+  context: { params: { path: string[] } }
+) {
+  return handleRequest(request, context, "GET");
 }
 
 export async function PUT(
-  request: NextRequest,
-  { params }: { params: { path: string[] } }
+  request: Request,
+  context: { params: { path: string[] } }
 ) {
-  return proxyRequest(request, params.path, "PUT");
-}
-
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { path: string[] } }
-) {
-  return proxyRequest(request, params.path, "DELETE");
+  return handleRequest(request, context, "PUT");
 }
 
 export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { path: string[] } }
+  request: Request,
+  context: { params: { path: string[] } }
 ) {
-  return proxyRequest(request, params.path, "PATCH");
+  return handleRequest(request, context, "PATCH");
 }
 
-async function proxyRequest(
-  request: NextRequest,
-  pathSegments: string[],
+export async function DELETE(
+  request: Request,
+  context: { params: { path: string[] } }
+) {
+  return handleRequest(request, context, "DELETE");
+}
+
+async function handleRequest(
+  request: Request,
+  context: { params: { path: string[] } },
   method: string
 ) {
+  const { params } = context;
+  const path = params.path.join("/");
+
+  const url = new URL(request.url);
+  const backendUrl = `${BACKEND_URL}/${path}${url.search}`;
+
   try {
-    const path = pathSegments.join("/");
+    const body = ["POST", "PUT", "PATCH"].includes(method)
+      ? await request.text()
+      : undefined;
 
-    // Get query parameters from the original request
-    const searchParams = request.nextUrl.searchParams.toString();
-    const queryString = searchParams ? `?${searchParams}` : "";
-
-    const url = `${BACKEND_URL}/${path}${queryString}`;
-
-    // Get body for POST, PUT, PATCH requests
-    let body = undefined;
-    if (["POST", "PUT", "PATCH"].includes(method)) {
-      const contentType = request.headers.get("content-type");
-
-      if (contentType?.includes("application/json")) {
-        body = await request.text();
-      } else if (contentType?.includes("multipart/form-data")) {
-        // For file uploads
-        body = await request.formData();
-      } else {
-        body = await request.text();
-      }
-    }
-
-    // Prepare headers to forward
-    const headers: HeadersInit = {
-      "Content-Type": request.headers.get("content-type") || "application/json",
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
     };
 
-    // Forward authorization header if present
     const authHeader = request.headers.get("authorization");
     if (authHeader) {
       headers["Authorization"] = authHeader;
     }
 
-    // Forward other common headers
-    const cookieHeader = request.headers.get("cookie");
-    if (cookieHeader) {
-      headers["Cookie"] = cookieHeader;
-    }
-
-    // Make the proxied request
-    const response = await fetch(url, {
+    const response = await fetch(backendUrl, {
       method,
       headers,
-      body: body instanceof FormData ? body : body,
+      body,
     });
 
-    // Get response data
-    const contentType = response.headers.get("content-type");
-    let data;
+    const data = await response.text();
 
-    if (contentType?.includes("application/json")) {
-      data = await response.json();
-    } else {
-      data = await response.text();
-    }
-
-    // Return response with same status code
-    return NextResponse.json(data, {
+    return new Response(data, {
       status: response.status,
-    });
-  } catch (error) {
-    console.error("Proxy error:", error);
-    return NextResponse.json(
-      {
-        error: "Proxy request failed",
-        details: error instanceof Error ? error.message : "Unknown error",
+      headers: {
+        "Content-Type": "application/json",
       },
-      { status: 500 }
+    });
+  } catch (error: any) {
+    return new Response(
+      JSON.stringify({
+        error: "Proxy failed",
+        message: error?.message || "Unknown error",
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
     );
   }
 }
