@@ -38,7 +38,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: ".next/,package.json,pnpm-lock.yaml,public/"
-          target: "~/osado-admin"
+          target: "~/osado-admin-prod"
           strip_components: 0
 
       - name: Install and Restart on Server
@@ -51,7 +51,7 @@ jobs:
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             export PATH="$NVM_DIR/versions/node/v22.12.0/bin:$PATH"
-            cd ~/osado-admin
+            cd ~/osado-admin-prod
             pnpm install --prod --no-frozen-lockfile
-            pm2 restart osado-admin-portal || pm2 start pnpm --name "osado-admin-portal" -- start
+            pm2 restart osado-admin || pm2 start pnpm --name "osado-admin" -- start
             pm2 save
