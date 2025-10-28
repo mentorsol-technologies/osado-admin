@@ -1,0 +1,48 @@
+import { Award, Crown, Star } from "lucide-react";
+
+export const providers = [
+    {
+        id: 1,
+        icon: Award,
+        title: "Standard",
+        avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+        name: "Amara Singh",
+        rating: 4.4,
+        memberSince: "12/07/2025",
+        location: "Paris, France",
+        status: "Active",
+    },
+    {
+        id: 2,
+        icon: Crown,
+        title: "Elite",
+        avatar: "https://randomuser.me/api/portraits/men/46.jpg",
+        name: "Liam Anderson",
+        rating: 4.4,
+        memberSince: "22/06/2025",
+        location: "Liverpool, England",
+        status: "Active",
+    },
+    {
+        id: 3,
+        icon: Crown,
+        title: "Elite",
+        avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+        name: "Amara Singh",
+        rating: 4.4,
+        memberSince: "12/07/2025",
+        location: "Paris, France",
+        status: "Active",
+    },
+    {
+        id: 4,
+        icon: Star,
+        title: "High-rank",
+        avatar: "https://randomuser.me/api/portraits/men/46.jpg",
+        name: "Liam Anderson",
+        rating: 4.4,
+        memberSince: "22/06/2025",
+        location: "Liverpool, England",
+        status: "Active",
+    },
+];

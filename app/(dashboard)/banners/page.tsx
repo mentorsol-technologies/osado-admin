@@ -65,7 +65,7 @@ export default function BannersPage() {
 
     deleteBanner(selectedBanner.id, {
       onSuccess: () => {
-        toast.error("category deleted Successfully!")
+        toast.error("Banner deleted Successfully!")
         setDeleteOpen(false);
         setSelectedBanner(null);
       },

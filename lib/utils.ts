@@ -20,3 +20,7 @@ export const formatDate = (dateString?: string) => {
   const year = date.getFullYear();
   return `${day}/${month}/${year}`;
 };
+
+export const capitalizeFirstLetter = (str: string = ""): string => {
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+};

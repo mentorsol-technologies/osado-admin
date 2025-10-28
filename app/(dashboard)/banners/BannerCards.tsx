@@ -31,7 +31,7 @@ export default function BannerCard({
   return (
     <div className="rounded-xl bg-black-500 border border-black-200 text-white shadow-lg overflow-hidden flex flex-col">
       {/* Image */}
-      <div className="relative h-52 w-full">
+      <div className="relative h-[300px] w-full">
         <Image src={image} alt={bannerTitle} fill className="object-cover" />
       </div>
 
@@ -40,27 +40,27 @@ export default function BannerCard({
         <h3 className="text-lg">{bannerTitle}</h3>
 
         <div className="flex flex-col gap-2 text-sm">
-          <div className="flex justify-between">
+          <div className="flex justify-between flex-wrap">
             <span className="text-white">ID</span>
             <span>{bannerId}</span>
           </div>
 
-          <div className="flex justify-between">
+          <div className="flex justify-between flex-wrap">
             <span className="text-white">Start Date</span>
             <span>{startDate}</span>
           </div>
 
-          <div className="flex justify-between">
+          <div className="flex justify-between flex-wrap">
             <span className="text-white">End Date</span>
             <span>{endDate}</span>
           </div>
 
-          <div className="flex justify-between">
+          <div className="flex justify-between flex-wrap">
             <span className="text-white">Target Audience</span>
             <span>{displayCategories}</span>
           </div>
 
-          <div className="flex justify-between">
+          <div className="flex justify-between flex-wrap">
             <span className="text-white">Status</span>
             <span>{status}</span>
           </div>
@@ -68,7 +68,7 @@ export default function BannerCard({
       </div>
 
       {/* Footer Buttons */}
-      <div className="flex justify-between gap-2 p-4 pt-0 w-full">
+      <div className="flex justify-between flex-wrap  gap-2 p-4 pt-0 w-full">
         <Button variant="default" onClick={onEdit} className="flex-1 ">
           Edit
         </Button>
