@@ -14,11 +14,14 @@ interface KYCViewModalProps {
     kyc?: {
         id: string;
         userId: string;
-        name: string;
-        phone: string | number;
+        user: {
+            name: string;
+            phone: string | number;
+            photoURL?: string;
+        };
         dateOfBirth: string;
         gender: string;
-        avatar_url: string;
+        avatar_url?: string;
         frontDocumentURL?: string;
         backDocumentURL?: string;
     };

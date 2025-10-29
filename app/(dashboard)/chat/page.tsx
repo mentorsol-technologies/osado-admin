@@ -4,7 +4,8 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Star, Eye, Send } from "lucide-react";
+import { Star, Eye, Send, MapPin } from "lucide-react";
+import CommonInput from "@/components/ui/input";
 
 const messagesList = [
     {
@@ -31,7 +32,7 @@ const messagesList = [
 ];
 
 const Chat = () => {
-  const [activeMessageId, setActiveMessageId] = useState(null);
+    const [activeUserId, setActiveUserId] = useState<number | null>(null);
     const userInfo = {
         name: "Liam Anderson",
         title: "Standard",
@@ -51,37 +52,43 @@ const Chat = () => {
                     {messagesList.map((user) => (
                         <div
                             key={user.id}
-                            className="flex items-center justify-between p-3 hover:bg-[#1b1b1e] cursor-pointer "
+                            onClick={() => setActiveUserId(user.id)}
+                            className={`flex items-center gap-3 p-3   rounded-xl cursor-pointer transition-all duration-200 ${activeUserId === user.id
+                                ? "bg-black-300"
+                                : "hover:bg-[#1b1b1e]"
+                                }`}
                         >
-                            <div className="flex  space-x-3 bg-black-300 p-3 rounded-xl">
-                                <Image
-                                    src={user.avatar}
-                                    alt={user.name}
-                                    width={40}
-                                    height={40}
-                                    className="rounded-full"
-                                />
-                                <div className="flex flex-col">
-                                    <div className="flex justify-between items-center">
-                                        <p className="font-medium">{user.name}</p>
-                                        <span className="text-xs text-gray-500">{user.time}</span>
-                                    </div>
-                                    <p className="text-sm text-gray-400">{user.message}</p>
+                            <Image
+                                src={user.avatar}
+                                alt={user.name}
+                                width={40}
+                                height={40}
+                                className="rounded-full object-cover flex-shrink-0"
+                            />
+                            <div className="flex flex-col flex-1">
+                                <div className="flex justify-between items-center">
+                                    <p className="font-medium">{user.name}</p>
+                                    <span className="text-xs text-gray-500">{user.time}</span>
                                 </div>
+                                <p className="text-sm text-gray-400 truncate">{user.message}</p>
                             </div>
                         </div>
                     ))}
                 </ScrollArea>
             </div>
 
+
             {/* Chat Section */}
             <div className="flex-1 flex flex-col border-r border-[#1f1f22]">
                 <div className="border-b border-[#1f1f22] p-4">
                     <h2 className="text-lg font-semibold">City Marathon 2025</h2>
-                    <p className="text-sm text-gray-400">📍 Downtown Streets, Chicago</p>
+                    <div className="flex items-center gap-2 text-sm text-white-100">
+                        <MapPin size={16} />
+                        <p>Downtown Streets, Chicago</p>
+                    </div>
                 </div>
 
-                <ScrollArea className="flex-1 p-4 space-y-4">
+                <ScrollArea className="flex-1 p-4 space-y-4 bg-black-400">
                     {/* Messages */}
                     <div className="flex items-start space-x-2">
                         <Image
@@ -92,7 +99,7 @@ const Chat = () => {
                             className="rounded-full"
                         />
                         <div>
-                            <div className="bg-[#1b1b1e] p-3 rounded-md max-w-xs">
+                            <div className="bg-black-300 p-3 rounded-md max-w-xs">
                                 <p>Hello! That sounds exciting.</p>
                             </div>
                             <p className="text-xs text-gray-500 mt-1">7:34 PM</p>
@@ -101,7 +108,7 @@ const Chat = () => {
 
                     <div className="flex justify-end items-start space-x-2">
                         <div>
-                            <div className="bg-[#2b2b2f] p-3 rounded-md max-w-xs text-right">
+                            <div className="bg-black-300 p-3 rounded-md max-w-xs text-right">
                                 <p>
                                     Hi! We’d like to invite you to the upcoming Music Festival
                                     this weekend.
@@ -120,7 +127,7 @@ const Chat = () => {
 
                     <div className="flex justify-end items-start space-x-2">
                         <div>
-                            <div className="bg-[#2b2b2f] p-3 rounded-md max-w-xs text-right">
+                            <div className="bg-black-300 p-3 rounded-md max-w-xs text-right">
                                 <p>You’ll get a media pass and a reward for coverage.</p>
                             </div>
                             <p className="text-xs text-gray-500 mt-1 text-right">7:34 PM</p>
@@ -143,7 +150,7 @@ const Chat = () => {
                             className="rounded-full"
                         />
                         <div>
-                            <div className="bg-[#1b1b1e] p-3 rounded-md max-w-xs">
+                            <div className="bg-black-300 p-3 rounded-md max-w-xs">
                                 <p>Can you send me the schedule and reward details?</p>
                             </div>
                             <p className="text-xs text-gray-500 mt-1">7:34 PM</p>
@@ -153,7 +160,7 @@ const Chat = () => {
 
                 {/* Input Box */}
                 <div className="p-4 border-t border-[#1f1f22] flex items-center space-x-3">
-                    <input
+                    <CommonInput
                         type="text"
                         placeholder="Send message..."
                         className="flex-1 bg-[#1b1b1e] text-white px-4 py-2 rounded-lg text-sm focus:outline-none"

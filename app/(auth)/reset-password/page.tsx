@@ -16,8 +16,9 @@ const ForgetPassword = () => {
 
   // default to first country in the list
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(
-    countries[0] || null
+    countries.find((c) => c.iso3 === "KWT") || null
   );
+
   const [phoneNumber, setPhoneNumber] = useState("");
   const { forgotPasswordMutation } = useAuthMutations();
 

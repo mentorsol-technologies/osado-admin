@@ -134,7 +134,11 @@ const ServiceProviders = () => {
             <EditServiceProviderModal
                 open={editOpen}
                 setOpen={setEditOpen}
-                providerData={providers}
+                providerData={selectedProviders}
+                onUpdate={(updatedData) => {
+                    console.log("Updated Provider:", updatedData);
+
+                }}
             />
         </div>
     );

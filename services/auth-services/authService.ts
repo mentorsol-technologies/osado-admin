@@ -25,11 +25,15 @@ export const loginService = (data: LoginPayload) =>
 export const signupService = (data: any) =>
   api.post("/auth/signup", data);
 
-export const forgotPasswordService = (data: ForgetPasswordPayload) =>
-  api.post("/auth/forgetPassword", data);
+export const forgotPasswordService = async (data: ForgetPasswordPayload) => {
+  const res = await api.post("/auth/forgetPassword", data);
+  return res.data;
+};
 
-export const verifyOtpService = (data: VerifyOtpPayload) =>
-  api.post("/auth/verifyOtp", data);
+export const verifyOtpService = async (data: VerifyOtpPayload) => {
+  const res = await api.post("/auth/verifyOtp", data);
+  return res.data;
+};
 
 export const CreateNewPasswordService = (
   data: CreateNewPasswordPayload,

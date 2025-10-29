@@ -11,7 +11,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 interface MenuChild {
   label: string;
-  href: string;
+  href?: string;
   icon?: string;
 }
 
@@ -22,7 +22,7 @@ interface MenuItem {
   children?: MenuChild[];
 }
 
-const menuItems = [
+const menuItems: MenuItem[] = [
   { icon: "/images/si_dashboard-fill.svg", label: "Dashboard", href: "/dashboard" },
   {
     label: "Master",
@@ -139,7 +139,7 @@ export function Sidebar({ onClose }: SidebarProps) {
                         return (
                           <li key={child.href}>
                             <Link
-                              href={child.href}
+                              href={child.href ?? ""}
                               onClick={onClose}
                               className={`sidebar-item w-full justify-between ${childActive
                                 ? "bg-black-300 text-white"
@@ -174,7 +174,7 @@ export function Sidebar({ onClose }: SidebarProps) {
             return (
               <li key={item.href}>
                 <Link
-                  href={item.href}
+                  href={item.href ?? ""}
                   onClick={onClose}
                   className={`sidebar-item ${isActive
                     ? "bg-red-600 text-white"
