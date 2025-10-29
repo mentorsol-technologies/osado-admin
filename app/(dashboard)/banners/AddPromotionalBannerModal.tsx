@@ -97,7 +97,7 @@ export default function AddPromotionalBannerModal({
     endDate: new Date(data.endDate).toISOString(),
     photoId: uploadId,
     displayCategories: selectedCategories,
-    status: data.status.toLowerCase(), // convert to "active"/"inactive"
+    status: data.status.toLowerCase(),
   };
 
     createBanner(payload, {

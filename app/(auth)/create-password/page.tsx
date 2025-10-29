@@ -1,5 +1,5 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,9 @@ import { redirectIfAuthenticated } from '@/lib/auth'
 const ChangePassword = () => {
   const router = useRouter();
   const { createNewPasswordMutation } = useAuthMutations();
-  const accessToken = useAuthStore((state) => state.accessToken);
+  // const accessToken = useAuthStore((state) => state.accessToken);
+  const searchParams = useSearchParams();
+  const accessToken = searchParams.get("token");
 
 
   const [password, setPassword] = useState("");

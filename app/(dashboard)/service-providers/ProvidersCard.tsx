@@ -7,7 +7,7 @@ import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 
-interface InfluencerCardProps {
+interface ProvidersCardProps {
   icon: LucideIcon;
   title: string;
   avatar: string;
@@ -20,7 +20,7 @@ interface InfluencerCardProps {
   onDelete?: () => void;
 }
 
-export default function InfluencerCard({
+export default function ProvidersCard({
   icon: Icon,
   title,
   avatar,
@@ -31,7 +31,7 @@ export default function InfluencerCard({
   status,
   onEdit,
   onDelete,
-}: InfluencerCardProps) {
+}: ProvidersCardProps) {
   return (
     <Card className="bg-black-400 text-white rounded-2xl shadow-md hover:shadow-lg transition w-full">
       <CardContent className="flex flex-col justify-between h-full p-5">

@@ -23,39 +23,40 @@ export default function LoginPage() {
 
   const countries = useCountries();
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(
-    countries.length > 0 ? countries[0] : null
+    countries.find((c) => c.iso3 === "KWT") || null
   );
+
 
   const { setUser, setToken } = useAuthStore();
 
   // ✅ React Query Mutation
- const { mutate: login, isPending } = useMutation({
-  mutationFn: (payload: any) => loginService(payload),
-  onSuccess: (res: any) => {
-    const userId = res?.userId;
-    const accessToken = res?.accessToken;
+  const { mutate: login, isPending } = useMutation({
+    mutationFn: (payload: any) => loginService(payload),
+    onSuccess: (res: any) => {
+      const userId = res?.userId;
+      const accessToken = res?.accessToken;
 
-    if (accessToken) {
-      Cookies.set("token", accessToken, { expires: 7 }); 
-      setToken(accessToken);
-      setUser(userId);
-     toast.success("Login successful!");
-      router.push("/dashboard");
-    }
-  },
-  onError: (error: any) => {
-    console.error("Login Error:", error);
-    toast.error("Failed Login")
-  },
-});
+      if (accessToken) {
+        Cookies.set("token", accessToken, { expires: 7 });
+        setToken(accessToken);
+        setUser(userId);
+        toast.success("Login successful!");
+        router.push("/dashboard");
+      }
+    },
+    onError: (error: any) => {
+      console.error("Login Error:", error);
+      toast.error("Failed Login")
+    },
+  });
 
-    
+
   // ✅ Handle form submit
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!selectedCountry) {
-     toast.error("Please select your country before logging in.")
+      toast.error("Please select your country before logging in.")
       return;
     }
 

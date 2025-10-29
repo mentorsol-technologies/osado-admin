@@ -16,8 +16,9 @@ const ForgetPassword = () => {
 
   // default to first country in the list
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(
-    countries[0] || null
+    countries.find((c) => c.iso3 === "KWT") || null
   );
+
   const [phoneNumber, setPhoneNumber] = useState("");
   const { forgotPasswordMutation } = useAuthMutations();
 
@@ -45,16 +46,13 @@ const ForgetPassword = () => {
     };
 
     forgotPasswordMutation.mutate(payload, {
-      onSuccess: (response) => {
-        console.log("Forgot password response:", response);
-        toast.error("Please check your phone for the verification code.");
+      onSuccess: (res) => {
+        console.log("Forgot password response:", res);
+        toast.success("Please check your phone for the verification code.");
 
-        const userId = response?.data.userId;
+        const userId = res?.userId;
         useAuthStore.getState().setUserId(userId);
         router.push("/verify-otp");
-      },
-      onError: (error: any) => {
-        toast.error("Failed to send OTP. Please try again.");
       },
     });
   };

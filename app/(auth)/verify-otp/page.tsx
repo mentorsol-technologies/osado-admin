@@ -42,13 +42,14 @@ const VerifyAccount = () => {
       { otpCode: Number(otp), userId: userId ?? "" },
       {
         onSuccess: (res) => {
-          const token = res?.data.accessToken;
-          if (token) {
-            useAuthStore.getState().setAccessToken(token);
+          const token = res?.accessToken;
+          if (!token) {
+            toast.error("Access token missing from response.");
+            return;
           }
           toast.success("You can now set your new password.");
           // Navigate to create password page
-          router.push("/create-password");
+          router.push(`/create-password?token=${token}`);
         },
         onError: (err: any) => {
           toast.error("Verification failed");

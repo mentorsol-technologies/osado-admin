@@ -35,7 +35,7 @@ export default function EventCard({
   return (
     <div
       className="rounded-xl bg-black-500 border border-black-200 text-white shadow-lg overflow-hidden flex flex-col cursor-pointer"
-      
+
     >
       {/* Image */}
       <div className="relative h-48 w-full " onClick={onClick}>
@@ -52,10 +52,10 @@ export default function EventCard({
       {/* Card Body */}
       <div className="p-4 flex flex-col gap-3 flex-1">
         {/* Price Badge */}
-       <div className="flex items-center justify-between gap-2">
-       <h3 className="lg:text-lg font-semibold">{title}</h3>
-       <Badge className="w-fit sm:w-auto">{price}</Badge>
-       </div>
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <h3 className="lg:text-lg font-semibold">{title}</h3>
+          <Badge className="w-fit sm:w-auto">{price}</Badge>
+        </div>
 
         {/* Category Badge */}
         <Badge className="flex items-center gap-1 w-fit">
@@ -94,15 +94,15 @@ export default function EventCard({
       </div>
 
       {/* Footer Buttons */}
-      <div className="flex justify-between gap-2 p-4 pt-0 w-full">
+      <div className="flex justify-between gap-2 p-4 pt-0 w-full flex-wrap">
         <Button variant="default" onClick={onEdit} className="flex-1">
           Edit
         </Button>
-        <Button variant="outline"    onClick={(e) => {
-            e.stopPropagation();
-            onSuspend?.();
-          }}     
-     className="flex-1">
+        <Button variant="outline" onClick={(e) => {
+          e.stopPropagation();
+          onSuspend?.();
+        }}
+          className="flex-1">
           Suspend
         </Button>
       </div>
