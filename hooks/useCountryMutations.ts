@@ -2,8 +2,8 @@ import {
     createCountry,
     updateCountry,
     deleteCountry,
-    uploadCountryFile,
     getCountries,
+    getCountryUploadLink,
 } from "@/services/country/countryService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -70,16 +70,17 @@ export const useDeleteCountryMutation = () => {
     });
 };
 
-// ✅ Upload Country File Mutation
 export const useUploadCountryFileMutation = () => {
     return useMutation({
-        mutationFn: uploadCountryFile,
-        onSuccess: (data) => {
-            toast.success("File uploaded successfully!");
-            console.log("Uploaded file URL:", data.fileUrl);
+        mutationFn: (file: File) => getCountryUploadLink(file.type),
+        onSuccess: (result) => {
+            return result
         },
         onError: (error: any) => {
-            toast.error(error?.response?.data?.message || "File upload failed!");
+            const message =
+                error?.response?.data?.message || "File upload failed!";
+            toast.error(message);
         },
     });
 };
+

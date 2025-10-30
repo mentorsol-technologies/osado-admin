@@ -32,14 +32,17 @@ export default function CountryCard({
       <CardContent className="p-4 space-y-3">
         {/* Header */}
         <div className="flex items-center gap-3">
+          
           {iconURL ? (
+            <div className="p-3 bg-red-700 rounded-lg">
             <Image
               src={iconURL}
               alt={name}
-              width={30}
-              height={30}
-              className="object-contain rounded"
+              width={28}
+              height={28}
+              className="object-contain rounded "
             />
+            </div>
           ) : (
             <div className="p-3 bg-red-700 rounded-lg">
               <Flag className="text-white h-6 w-6" />

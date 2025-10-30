@@ -48,9 +48,10 @@ export default function EditSubAdminModal({
   const { mutate: updateSubAdmin, isPending } = useUpdateSubAdminMutation();
   const [phoneNumber, setPhoneNumber] = useState("");
   const countries = useCountries();
-  const [selectedCountry, setSelectedCountry] = useState<Country | null>(
-    countries.length > 0 ? countries[0] : null
-  );
+   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
+
+ 
+
   const {
     register,
     handleSubmit,
@@ -61,7 +62,13 @@ export default function EditSubAdminModal({
   } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
-
+    useEffect(() => {
+    if (countries.length > 0 && !selectedCountry) {
+      const kuwait = countries.find((c) => c.iso3 === "KWT");
+      if (kuwait) setSelectedCountry(kuwait);
+    }
+  }, [countries, selectedCountry]);
+  
   // 🔹 Update form when selectedAdmin changes
   useEffect(() => {
     if (selectedAdmin) {

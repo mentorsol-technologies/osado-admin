@@ -117,7 +117,7 @@ const Countries = () => {
         onOpenChange={setDeleteOpen}
         onConfirm={handleDelete}
         title="Delete Country"
-        description={`Are you sure you want to delete "${selectedCountry?.title}"? This action cannot be undone.`}
+        description={`Are you sure you want to delete "${selectedCountry?.name}"? This action cannot be undone.`}
       />
     </div>
   );

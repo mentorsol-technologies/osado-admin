@@ -18,6 +18,8 @@ import CommonInput from "@/components/ui/input";
 import Upload from "@/components/ui/upload";
 import { useCreateInfluencerRankMutation, useUploadInfluencerRankFileMutation } from "@/hooks/useInfluencersRankMutations";
 import { toast } from 'react-toastify';
+import { getInfluencersRankUploadLink } from "@/services/influencers-rank-table/InfluencersRankServices";
+import { uploadToS3 } from "@/lib/s3Upload";
 
 
 const schema = z.object({
@@ -52,6 +54,8 @@ export default function AddRankModal({
   const { mutate: createInfluencersRank, isPending } = useCreateInfluencerRankMutation();
   const { mutateAsync: uploadInfluencersRankFile, isPending: isUploading } = useUploadInfluencerRankFileMutation();
   const [uploadId, setUploadId] = useState<string>("");
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
 
   const {
     register,
@@ -67,6 +71,22 @@ export default function AddRankModal({
       noOfReviews: selectedInfluencers?.noOfReviews?.toString() || "",
     },
   });
+
+
+
+  const handleFileUpload = async (file: File) => {
+    try {
+      const { url, fields, uploadId } = await getInfluencersRankUploadLink(file.type);
+      setUploadId(uploadId);
+      const localPreview = URL.createObjectURL(file);
+      setPreviewUrl(localPreview);
+      await uploadToS3(file, url, fields);
+      setValue("image", file);
+    } catch (error) {
+      console.error("File upload failed:", error);
+      toast.error("File upload failed");
+    }
+  };
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -196,22 +216,14 @@ export default function AddRankModal({
       {/* Upload */}
       <div className="mt-4">
         <Upload
-          label="Upload Badge"
+          label="Upload Icon/Image"
           onFileSelect={async (file) => {
-            if (file) {
-              try {
-                const result = await uploadInfluencersRankFile(file);
-                setUploadId(result?.uploadId || "");
-                setValue("image", file);
-                toast.success("File uploaded successfully");
-              } catch (error) {
-                console.error("File upload failed:", error);
-                toast.error("File upload failed");
-              }
-            }
+            if (file) await handleFileUpload(file);
           }}
         />
-        {isUploading && <p className="text-sm text-blue-500 mt-1">Uploading...</p>}
+        {isUploading && (
+          <p className="text-sm text-blue-500 mt-1">Uploading...</p>
+        )}
       </div>
     </Modal>
   );

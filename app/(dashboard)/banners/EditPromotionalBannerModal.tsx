@@ -36,7 +36,7 @@ type FormData = z.infer<typeof schema> & { id?: string };
 interface EditPromotionalBannerModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  bannerData: (FormData & { id?: string }) | null; // existing banner data to edit
+  bannerData: (FormData & { id?: string; photoURL?: string; }) | null; 
   onUpdate: (data: FormData) => void;
 }
 
@@ -75,7 +75,7 @@ export default function EditPromotionalBannerModal({
       displayCategories: bannerData?.displayCategories || ["All"],
     },
   });
-  const { mutate: updateBanner, isPending } = useUpdateBannersMutation();
+  const { mutate: updateBanner, isPending: isUploading } = useUpdateBannersMutation();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [preview, setPreview] = useState<string | null>(null);
   const [uploadId, setUploadId] = useState<string>("");
@@ -89,11 +89,14 @@ export default function EditPromotionalBannerModal({
         linkType: bannerData?.linkType || "external",
         link: bannerData?.link || "",
         status:
-          bannerData?.status === "active"
+          bannerData.status === "active"
             ? "Active"
-            : bannerData?.status === "inactive"
+            : bannerData.status === "inactive"
               ? "Inactive"
-              : "",
+              : bannerData.status === "suspended"
+                ? "Suspended"
+                : "",
+
         startDate: bannerData?.startDate
           ? new Date(bannerData.startDate).toISOString().split("T")[0]
           : "",
@@ -103,10 +106,11 @@ export default function EditPromotionalBannerModal({
         displayCategories: bannerData?.displayCategories || ["All"],
       });
       setSelectedCategories(bannerData?.displayCategories || ["All"]);
-      setPreview(bannerData?.image || null);
-      setUploadId(bannerData?.image || "");
+      setPreview(bannerData?.photoURL || null);
+      setUploadId(bannerData?.photoURL || "");
     }
   }, [bannerData, reset]);
+  console.log("Banner Data:", bannerData);
 
   const toggleCategory = (cat: string) => {
     let updated: string[];
@@ -182,21 +186,35 @@ export default function EditPromotionalBannerModal({
       <div className="max-h-[70vh] overflow-y-auto pr-2">
         {/* Upload Image */}
 
-        <div className="mb-4">
+        <div className="mt-4">
           <Upload
             label="Upload Icon/Image"
             onFileSelect={async (file) => {
-              if (!file) return;
-              console.log("Uploading file:", file);
-
-              try {
-                // ✅ Use your service + reusable S3 upload
-                await handleFileUpload(file);
-              } catch (error) {
-                console.error("File upload failed:", error);
-              }
+              if (file) await handleFileUpload(file);
             }}
           />
+          {isUploading && (
+            <p className="text-sm text-blue-500 mt-1">Uploading...</p>
+          )}
+
+          {/* Image Preview */}
+          {previewUrl ? (
+            <div className="mt-2">
+              <img
+                src={previewUrl}
+                alt="New Preview"
+                className="w-16 h-16 rounded-md border"
+              />
+            </div>
+          ) : bannerData?.photoURL ? (
+            <div className="mt-2">
+              <img
+                src={bannerData.photoURL}
+                alt="Current Icon"
+                className="w-16 h-16 rounded-md border"
+              />
+            </div>
+          ) : null}
         </div>
 
         {/* Banner Title / Link Type */}
@@ -215,15 +233,21 @@ export default function EditPromotionalBannerModal({
           </div>
           <div>
             <label className="block text-sm mb-1">Link Type</label>
-            <Select onValueChange={(val) => setValue("linkType", val)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select link type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="internal">Internal</SelectItem>
-                <SelectItem value="external">External</SelectItem>
-              </SelectContent>
-            </Select>
+            <Controller
+              name="linkType"
+              control={control}
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select link type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="internal">Internal</SelectItem>
+                    <SelectItem value="external">External</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
             {errors.linkType && (
               <p className="text-xs text-red-500">{errors.linkType.message}</p>
             )}
@@ -252,6 +276,7 @@ export default function EditPromotionalBannerModal({
                   <SelectContent>
                     <SelectItem value="Active">Active</SelectItem>
                     <SelectItem value="Inactive">Inactive</SelectItem>
+                    <SelectItem value="Suspended">Suspended</SelectItem>
                   </SelectContent>
                 </Select>
               )}

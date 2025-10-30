@@ -21,6 +21,8 @@ import {
 } from "@/hooks/useInfluencersRankMutations";
 import { useEffect, useState } from "react";
 import { toast } from 'react-toastify';
+import { getInfluencersRankUploadLink } from "@/services/influencers-rank-table/InfluencersRankServices";
+import { uploadToS3 } from "@/lib/s3Upload";
 
 
 // ✅ Validation Schema
@@ -44,6 +46,7 @@ interface EditRankModalProps {
     noOfEventsVisited?: number;
     noOfReviews?: number;
     image?: string;
+    iconURL?:string;
   };
   onSave: (data: FormData) => void;
 }
@@ -60,6 +63,8 @@ export default function EditRankModal({
     useUploadInfluencerRankFileMutation();
 
   const [uploadId, setUploadId] = useState<string>("");
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
 
   const {
     register,
@@ -94,10 +99,26 @@ export default function EditRankModal({
         noOfReviews: selectedInfluencers.noOfReviews
           ? String(selectedInfluencers.noOfReviews)
           : "",
-        image: selectedInfluencers.image || undefined,
+        image: selectedInfluencers.iconURL || undefined,
       });
     }
   }, [selectedInfluencers, reset]);
+
+  console.log("Selected Influencers:", selectedInfluencers);
+
+  const handleFileUpload = async (file: File) => {
+    try {
+      const { url, fields, uploadId } = await getInfluencersRankUploadLink(file.type);
+      setUploadId(uploadId);
+      const localPreview = URL.createObjectURL(file);
+      setPreviewUrl(localPreview);
+      await uploadToS3(file, url, fields);
+      setValue("image", file);
+    } catch (error) {
+      console.error("File upload failed:", error);
+      toast.error("File upload failed");
+    }
+  };
 
   // ✅ Submit handler
   const onSubmit = (data: FormData) => {
@@ -238,33 +259,33 @@ export default function EditRankModal({
       {/* File Upload */}
       <div className="mt-4">
         <Upload
-          label="Upload Badge"
+          label="Upload Icon/Image"
           onFileSelect={async (file) => {
-            if (file) {
-              try {
-                const result = await uploadInfluencersRankFile(file);
-                setUploadId(result?.uploadId || "");
-                setValue("image", file);
-              } catch (err) {
-                console.error("File upload failed:", err);
-              }
-            }
+            if (file) await handleFileUpload(file);
           }}
         />
         {isUploading && (
           <p className="text-sm text-blue-500 mt-1">Uploading...</p>
         )}
 
-        {/* Existing Image Preview */}
-        {selectedInfluencers?.image && (
+        {/* Image Preview */}
+        {previewUrl ? (
           <div className="mt-2">
             <img
-              src={selectedInfluencers.image}
-              alt="Current Badge"
+              src={previewUrl}
+              alt="New Preview"
               className="w-16 h-16 rounded-md border"
             />
           </div>
-        )}
+        ) : selectedInfluencers?.iconURL ? (
+          <div className="mt-2">
+            <img
+              src={selectedInfluencers.iconURL}
+              alt="Current Icon"
+              className="w-16 h-16 rounded-md border"
+            />
+          </div>
+        ) : null}
       </div>
     </Modal>
   );

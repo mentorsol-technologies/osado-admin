@@ -1,11 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Star, Eye, Send, MapPin } from "lucide-react";
-import CommonInput from "@/components/ui/input";
+import { Star, Eye, MapPin } from "lucide-react";
+import RichTextEditor from "@/components/ui/RichTextEditor";
+import { socket } from "@/lib/socket";
+import { useChatConversationById, useChatConversations } from "@/hooks/useChatMutations";
+
+interface Message {
+    id: number;
+    sender: "me" | "other";
+    text: string;
+    time: string;
+}
 
 const messagesList = [
     {
@@ -18,21 +27,84 @@ const messagesList = [
     {
         id: 2,
         name: "Olivia Martinez",
-        message: "Hi! Sure, that's fine with me",
-        time: "7:34 PM",
+        message: "Got it, will send you the files soon.",
+        time: "8:10 PM",
         avatar: "/images/Ellipse 5.png",
     },
     {
         id: 3,
         name: "Isabella Rossi",
-        message: "Hi! Sure, that's fine with me",
-        time: "7:34 PM",
+        message: "Can we finalize by tomorrow?",
+        time: "9:02 PM",
         avatar: "/images/Ellipse 5.png",
     },
 ];
 
 const Chat = () => {
-    const [activeUserId, setActiveUserId] = useState<number | null>(null);
+    const [activeUserId, setActiveUserId] = useState<number | null>(1);
+    const [messages, setMessages] = useState<Message[]>([]);
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const { data, isLoading } = useChatConversations();
+    console.log("chat conversation data", data)
+
+    
+
+
+
+    // 🧩 Connect & listen for messages
+    useEffect(() => {
+        // Connect to socket
+        socket.on("connect", () => {
+            console.log("✅ Connected to WebSocket:", socket.id);
+        });
+
+        // Listen for incoming messages from backend
+        socket.on("receive_message", (data: any) => {
+            console.log("📩 Message received:", data);
+            setMessages((prev) => [
+                ...prev,
+                {
+                    id: Date.now(),
+                    sender: "other",
+                    text: data.message,
+                    time: data.time || new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+                },
+            ]);
+        });
+
+        // Cleanup on unmount
+        return () => {
+            socket.off("receive_message");
+            socket.off("connect");
+        };
+    }, []);
+
+    // Scroll to bottom automatically
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+    }, [messages]);
+
+    // 🧩 Send message
+    const handleSend = (message: string) => {
+        if (!message.trim()) return;
+        const newMessage: Message = {
+            id: Date.now(),
+            sender: "me",
+            text: message,
+            time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        };
+
+        setMessages((prev) => [...prev, newMessage]);
+
+        // Emit to backend
+        socket.emit("send_message", {
+            message,
+            time: newMessage.time,
+        });
+    };
+
     const userInfo = {
         name: "Liam Anderson",
         title: "Standard",
@@ -42,139 +114,97 @@ const Chat = () => {
         status: "Active",
     };
 
-
     return (
         <div className="flex min-h-[calc(100vh-120px)] bg-black-500 p-6 rounded-lg text-white">
-            {/* Left Sidebar */}
-            <div className="w-[280px] border-r border-[#1f1f22] flex flex-col">
-                <div className="p-4 text-lg font-semibold">Messages</div>
-                <ScrollArea className="flex-1">
-                    {messagesList.map((user) => (
-                        <div
-                            key={user.id}
-                            onClick={() => setActiveUserId(user.id)}
-                            className={`flex items-center gap-3 p-3   rounded-xl cursor-pointer transition-all duration-200 ${activeUserId === user.id
-                                ? "bg-black-300"
-                                : "hover:bg-[#1b1b1e]"
-                                }`}
-                        >
-                            <Image
-                                src={user.avatar}
-                                alt={user.name}
-                                width={40}
-                                height={40}
-                                className="rounded-full object-cover flex-shrink-0"
-                            />
-                            <div className="flex flex-col flex-1">
-                                <div className="flex justify-between items-center">
-                                    <p className="font-medium">{user.name}</p>
-                                    <span className="text-xs text-gray-500">{user.time}</span>
+            <div className="flex flex-1 gap-3">
+                {/* 🧭 Left Sidebar (Inbox List) */}
+                <div className="w-[280px] flex flex-col">
+                    <div className="p-4 text-lg font-semibold">Messages</div>
+                    <ScrollArea className="flex-1">
+                        {messagesList.map((user) => (
+                            <div
+                                key={user.id}
+                                onClick={() => setActiveUserId(user.id)}
+                                className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all duration-200 ${activeUserId === user.id ? "bg-black-300" : "hover:bg-[#1b1b1e]"
+                                    }`}
+                            >
+                                <Image
+                                    src={user.avatar}
+                                    alt={user.name}
+                                    width={40}
+                                    height={40}
+                                    className="rounded-full object-cover flex-shrink-0"
+                                />
+                                <div className="flex flex-col flex-1">
+                                    <div className="flex justify-between items-center">
+                                        <p className="font-medium">{user.name}</p>
+                                        <span className="text-xs text-gray-500">{user.time}</span>
+                                    </div>
+                                    <p className="text-sm text-gray-400 truncate">{user.message}</p>
                                 </div>
-                                <p className="text-sm text-gray-400 truncate">{user.message}</p>
                             </div>
-                        </div>
-                    ))}
-                </ScrollArea>
-            </div>
-
-
-            {/* Chat Section */}
-            <div className="flex-1 flex flex-col border-r border-[#1f1f22]">
-                <div className="border-b border-[#1f1f22] p-4">
-                    <h2 className="text-lg font-semibold">City Marathon 2025</h2>
-                    <div className="flex items-center gap-2 text-sm text-white-100">
-                        <MapPin size={16} />
-                        <p>Downtown Streets, Chicago</p>
-                    </div>
+                        ))}
+                    </ScrollArea>
                 </div>
 
-                <ScrollArea className="flex-1 p-4 space-y-4 bg-black-400">
+                {/* 💬 Chat Section */}
+                <div className="flex-1 flex flex-col border-l border-[#1f1f22] border-r border-[#1f1f22]">
+                    {/* Header */}
+                    <div className="border-b border-[#1f1f22] p-4">
+                        <h2 className="text-lg font-semibold">City Marathon 2025</h2>
+                        <div className="flex items-center gap-2 text-sm text-white-100">
+                            <MapPin size={16} />
+                            <p>Downtown Streets, Chicago</p>
+                        </div>
+                    </div>
+
                     {/* Messages */}
-                    <div className="flex items-start space-x-2">
-                        <Image
-                            src="/images/Ellipse 5.png"
-                            alt="Liam"
-                            width={32}
-                            height={32}
-                            className="rounded-full"
-                        />
-                        <div>
-                            <div className="bg-black-300 p-3 rounded-md max-w-xs">
-                                <p>Hello! That sounds exciting.</p>
-                            </div>
-                            <p className="text-xs text-gray-500 mt-1">7:34 PM</p>
-                        </div>
+                    <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-black-400">
+                        {messages.map((msg) =>
+                            msg.sender === "me" ? (
+                                <div key={msg.id} className="flex justify-end items-start space-x-2">
+                                    <div>
+                                        <div className="bg-black-300 p-3 rounded-md max-w-xs text-right">
+                                            <p dangerouslySetInnerHTML={{ __html: msg.text }} />
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-1 text-right">{msg.time}</p>
+                                    </div>
+                                    <Image
+                                        src="/images/Ellipse 4.png"
+                                        alt="You"
+                                        width={32}
+                                        height={32}
+                                        className="rounded-full"
+                                    />
+                                </div>
+                            ) : (
+                                <div key={msg.id} className="flex items-start space-x-2">
+                                    <Image
+                                        src="/images/Ellipse 5.png"
+                                        alt="Liam"
+                                        width={32}
+                                        height={32}
+                                        className="rounded-full"
+                                    />
+                                    <div>
+                                        <div className="bg-black-300 p-3 rounded-md max-w-xs">
+                                            <p dangerouslySetInnerHTML={{ __html: msg.text }} />
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-1">{msg.time}</p>
+                                    </div>
+                                </div>
+                            )
+                        )}
                     </div>
 
-                    <div className="flex justify-end items-start space-x-2">
-                        <div>
-                            <div className="bg-black-300 p-3 rounded-md max-w-xs text-right">
-                                <p>
-                                    Hi! We’d like to invite you to the upcoming Music Festival
-                                    this weekend.
-                                </p>
-                            </div>
-                            <p className="text-xs text-gray-500 mt-1 text-right">7:34 PM</p>
-                        </div>
-                        <Image
-                            src="/images/Ellipse 4.png"
-                            alt="You"
-                            width={32}
-                            height={32}
-                            className="rounded-full"
-                        />
+                    {/* Input */}
+                    <div className="p-4 border-t border-[#1f1f22]">
+                        <RichTextEditor onSend={handleSend} />
                     </div>
-
-                    <div className="flex justify-end items-start space-x-2">
-                        <div>
-                            <div className="bg-black-300 p-3 rounded-md max-w-xs text-right">
-                                <p>You’ll get a media pass and a reward for coverage.</p>
-                            </div>
-                            <p className="text-xs text-gray-500 mt-1 text-right">7:34 PM</p>
-                        </div>
-                        <Image
-                            src="/images/Ellipse 4.png"
-                            alt="You"
-                            width={32}
-                            height={32}
-                            className="rounded-full"
-                        />
-                    </div>
-
-                    <div className="flex items-start space-x-2">
-                        <Image
-                            src="/images/Ellipse 5.png"
-                            alt="Liam"
-                            width={32}
-                            height={32}
-                            className="rounded-full"
-                        />
-                        <div>
-                            <div className="bg-black-300 p-3 rounded-md max-w-xs">
-                                <p>Can you send me the schedule and reward details?</p>
-                            </div>
-                            <p className="text-xs text-gray-500 mt-1">7:34 PM</p>
-                        </div>
-                    </div>
-                </ScrollArea>
-
-                {/* Input Box */}
-                <div className="p-4 border-t border-[#1f1f22] flex items-center space-x-3">
-                    <CommonInput
-                        type="text"
-                        placeholder="Send message..."
-                        className="flex-1 bg-[#1b1b1e] text-white px-4 py-2 rounded-lg text-sm focus:outline-none"
-                    />
-                    <Button
-                        size="icon"
-                        className="bg-blue-600 hover:bg-blue-700 rounded-full"
-                    >
-                        <Send className="w-4 h-4" />
-                    </Button>
                 </div>
             </div>
 
-            {/* Right Sidebar */}
+            {/* 👤 Right Sidebar (User Info) */}
             <div className="w-[300px] p-6 flex flex-col items-center text-center">
                 <Image
                     src="/images/Ellipse 5.png"
@@ -183,12 +213,9 @@ const Chat = () => {
                     height={80}
                     className="rounded-full"
                 />
-
                 <h3 className="mt-3 font-semibold">{userInfo.name}</h3>
 
-                {/* Member Info */}
                 <div className="text-sm space-y-2 text-gray-300 w-full mt-4">
-                    {/* Title and Rating */}
                     <div className="flex justify-between items-center flex-wrap">
                         <div className="flex items-center gap-2">
                             <span className="p-1 bg-red-700 rounded-md">
@@ -207,26 +234,22 @@ const Chat = () => {
                         </div>
                     </div>
 
-                    {/* Member Since */}
                     <div className="flex justify-between flex-wrap">
                         <span className="font-semibold">Member Since</span>
                         <span>{userInfo.memberSince}</span>
                     </div>
 
-                    {/* Location */}
                     <div className="flex justify-between flex-wrap">
                         <span className="font-semibold">Location</span>
                         <span>{userInfo.location}</span>
                     </div>
 
-                    {/* Status */}
                     <div className="flex justify-between flex-wrap">
                         <span className="font-semibold">Status</span>
                         <span className="text-green-400">{userInfo.status}</span>
                     </div>
                 </div>
 
-                {/* View Event Button */}
                 <Button
                     variant="link"
                     className="mt-6 text-red-500 hover:text-red-400 flex items-center space-x-1"

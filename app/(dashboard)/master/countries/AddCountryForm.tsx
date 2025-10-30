@@ -13,6 +13,8 @@ import { toast } from 'react-toastify';
 
 
 import { useCreateCountryMutation, useUploadCountryFileMutation } from "@/hooks/useCountryMutations";
+import { getCountryUploadLink } from "@/services/country/countryService";
+import { uploadToS3 } from "@/lib/s3Upload";
 
 // ✅ Schema validation
 const schema = z.object({
@@ -42,9 +44,26 @@ export default function AddCountryModal({ open, setOpen, onSave }: AddCountryMod
 
   const { mutate: createCountry, isPending } = useCreateCountryMutation();
   const { mutateAsync: uploadCountryFile, isPending: isUploading } = useUploadCountryFileMutation();
-  const [uploadId, setUploadId] = useState<string>("");
 
-  // 🔹 Handle form submit
+  const [uploadId, setUploadId] = useState<string>("");
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+
+  const handleFileUpload = async (file: File) => {
+    try {
+      const { url, fields, uploadId } = await getCountryUploadLink(file.type);
+      setUploadId(uploadId);
+      const localPreview = URL.createObjectURL(file);
+      setPreviewUrl(localPreview);
+      await uploadToS3(file, url, fields);
+      setValue("image", file);
+    } catch (error) {
+      console.error("File upload failed:", error);
+      toast.error("File upload failed");
+    }
+  };
+
+  //  Handle form submit
   const onSubmit = (data: FormData) => {
     const payload = {
       name: data.name,
@@ -122,15 +141,7 @@ export default function AddCountryModal({ open, setOpen, onSave }: AddCountryMod
         <Upload
           label="Upload Icon/Image"
           onFileSelect={async (file) => {
-            if (file) {
-              try {
-                const result = await uploadCountryFile(file);
-                setUploadId(result?.uploadId || "");
-                setValue("image", file);
-              } catch (error) {
-                console.error("File upload failed:", error);
-              }
-            }
+            if (file) await handleFileUpload(file);
           }}
         />
         {isUploading && (
