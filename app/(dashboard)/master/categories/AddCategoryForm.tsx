@@ -18,13 +18,12 @@ import Modal from "@/components/ui/Modal";
 import CommonInput from "@/components/ui/input";
 import Upload from "@/components/ui/upload";
 import {
-  useUpdateCategoryMutation,
+  useCreateCategoryMutation, // ✅ use create mutation
   useUploadCategoryFileMutation,
 } from "@/hooks/useCategoryMutations";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 import { uploadToS3 } from "@/lib/s3Upload";
 import { getCategoryUploadLink } from "@/services/categories/categoriesService";
-
 
 const schema = z.object({
   name: z.string().min(2, "Category name is required"),
@@ -35,32 +34,23 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-interface EditCategoryModalProps {
+interface AddCategoryModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  selectedCategory?: {
-    id?: number;
-    name: string;
-    status: string;
-    description?: string;
-    image?: string;
-  };
   onSave: (data: FormData) => void;
 }
 
-export default function EditCategoryModal({
+export default function AddCategoryModal({
   open,
   setOpen,
-  selectedCategory,
   onSave,
-}: EditCategoryModalProps) {
-  const { mutate: updateCategory, isPending } = useUpdateCategoryMutation();
+}: AddCategoryModalProps) {
+  const { mutate: createCategory, isPending } = useCreateCategoryMutation(); // ✅ use create
   const { mutateAsync: uploadFile, isPending: isUploading } =
     useUploadCategoryFileMutation();
 
   const [uploadId, setUploadId] = useState<string>("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
 
   const {
     register,
@@ -78,22 +68,6 @@ export default function EditCategoryModal({
     },
   });
 
-  // ✅ Populate form when selectedCategory changes
-  useEffect(() => {
-    if (selectedCategory) {
-      reset({
-        name: selectedCategory.name || "",
-        status:
-          selectedCategory.status === "ACTIVE"
-            ? "Active"
-            : selectedCategory.status === "INACTIVE"
-              ? "Inactive"
-              : "Active",
-        description: selectedCategory.description || "",
-        image: selectedCategory.image || undefined,
-      });
-    }
-  }, [selectedCategory, reset]);
   const handleFileUpload = async (file: File) => {
     try {
       const { url, fields, uploadId } = await getCategoryUploadLink(file.type);
@@ -108,8 +82,6 @@ export default function EditCategoryModal({
   };
 
   const onSubmit = (formData: FormData) => {
-    if (!selectedCategory?.id) return;
-
     const payload = {
       name: formData.name,
       status: formData.status.toLowerCase(),
@@ -117,24 +89,21 @@ export default function EditCategoryModal({
       iconId: uploadId || undefined,
     };
 
-    updateCategory(
-      { categoryId: selectedCategory.id, data: payload },
-      {
-        onSuccess: () => {
-          toast.success("category updated successfully!")
-          onSave(formData);
-          setOpen(false);
-        },
-      }
-    );
+    createCategory(payload, {
+      onSuccess: () => {
+        toast.success("Category created successfully!");
+        onSave(formData);
+        setOpen(false);
+        reset(); // ✅ clear form after submit
+      },
+    });
   };
-
 
   return (
     <Modal
       open={open}
       onOpenChange={setOpen}
-      title="Edit Category"
+      title="Add Category"
       footer={
         <div className="flex flex-col sm:flex-row gap-3 w-full">
           <Button
@@ -142,7 +111,7 @@ export default function EditCategoryModal({
             className="flex-1"
             disabled={isPending}
           >
-            {isPending ? "Saving..." : "Save"}
+            {isPending ? "Submitting..." : "Submit"}
           </Button>
           <Button
             variant="outline"
@@ -203,24 +172,6 @@ export default function EditCategoryModal({
           <p className="text-sm text-blue-500 mt-1">Uploading...</p>
         )}
 
-        {/* Image Preview */}
-        {previewUrl ? (
-          <div className="mt-2">
-            <img
-              src={previewUrl}
-              alt="New Preview"
-              className="w-16 h-16 rounded-md border"
-            />
-          </div>
-        ) : selectedCategory?.image ? (
-          <div className="mt-2">
-            <img
-              src={selectedCategory.image}
-              alt="Current Icon"
-              className="w-16 h-16 rounded-md border"
-            />
-          </div>
-        ) : null}
       </div>
     </Modal>
   );

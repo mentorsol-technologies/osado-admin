@@ -9,15 +9,14 @@ import { Button } from "@/components/ui/button";
 import Modal from "@/components/ui/Modal";
 import CommonInput from "@/components/ui/input";
 import Upload from "@/components/ui/upload";
-import { toast } from 'react-toastify';
-
+import { toast } from "react-toastify";
 
 import {
   useUpdateCountryMutation,
-  useUploadCountryFileMutation,
 } from "@/hooks/useCountryMutations";
+import { getCountryUploadLink } from "@/services/country/countryService";
+import { uploadToS3 } from "@/lib/s3Upload";
 
-// ✅ Schema validation
 const schema = z.object({
   name: z.string().min(2, "Country name is required"),
   countryCode: z.string().optional(),
@@ -34,6 +33,7 @@ interface EditCountryModalProps {
     name: string;
     countryCode?: string;
     image?: string;
+    iconURL?: string;
   };
   onSave?: (formData: any) => void;
 }
@@ -44,18 +44,17 @@ export default function EditCountryModal({
   selectedCountry,
   onSave,
 }: EditCountryModalProps) {
-  const { mutate: updateCountry, status, isPending } = useUpdateCountryMutation();
-  const { mutateAsync: uploadCountryFile, isPending: isUploading } =
-    useUploadCountryFileMutation();
+  const { mutate: updateCountry, isPending, } = useUpdateCountryMutation();
 
   const [uploadId, setUploadId] = useState<string>("");
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState("")
 
   const {
     register,
     handleSubmit,
     setValue,
     reset,
-    watch,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -69,15 +68,33 @@ export default function EditCountryModal({
   // ✅ Populate form when selectedCountry changes
   useEffect(() => {
     if (selectedCountry) {
-      console.log("Populating form with selectedCountry:", selectedCountry);
       reset({
         name: selectedCountry.name || "",
         countryCode: selectedCountry.countryCode || "",
-        image: selectedCountry.image || undefined,
+        image: selectedCountry.iconURL || undefined,
       });
+      setPreviewUrl(selectedCountry.iconURL || null);
     }
   }, [selectedCountry, reset]);
 
+  console.log("Selected Country:", selectedCountry);
+
+  // ✅ Handle file upload (S3 flow)
+  const handleFileUpload = async (file: File) => {
+    try {
+      const { url, fields, uploadId } = await getCountryUploadLink(file.type);
+      setUploadId(uploadId);
+      const localPreview = URL.createObjectURL(file);
+      setPreviewUrl(localPreview);
+      await uploadToS3(file, url, fields);
+      setValue("image", file);
+    } catch (error) {
+      console.error("File upload failed:", error);
+      toast.error("File upload failed");
+    }
+  };
+
+  // ✅ Submit updated data
   const onSubmit = (data: FormData) => {
     if (!selectedCountry) return;
 
@@ -91,7 +108,7 @@ export default function EditCountryModal({
       { countryId: selectedCountry.id, data: payload },
       {
         onSuccess: () => {
-          toast.success("Country updated Successfully !")
+          toast.success("Country updated successfully!");
           reset();
           setOpen(false);
           onSave?.(payload);
@@ -128,14 +145,12 @@ export default function EditCountryModal({
         </div>
       }
     >
+      {/* Country Fields */}
       <div className="flex flex-col sm:flex-row gap-3 w-full">
         {/* Country Name */}
         <div className="flex-1">
           <label className="block text-sm mb-1">Country Name</label>
-          <CommonInput
-            placeholder="Country Name"
-            {...register("name")}
-          />
+          <CommonInput placeholder="Country Name" {...register("name")} />
           {errors.name && (
             <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>
           )}
@@ -144,48 +159,40 @@ export default function EditCountryModal({
         {/* Country Code */}
         <div className="flex-1">
           <label className="block text-sm mb-1">Country Code</label>
-          <CommonInput
-            placeholder="+965"
-            {...register("countryCode")}
-          />
-          {errors.countryCode && (
-            <p className="text-xs text-red-500 mt-1">
-              {errors.countryCode.message}
-            </p>
-          )}
+          <CommonInput placeholder="+965" {...register("countryCode")} />
         </div>
       </div>
 
       {/* Upload Flag */}
       <div className="mt-4">
         <Upload
-          label="Upload Flag"
+          label="Upload Icon/Image"
           onFileSelect={async (file) => {
-            if (file) {
-              try {
-                const result = await uploadCountryFile(file);
-                setUploadId(result?.uploadId || "");
-                setValue("image", file);
-              } catch (err) {
-                console.error("File upload failed:", err);
-              }
-            }
+            if (file) await handleFileUpload(file);
           }}
         />
         {isUploading && (
           <p className="text-sm text-blue-500 mt-1">Uploading...</p>
         )}
 
-        {/* Existing Image Preview */}
-        {selectedCountry?.image && (
+        {/* Image Preview */}
+        {previewUrl ? (
           <div className="mt-2">
             <img
-              src={selectedCountry.image}
-              alt="Current Flag"
+              src={previewUrl}
+              alt="New Preview"
               className="w-16 h-16 rounded-md border"
             />
           </div>
-        )}
+        ) : selectedCountry?.image ? (
+          <div className="mt-2">
+            <img
+              src={selectedCountry.image}
+              alt="Current Icon"
+              className="w-16 h-16 rounded-md border"
+            />
+          </div>
+        ) : null}
       </div>
     </Modal>
   );

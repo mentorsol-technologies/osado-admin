@@ -1,5 +1,5 @@
 
-import { createInfluencersRank, deleteInfluencersRank, getInfluencersRank, updateInfluencersRank, uploadInfluencersRankFile } from "@/services/influencers-rank-table/InfluencersRankServices";
+import { createInfluencersRank, deleteInfluencersRank, getInfluencersRank, getInfluencersRankUploadLink, updateInfluencersRank, } from "@/services/influencers-rank-table/InfluencersRankServices";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -66,15 +66,17 @@ export const useDeleteInfluencerRankMutation = () => {
 };
 
 // ✅ Upload Country File Mutation
+
 export const useUploadInfluencerRankFileMutation = () => {
     return useMutation({
-        mutationFn: uploadInfluencersRankFile,
-        onSuccess: (data) => {
-            toast.success("File uploaded successfully!");
-            console.log("Uploaded file URL:", data.fileUrl);
+        mutationFn: (file: File) => getInfluencersRankUploadLink(file.type),
+        onSuccess: (result) => {
+            return result
         },
         onError: (error: any) => {
-            toast.error(error?.response?.data?.message || "File upload failed!");
+            const message =
+                error?.response?.data?.message || "File upload failed!";
+            toast.error(message);
         },
     });
 };

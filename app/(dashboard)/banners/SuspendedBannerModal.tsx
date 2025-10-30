@@ -9,7 +9,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import Modal from "@/components/ui/Modal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface SuspendedBannerModalProps {
   open: boolean;
@@ -26,6 +26,27 @@ export default function SuspendedBannerModal({
 }: SuspendedBannerModalProps) {
   const [reason, setReason] = useState(selectedReason || "");
 
+  useEffect(() => {
+    if (!open) {
+      setReason("");
+    } else if (selectedReason) {
+      setReason(selectedReason);
+    }
+  }, [open, selectedReason]);
+
+  const handleSubmit = () => {
+    if (reason) {
+      onSave(reason);
+      setOpen(false);
+      setReason(""); // ✅ Reset after submit
+    }
+  };
+
+  const handleCancel = () => {
+    setReason(""); // ✅ Reset when canceled
+    setOpen(false);
+  };
+
   return (
     <Modal
       open={open}
@@ -33,22 +54,10 @@ export default function SuspendedBannerModal({
       title="Suspend Banner"
       footer={
         <div className="flex flex-col sm:flex-row gap-3 w-full">
-          <Button
-            onClick={() => {
-              if (reason) {
-                onSave(reason);
-                setOpen(false);
-              }
-            }}
-            className="flex-1"
-          >
+          <Button onClick={handleSubmit} className="flex-1">
             Submit
           </Button>
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => setOpen(false)}
-          >
+          <Button variant="outline" className="flex-1" onClick={handleCancel}>
             Cancel
           </Button>
         </div>
@@ -56,7 +65,7 @@ export default function SuspendedBannerModal({
     >
       <div className="w-full">
         <label className="block text-sm mb-1">Reason</label>
-        <Select defaultValue={reason} onValueChange={setReason}>
+        <Select value={reason} onValueChange={setReason}>
           <SelectTrigger>
             <SelectValue placeholder="Select reason" />
           </SelectTrigger>

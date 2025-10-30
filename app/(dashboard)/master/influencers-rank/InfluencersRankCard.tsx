@@ -34,13 +34,15 @@ export default function InfluencersRankCard({
         {/* Header */}
         <div className="flex items-center gap-3">
           {iconURL ? (
+          <div className="p-3 bg-red-700 rounded-lg">
             <Image
               src={iconURL}
               alt={title}
-              width={30}
-              height={30}
+              width={28}
+              height={28}
               className="object-contain rounded"
             />
+            </div>
           ) : (
             <div className="p-3 bg-red-700 rounded-lg">
               <Crown className="text-white h-6 w-6" />

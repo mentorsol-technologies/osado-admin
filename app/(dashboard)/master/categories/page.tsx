@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import EditCategoryModal from "./EditCategoryForm";
 import DeleteConfirmModal from "@/components/ui/commonComponent/DeleteConfirmModal";
-import AddCategoryModal from "./AddCategoryForm";
 import { useCategoriesQuery, useDeleteCategoryMutation } from "@/hooks/useCategoryMutations";
 import { toast } from 'react-toastify';
+import AddCategoryModal from "./AddCategoryForm";
 
 
 export default function Categories() {

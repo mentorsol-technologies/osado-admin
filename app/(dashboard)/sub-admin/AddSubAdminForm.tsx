@@ -8,7 +8,7 @@ import CommonInput from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useCreateSubAdminMutation } from "@/hooks/useSubAdminMutations";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Country, useCountries } from "@/components/ui/CountryPicker";
 
 const schema = z.object({
@@ -64,9 +64,14 @@ export default function AddSubAdminModal({
   });
   const [phoneNumber, setPhoneNumber] = useState("");
   const countries = useCountries();
-  const [selectedCountry, setSelectedCountry] = useState<Country | null>(
-    countries.length > 0 ? countries[0] : null
-  );
+  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
+
+  useEffect(() => {
+    if (countries.length > 0 && !selectedCountry) {
+      const kuwait = countries.find((c) => c.iso3 === "KWT");
+      if (kuwait) setSelectedCountry(kuwait);
+    }
+  }, [countries, selectedCountry]);
 
 
   // 🔹 React Query mutation
