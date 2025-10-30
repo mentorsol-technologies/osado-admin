@@ -2,7 +2,7 @@
 export const dynamic = "force-dynamic";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import CommonInput from "@/components/ui/input";
@@ -13,7 +13,7 @@ import { toast } from 'react-toastify';
 import { useAuthStore } from "@/app/store/authStore";
 import { redirectIfAuthenticated } from '@/lib/auth'
 
-const ChangePassword = () => {
+const ChangePasswordForm = () => {
   const router = useRouter();
   const { createNewPasswordMutation } = useAuthMutations();
   // const accessToken = useAuthStore((state) => state.accessToken);
@@ -148,6 +148,14 @@ const ChangePassword = () => {
         </div>
       </CardContent>
     </Card>
+  );
+};
+
+const ChangePassword = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ChangePasswordForm />
+    </Suspense>
   );
 };
 
