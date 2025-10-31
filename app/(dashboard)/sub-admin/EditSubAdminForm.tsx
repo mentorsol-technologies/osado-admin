@@ -15,7 +15,7 @@ const schema = z.object({
   fullName: z.string().min(1, "Full name is required"),
   surname: z.string().min(1, "Surname is required"),
   email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().optional(),
   permissions: z.array(z.string()).optional(),
 });
 
@@ -48,9 +48,9 @@ export default function EditSubAdminModal({
   const { mutate: updateSubAdmin, isPending } = useUpdateSubAdminMutation();
   const [phoneNumber, setPhoneNumber] = useState("");
   const countries = useCountries();
-   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
 
- 
+
 
   const {
     register,
@@ -62,13 +62,13 @@ export default function EditSubAdminModal({
   } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
-    useEffect(() => {
+  useEffect(() => {
     if (countries.length > 0 && !selectedCountry) {
       const kuwait = countries.find((c) => c.iso3 === "KWT");
       if (kuwait) setSelectedCountry(kuwait);
     }
   }, [countries, selectedCountry]);
-  
+
   // 🔹 Update form when selectedAdmin changes
   useEffect(() => {
     if (selectedAdmin) {

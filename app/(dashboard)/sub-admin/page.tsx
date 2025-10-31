@@ -20,6 +20,7 @@ export default function SubAdminPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const { data, isLoading, isError } = useGetSubAdminsQuery();
+  console.log("data",data)
   const { mutate: deleteSubAdmin, isPending } = useDeleteSubAdminMutation();
 
 
@@ -36,8 +37,8 @@ export default function SubAdminPage() {
 
 
   const columns = [
-    { key: "id", label: "ID" },
     { key: "name", label: "Full Name" },
+    {key:"phoneNumber",label:"Phone Number"},
     { key: "email", label: "Email" },
     {
       key: "updatedAt",

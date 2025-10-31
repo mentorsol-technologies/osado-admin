@@ -77,7 +77,6 @@ export default function EditCountryModal({
     }
   }, [selectedCountry, reset]);
 
-  console.log("Selected Country:", selectedCountry);
 
   // ✅ Handle file upload (S3 flow)
   const handleFileUpload = async (file: File) => {
