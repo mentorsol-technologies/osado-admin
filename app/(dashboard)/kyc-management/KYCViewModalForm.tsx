@@ -38,7 +38,6 @@ export default function KYCViewModal({
 }: KYCViewModalProps) {
     const { register, getValues } = useForm();
     const { data: KycDetails, isLoading } = useGetKYCDetailsQuery(kyc?.id || "");
-    console.log("kyc details", KycDetails)
     const { mutate: updateStatus, isPending } = useUpdateKycStatusMutation();
 
 

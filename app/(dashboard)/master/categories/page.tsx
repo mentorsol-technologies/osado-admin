@@ -101,7 +101,7 @@ export default function Categories() {
         onOpenChange={setDeleteOpen}
         onConfirm={handleDelete}
         title="Delete Category"
-        description={`Are you sure you want to delete "${selectedCategory?.title}"? This action cannot be undone.`}
+        description={`Are you sure you want to delete "${selectedCategory?.name}"? This action cannot be undone.`}
       />
     </div>
   );

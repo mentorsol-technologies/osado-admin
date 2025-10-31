@@ -83,7 +83,6 @@ export default function EditPromotionalBannerModal({
 
   useEffect(() => {
     if (bannerData) {
-      console.log("Populating form with:", bannerData);
       reset({
         bannerTitle: bannerData?.bannerTitle || "",
         linkType: bannerData?.linkType || "external",
@@ -110,7 +109,6 @@ export default function EditPromotionalBannerModal({
       setUploadId(bannerData?.photoURL || "");
     }
   }, [bannerData, reset]);
-  console.log("Banner Data:", bannerData);
 
   const toggleCategory = (cat: string) => {
     let updated: string[];

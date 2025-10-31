@@ -131,7 +131,6 @@ export default function EditSubCategoryModal({
       categoryId: data.assign_category,
     };
 
-    console.log("Updating SubCategory with Payload:", payload);
 
     updateSubCategory(
       {

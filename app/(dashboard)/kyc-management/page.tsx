@@ -14,7 +14,6 @@ export default function ServiceBookingPage() {
     const [deleteOpen, setDeleteOpen] = useState(false);
 
     const { data: kycList, isLoading, isError } = useGetKYCListQuery();
-    console.log("kyc data", kycList)
     const { mutate: deleteKyc, isPending } = useDeleteKycMutation();
 
 
@@ -28,9 +27,9 @@ export default function ServiceBookingPage() {
             label: "KYC Status",
             render: (row: any) => (
                 <span
-                    className={`rounded px-2 py-1 text-xs ${row.status === "Approved"
+                    className={`rounded px-2 py-1 text-xs ${row.status === "approved"
                         ? "text-green-400 border border-green-500/30"
-                        : row.status === "Rejected"
+                        : row.status === "rejected"
                             ? "text-red-400 border border-red-500/30"
                             : "text-blue-400 border border-blue-500/30"
                         }`}

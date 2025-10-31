@@ -86,7 +86,6 @@ export default function EditRankModal({
   // ✅ Populate form when editing
   useEffect(() => {
     if (selectedInfluencers) {
-      console.log("selected Influencers", selectedInfluencers)
       reset({
         title: selectedInfluencers.title || "",
         status:
@@ -104,7 +103,6 @@ export default function EditRankModal({
     }
   }, [selectedInfluencers, reset]);
 
-  console.log("Selected Influencers:", selectedInfluencers);
 
   const handleFileUpload = async (file: File) => {
     try {

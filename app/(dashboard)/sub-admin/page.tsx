@@ -36,8 +36,8 @@ export default function SubAdminPage() {
 
 
   const columns = [
-    { key: "id", label: "ID" },
     { key: "name", label: "Full Name" },
+    { key: "phoneNumber", label: "Phone Number" },
     { key: "email", label: "Email" },
     {
       key: "updatedAt",
@@ -171,9 +171,9 @@ export default function SubAdminPage() {
       <AddSubAdminModal
         open={addOpen}
         setOpen={setAddOpen}
-        // onSave={(data) => {
-        //   console.log("New Sub Admin Data:", data);
-        // }}
+      // onSave={(data) => {
+      //   console.log("New Sub Admin Data:", data);
+      // }}
       />
 
       {/* Edit Modal */}
