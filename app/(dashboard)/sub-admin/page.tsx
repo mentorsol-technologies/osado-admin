@@ -20,7 +20,6 @@ export default function SubAdminPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const { data, isLoading, isError } = useGetSubAdminsQuery();
-  console.log("data",data)
   const { mutate: deleteSubAdmin, isPending } = useDeleteSubAdminMutation();
 
 
@@ -38,7 +37,7 @@ export default function SubAdminPage() {
 
   const columns = [
     { key: "name", label: "Full Name" },
-    {key:"phoneNumber",label:"Phone Number"},
+    { key: "phoneNumber", label: "Phone Number" },
     { key: "email", label: "Email" },
     {
       key: "updatedAt",
@@ -172,9 +171,9 @@ export default function SubAdminPage() {
       <AddSubAdminModal
         open={addOpen}
         setOpen={setAddOpen}
-        // onSave={(data) => {
-        //   console.log("New Sub Admin Data:", data);
-        // }}
+      // onSave={(data) => {
+      //   console.log("New Sub Admin Data:", data);
+      // }}
       />
 
       {/* Edit Modal */}
