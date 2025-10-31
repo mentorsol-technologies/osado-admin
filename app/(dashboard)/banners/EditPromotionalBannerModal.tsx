@@ -37,7 +37,9 @@ type FormData = z.infer<typeof schema> & { id?: string };
 interface EditPromotionalBannerModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  bannerData: (FormData & { id?: string; photoURL?: string; photoId?: string; }) | null;
+  bannerData:
+    | (FormData & { id?: string; photoURL?: string; photoId?: string })
+    | null;
   onUpdate: (data: FormData) => void;
 }
 
@@ -76,7 +78,8 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
       displayCategories: bannerData?.displayCategories || ["All"],
     },
   });
-  const { mutate: updateBanner, isPending: isUploading } = useUpdateBannersMutation();
+  const { mutate: updateBanner, isPending: isUploading } =
+    useUpdateBannersMutation();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [preview, setPreview] = useState<string | null>(null);
   const [uploadId, setUploadId] = useState<string>("");
@@ -111,7 +114,6 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
     }
   }, [bannerData, reset]);
 
-
   const toggleCategory = (cat: string) => {
     let updated: string[];
     if (cat === "All") {
@@ -130,6 +132,7 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
       setUploadId(uploadId);
       setValue("image", file);
       await uploadToS3(file, url, fields);
+      setPreviewUrl(URL.createObjectURL(file)); // show the uploaded image
     } catch (error) {
       console.error("File upload failed:", error);
     }
@@ -140,11 +143,14 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
       return;
     }
 
+    // If no new upload happened, fall back to the existing banner photoId
+    const finalPhotoId = uploadId || bannerData?.photoId;
+
     const payload = {
       bannerTitle: data.bannerTitle,
       startDate: new Date(data.startDate).toISOString(),
       endDate: new Date(data.endDate).toISOString(),
-      photoId: uploadId,
+      photoId: finalPhotoId,
       displayCategories: selectedCategories,
       status: data.status.toLowerCase(),
       linkType: data.linkType,
@@ -158,8 +164,6 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
       }
     );
   };
-
-
 
   return (
     <Modal
@@ -201,7 +205,7 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
           {/* Image Preview */}
           {previewUrl ? (
             <div className="mt-2">
-              <Image
+              <img
                 src={previewUrl}
                 alt="New Preview"
                 className="w-16 h-16 rounded-md border"
@@ -209,7 +213,7 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
             </div>
           ) : bannerData?.photoURL ? (
             <div className="mt-2">
-              <Image
+              <img
                 src={bannerData?.photoURL}
                 alt="Current Icon"
                 className="w-16 h-16 rounded-md border"
@@ -320,10 +324,11 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
               <Badge
                 key={cat}
                 onClick={() => toggleCategory(cat)}
-                className={`cursor-pointer px-4 py-1 ${selectedCategories?.includes(cat)
-                  ? "bg-red-600 text-white"
-                  : "bg-gray-700 text-gray-300"
-                  }`}
+                className={`cursor-pointer px-4 py-1 ${
+                  selectedCategories?.includes(cat)
+                    ? "bg-red-600 text-white"
+                    : "bg-gray-700 text-gray-300"
+                }`}
               >
                 {cat}
               </Badge>
@@ -338,6 +343,6 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
       </div>
     </Modal>
   );
-}
+};
 
 export default EditPromotionalBannerModal;
