@@ -25,7 +25,7 @@ interface EditSubAdminModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   onSave?: (data: FormData) => void;
-  selectedAdmin?: any; // your sub admin object
+  selectedAdmin?: any; 
 }
 
 const permissionsList = [
@@ -71,7 +71,7 @@ export default function EditSubAdminModal({
 
   // 🔹 Update form when selectedAdmin changes
   useEffect(() => {
-    if (selectedAdmin) {
+    if (selectedAdmin && countries.length > 0) {
       reset({
         fullName: selectedAdmin.name || "",
         surname: selectedAdmin.surName || "",
@@ -80,20 +80,24 @@ export default function EditSubAdminModal({
         permissions: selectedAdmin.permissions || [],
       });
 
-      // Set phone number
       setPhoneNumber(selectedAdmin.phoneNumber || "");
 
-      // Match country from calling code (if available)
-      if (selectedAdmin.callingCode) {
-        const found = countries.find(
-          (c) => c.callingCode === selectedAdmin.callingCode
+      let foundCountry: Country | undefined;
+
+      if (selectedAdmin.countryCode) {
+        foundCountry = countries.find(
+          (c) => c.iso3?.toUpperCase() === selectedAdmin.countryCode?.toUpperCase()
         );
-        setSelectedCountry(found || countries[0]);
+      }
+
+      if (foundCountry) {
+        setSelectedCountry(foundCountry);
       } else {
-        setSelectedCountry(countries[0]);
+        setSelectedCountry(null);
       }
     }
-  }, [selectedAdmin, reset, countries]);
+  }, [selectedAdmin, countries, reset]);
+
 
   const selectedPermissions = watch("permissions") || [];
 

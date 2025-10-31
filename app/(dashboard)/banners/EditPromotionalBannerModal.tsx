@@ -19,6 +19,7 @@ import Upload from "@/components/ui/upload";
 import { getBannerUploadLink } from "@/services/banners/bannersService";
 import { uploadToS3 } from "@/lib/s3Upload";
 import { useUpdateBannersMutation } from "@/hooks/useBannersMutations";
+import Image from "next/image";
 
 const schema = z.object({
   image: z.any().optional(),
@@ -36,16 +37,16 @@ type FormData = z.infer<typeof schema> & { id?: string };
 interface EditPromotionalBannerModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  bannerData: (FormData & { id?: string; photoURL?: string; }) | null; 
+  bannerData: (FormData & { id?: string; photoURL?: string; photoId?: string; }) | null;
   onUpdate: (data: FormData) => void;
 }
 
-export default function EditPromotionalBannerModal({
+const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
   open,
   setOpen,
   bannerData,
   onUpdate,
-}: EditPromotionalBannerModalProps) {
+}) => {
   const {
     register,
     handleSubmit,
@@ -95,7 +96,6 @@ export default function EditPromotionalBannerModal({
               : bannerData.status === "suspended"
                 ? "Suspended"
                 : "",
-
         startDate: bannerData?.startDate
           ? new Date(bannerData.startDate).toISOString().split("T")[0]
           : "",
@@ -104,11 +104,13 @@ export default function EditPromotionalBannerModal({
           : "",
         displayCategories: bannerData?.displayCategories || ["All"],
       });
+      setPreviewUrl(bannerData?.photoURL || "");
+      setUploadId(bannerData?.photoId || "");
+
       setSelectedCategories(bannerData?.displayCategories || ["All"]);
-      setPreview(bannerData?.photoURL || null);
-      setUploadId(bannerData?.photoURL || "");
     }
   }, [bannerData, reset]);
+
 
   const toggleCategory = (cat: string) => {
     let updated: string[];
@@ -158,6 +160,7 @@ export default function EditPromotionalBannerModal({
   };
 
 
+
   return (
     <Modal
       open={open}
@@ -198,7 +201,7 @@ export default function EditPromotionalBannerModal({
           {/* Image Preview */}
           {previewUrl ? (
             <div className="mt-2">
-              <img
+              <Image
                 src={previewUrl}
                 alt="New Preview"
                 className="w-16 h-16 rounded-md border"
@@ -206,8 +209,8 @@ export default function EditPromotionalBannerModal({
             </div>
           ) : bannerData?.photoURL ? (
             <div className="mt-2">
-              <img
-                src={bannerData.photoURL}
+              <Image
+                src={bannerData?.photoURL}
                 alt="Current Icon"
                 className="w-16 h-16 rounded-md border"
               />
@@ -336,3 +339,5 @@ export default function EditPromotionalBannerModal({
     </Modal>
   );
 }
+
+export default EditPromotionalBannerModal;

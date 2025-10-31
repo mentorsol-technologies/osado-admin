@@ -112,7 +112,20 @@ export default function AddSubAdminModal({
   return (
     <Modal
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={(isOpen) => {
+      setOpen(isOpen);
+      if (!isOpen) {
+        reset({
+          fullName: "",
+          surname: "",
+          email: "",
+          password: "",
+          permissions: [],
+        });
+        setPhoneNumber("");
+        setSelectedCountry(null);
+      }
+    }}
       title="Add Sub Admin"
       footer={
         <div className="flex flex-col sm:flex-row gap-3 w-full">

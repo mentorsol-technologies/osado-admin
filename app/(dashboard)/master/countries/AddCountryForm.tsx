@@ -88,7 +88,18 @@ export default function AddCountryModal({ open, setOpen, onSave }: AddCountryMod
   return (
     <Modal
       open={open}
-      onOpenChange={setOpen}
+       onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        if (!isOpen) {
+          reset({
+            name: "",
+            countryCode: "",
+            image: undefined,
+          });
+          setPreviewUrl(null);
+          setUploadId("");
+        }
+      }}
       title="Add Country"
       footer={
         <div className="flex flex-col sm:flex-row gap-3 w-full">
