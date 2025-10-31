@@ -66,6 +66,11 @@ export default function AddPromotionalBannerModal({
     "All",
   ]);
   const [preview, setPreview] = useState<string | null>(null);
+  const resetAll = () => {
+    setSelectedCategories(["All"]);
+    setPreview(null);
+    setUploadId("");
+  };
 
   const toggleCategory = (cat: string) => {
     let updated: string[];
@@ -90,15 +95,15 @@ export default function AddPromotionalBannerModal({
     }
   };
 
- const onSubmit = (data: FormData) => {
-      const payload = {
-    bannerTitle: data.bannerTitle,
-    startDate: new Date(data.startDate).toISOString(),
-    endDate: new Date(data.endDate).toISOString(),
-    photoId: uploadId,
-    displayCategories: selectedCategories,
-    status: data.status.toLowerCase(),
-  };
+  const onSubmit = (data: FormData) => {
+    const payload = {
+      bannerTitle: data.bannerTitle,
+      startDate: new Date(data.startDate).toISOString(),
+      endDate: new Date(data.endDate).toISOString(),
+      photoId: uploadId,
+      displayCategories: selectedCategories,
+      status: data.status.toLowerCase(),
+    };
 
     createBanner(payload, {
       onSuccess: () => {
@@ -111,7 +116,12 @@ export default function AddPromotionalBannerModal({
   return (
     <Modal
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        if (!isOpen) {
+          resetAll();
+        }
+      }}
       title="Add Promotional Banner"
       footer={
         <div className="flex flex-col sm:flex-row gap-3 w-full">
@@ -124,7 +134,10 @@ export default function AddPromotionalBannerModal({
           <Button
             variant="outline"
             className="flex-1 border-gray-600 text-gray-300"
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              setOpen(false);
+              resetAll();
+            }}
           >
             Cancel
           </Button>

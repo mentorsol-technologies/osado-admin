@@ -19,6 +19,7 @@ import Upload from "@/components/ui/upload";
 import { getBannerUploadLink } from "@/services/banners/bannersService";
 import { uploadToS3 } from "@/lib/s3Upload";
 import { useUpdateBannersMutation } from "@/hooks/useBannersMutations";
+import Image from "next/image";
 
 const schema = z.object({
   image: z.any().optional(),
@@ -36,16 +37,18 @@ type FormData = z.infer<typeof schema> & { id?: string };
 interface EditPromotionalBannerModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  bannerData: (FormData & { id?: string; photoURL?: string; }) | null; 
+  bannerData:
+    | (FormData & { id?: string; photoURL?: string; photoId?: string })
+    | null;
   onUpdate: (data: FormData) => void;
 }
 
-export default function EditPromotionalBannerModal({
+const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
   open,
   setOpen,
   bannerData,
   onUpdate,
-}: EditPromotionalBannerModalProps) {
+}) => {
   const {
     register,
     handleSubmit,
@@ -75,7 +78,8 @@ export default function EditPromotionalBannerModal({
       displayCategories: bannerData?.displayCategories || ["All"],
     },
   });
-  const { mutate: updateBanner, isPending: isUploading } = useUpdateBannersMutation();
+  const { mutate: updateBanner, isPending: isUploading } =
+    useUpdateBannersMutation();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [preview, setPreview] = useState<string | null>(null);
   const [uploadId, setUploadId] = useState<string>("");
@@ -95,7 +99,6 @@ export default function EditPromotionalBannerModal({
               : bannerData.status === "suspended"
                 ? "Suspended"
                 : "",
-
         startDate: bannerData?.startDate
           ? new Date(bannerData.startDate).toISOString().split("T")[0]
           : "",
@@ -104,9 +107,10 @@ export default function EditPromotionalBannerModal({
           : "",
         displayCategories: bannerData?.displayCategories || ["All"],
       });
+      setPreviewUrl(bannerData?.photoURL || "");
+      setUploadId(bannerData?.photoId || "");
+
       setSelectedCategories(bannerData?.displayCategories || ["All"]);
-      setPreview(bannerData?.photoURL || null);
-      setUploadId(bannerData?.photoURL || "");
     }
   }, [bannerData, reset]);
 
@@ -128,6 +132,7 @@ export default function EditPromotionalBannerModal({
       setUploadId(uploadId);
       setValue("image", file);
       await uploadToS3(file, url, fields);
+      setPreviewUrl(URL.createObjectURL(file)); // show the uploaded image
     } catch (error) {
       console.error("File upload failed:", error);
     }
@@ -138,11 +143,14 @@ export default function EditPromotionalBannerModal({
       return;
     }
 
+    // If no new upload happened, fall back to the existing banner photoId
+    const finalPhotoId = uploadId || bannerData?.photoId;
+
     const payload = {
       bannerTitle: data.bannerTitle,
       startDate: new Date(data.startDate).toISOString(),
       endDate: new Date(data.endDate).toISOString(),
-      photoId: uploadId,
+      photoId: finalPhotoId,
       displayCategories: selectedCategories,
       status: data.status.toLowerCase(),
       linkType: data.linkType,
@@ -156,7 +164,6 @@ export default function EditPromotionalBannerModal({
       }
     );
   };
-
 
   return (
     <Modal
@@ -207,7 +214,7 @@ export default function EditPromotionalBannerModal({
           ) : bannerData?.photoURL ? (
             <div className="mt-2">
               <img
-                src={bannerData.photoURL}
+                src={bannerData?.photoURL}
                 alt="Current Icon"
                 className="w-16 h-16 rounded-md border"
               />
@@ -317,10 +324,11 @@ export default function EditPromotionalBannerModal({
               <Badge
                 key={cat}
                 onClick={() => toggleCategory(cat)}
-                className={`cursor-pointer px-4 py-1 ${selectedCategories?.includes(cat)
-                  ? "bg-red-600 text-white"
-                  : "bg-gray-700 text-gray-300"
-                  }`}
+                className={`cursor-pointer px-4 py-1 ${
+                  selectedCategories?.includes(cat)
+                    ? "bg-red-600 text-white"
+                    : "bg-gray-700 text-gray-300"
+                }`}
               >
                 {cat}
               </Badge>
@@ -335,4 +343,6 @@ export default function EditPromotionalBannerModal({
       </div>
     </Modal>
   );
-}
+};
+
+export default EditPromotionalBannerModal;

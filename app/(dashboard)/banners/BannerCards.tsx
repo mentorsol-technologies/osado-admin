@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
 interface BannerCardProps {
-  image: string;
+  image: string | null | undefined;
   bannerTitle: string;
   bannerId: string;
   startDate: string;
@@ -28,11 +28,27 @@ export default function BannerCard({
   onSuspend,
   onDelete,
 }: BannerCardProps) {
+  const imageSrc = image || "/images/Ellipse 5.png";
   return (
     <div className="rounded-xl bg-black-500 border border-black-200 text-white shadow-lg overflow-hidden flex flex-col">
       {/* Image */}
       <div className="relative h-[300px] w-full">
-        <Image src={image} alt={bannerTitle} fill className="object-cover" />
+        {imageSrc ? (
+          <Image
+            src={imageSrc}
+            alt={bannerTitle}
+            fill
+            className="object-cover"
+            onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+              const target = e.currentTarget;
+              target.src = "/images/Ellipse 5.png";
+            }}
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full text-gray-500">
+            No Image Available
+          </div>
+        )}
       </div>
 
       {/* Card Body */}
