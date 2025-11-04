@@ -125,3 +125,23 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 .ProseMirror{
   outline:none;
 }
+
+.rdp-tbody{
+  color:white;
+}
+
+.rdp-head{
+  color:#830d13;
+}
+
+/* .rdp-button_reset{
+  background-color:#830d13;
+  color:white;
+} */
+
+#react-day-picker-2{
+  color:white;
+}
+#react-day-picker-17{
+  color:white;
+}

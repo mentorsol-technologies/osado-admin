@@ -1,6 +1,7 @@
 "use client";
 
-import { Search } from "lucide-react";
+import { useState } from "react";
+import { Search, Calendar as CalendarIcon } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -9,11 +10,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import CommonInput from "../input";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
 
 interface Filter {
   key: string;
   label: string;
-  options: string[];
+  options?: string[];
+  type?: "select" | "date";
 }
 
 interface FiltersBarProps {
@@ -35,11 +40,13 @@ const FiltersBar = ({
   onSearchChange,
   className = "",
 }: FiltersBarProps) => {
+  const [openCalendar, setOpenCalendar] = useState<string | null>(null);
+
   return (
     <div
       className={`mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between ${className}`}
     >
-      {/* Search (mobile: on top, desktop: right side) */}
+      {/* 🔍 Search Input */}
       {searchable && (
         <div className="md:order-2">
           <CommonInput
@@ -53,26 +60,73 @@ const FiltersBar = ({
         </div>
       )}
 
-      {/* Filters */}
+      {/* 🎛️ Filters */}
       <div className="grid grid-cols-2 gap-3 md:order-1 md:flex md:flex-wrap">
-        {filters.map((filter) => (
-          <Select
-            key={filter.key}
-            value={selectedFilters[filter.key] || ""}
-            onValueChange={(val) => onFilterChange(filter.key, val)}
-          >
-            <SelectTrigger className="w-full md:w-[160px]">
-              <SelectValue placeholder={filter.label} />
-            </SelectTrigger>
-            <SelectContent>
-              {filter.options.map((opt) => (
-                <SelectItem className="w-[150px] py-1" key={opt} value={opt}>
-                  {opt}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ))}
+        {filters?.map((filter) => {
+          if (filter.type === "date") {
+            const selectedDate = selectedFilters[filter.key]
+              ? new Date(selectedFilters[filter.key])
+              : undefined;
+
+            return (
+              <Popover
+                key={filter.key}
+                open={openCalendar === filter.key}
+                onOpenChange={(open) => setOpenCalendar(open ? filter.key : null)}
+              >
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex gap-10 h-[51px] items-center justify-between rounded-[14px] border border-black-300 bg-black-500 px-4 text-sm  text-gray-200 focus:outline-none   disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {selectedDate
+                      ? format(selectedDate, "dd MMM yyyy")
+                      : filter.label}
+                    <CalendarIcon className="h-4 w-4 opacity-70" />
+                  </button>
+                </PopoverTrigger>
+
+                {/* 👇 Your custom Calendar component */}
+                <PopoverContent
+                  align="start"
+                  className="p-0 bg-black-400 border border-gray-700 rounded-lg"
+                >
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(date) => {
+                      if (date) {
+                        onFilterChange(filter.key, date.toISOString());
+                        setOpenCalendar(null);
+                      }
+                    }}
+                    showOutsideDays
+                  />
+                </PopoverContent>
+              </Popover>
+            );
+          }
+
+          // 🔽 Default Select Dropdown
+          return (
+            <Select
+              key={filter.key}
+              value={selectedFilters[filter.key] || ""}
+              onValueChange={(val) => onFilterChange(filter.key, val)}
+            >
+              <SelectTrigger className="w-full md:w-[160px]">
+                <SelectValue placeholder={filter.label} />
+              </SelectTrigger>
+              <SelectContent>
+                {filter?.options?.map((opt) => (
+                  <SelectItem className="w-[150px] py-1" key={opt} value={opt}>
+                    {opt}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          );
+        })}
       </div>
     </div>
   );

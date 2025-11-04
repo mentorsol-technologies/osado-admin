@@ -59,37 +59,72 @@ export function CommonTable<T extends { [key: string]: any }>({
   >({});
 
   const handleFilterChange = (key: string, value: string) => {
-    setSelectedFilters((prev) => ({ ...prev, [key]: value }));
+    setSelectedFilters((prev) => {
+      if (value === "All" || !value) {
+        const updated = { ...prev };
+        delete updated[key];
+        return updated;
+      }
+      return { ...prev, [key]: value };
+    });
     setPage(1);
   };
 
+
   const filteredData = useMemo(() => {
-    return data?.filter((row) => {
-      if (
-        search &&
-        !Object.values(row)
-          .join(" ")
-          .toLowerCase()
-          .includes(search.toLowerCase())
-      )
-        return false;
+    let result = [...(data || [])];
 
-      for (const [key, value] of Object.entries(selectedFilters)) {
-        if (!value) continue;
+    // 🔍 Search
+    if (search) {
+      result = result.filter((row) =>
+        Object.values(row).some((val) =>
+          val?.toString().toLowerCase().includes(search.toLowerCase())
+        )
+      );
+    }
 
-        if (key === "month") {
-          const monthName = new Date(row.date).toLocaleString("default", {
-            month: "long",
-          });
-          if (monthName !== value) return false;
+    // 🎛 Apply filters
+    Object.entries(selectedFilters).forEach(([key, value]) => {
+      if (!value) return;
+
+      const filterConfig = filters.find((f) => f.key === key);
+      const mappedKey = filterConfig?.mapTo || key;
+
+      // If filter is for sorting
+      if (filterConfig?.sortBy) {
+        if (filterConfig.customSort) {
+          result.sort((a, b) => filterConfig.customSort!(a, b, value));
         } else {
-          if (row[key]?.toString() !== value) return false;
+          result.sort((a, b) => {
+            switch (value) {
+              case "Newest":
+                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+              case "Oldest":
+                return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+              case "A–Z":
+                return a.name.localeCompare(b.name);
+              case "Z–A":
+                return b.name.localeCompare(a.name);
+              default:
+                return 0;
+            }
+          });
         }
+        return; // skip further filtering
       }
 
-      return true;
+      // Otherwise, apply value filter
+      result = result.filter(
+        (row) =>
+          String(row[mappedKey] ?? "")
+            .toLowerCase()
+            .includes(value.toLowerCase())
+      );
     });
-  }, [data, search, selectedFilters]);
+
+    return result;
+  }, [data, search, selectedFilters, filters]);
+
 
   const totalPages = Math.ceil(filteredData?.length / rowsPerPage);
 

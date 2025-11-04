@@ -104,12 +104,15 @@ export default function SubAdminPage() {
     {
       key: "status",
       label: "Status",
-      options: ["Confirmed", "Pending", "Cancelled"],
+      mapTo: "status",
+      options: ["All","Active", "Inactive"],
     },
     {
       key: "sort_by",
       label: "Sort by",
       options: ["Newest", "Oldest", "A–Z", "Z–A"],
+      sortBy: true, 
+
     },
   ];
 

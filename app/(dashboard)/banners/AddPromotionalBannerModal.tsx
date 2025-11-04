@@ -25,7 +25,7 @@ const schema = z.object({
   bannerTitle: z.string().min(1, "Banner title is required"),
   linkType: z.string().min(1, "Link type is required"),
   link: z.string().url("Valid URL required"),
-  status: z.string().min(1, "Status is required"),
+  status: z.string().min(1, "Status is required"),  
   startDate: z.string().min(1, "Start date required"),
   endDate: z.string().min(1, "End date required"),
   category: z.array(z.string()).min(1, "Select at least one category"),
@@ -54,6 +54,7 @@ export default function AddPromotionalBannerModal({
     register,
     handleSubmit,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -66,10 +67,14 @@ export default function AddPromotionalBannerModal({
     "All",
   ]);
   const [preview, setPreview] = useState<string | null>(null);
-  const resetAll = () => {
-    setSelectedCategories(["All"]);
-    setPreview(null);
-    setUploadId("");
+  const handleResetForm = () => {
+    reset({
+      bannerTitle: "",
+      startDate: "",
+      endDate: "",
+      status: "",
+      link: "",
+    });
   };
 
   const toggleCategory = (cat: string) => {
@@ -103,10 +108,12 @@ export default function AddPromotionalBannerModal({
       photoId: uploadId,
       displayCategories: selectedCategories,
       status: data.status.toLowerCase(),
+      link: data.link
     };
 
     createBanner(payload, {
       onSuccess: () => {
+        handleResetForm();
         setOpen(false);
       },
     });
@@ -118,9 +125,7 @@ export default function AddPromotionalBannerModal({
       open={open}
       onOpenChange={(isOpen) => {
         setOpen(isOpen);
-        if (!isOpen) {
-          resetAll();
-        }
+        if (!isOpen) handleResetForm();
       }}
       title="Add Promotional Banner"
       footer={
@@ -136,7 +141,7 @@ export default function AddPromotionalBannerModal({
             className="flex-1 border-gray-600 text-gray-300"
             onClick={() => {
               setOpen(false);
-              resetAll();
+              handleResetForm();
             }}
           >
             Cancel

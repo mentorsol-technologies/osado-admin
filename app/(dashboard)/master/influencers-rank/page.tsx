@@ -2,13 +2,14 @@
 import { Button } from "@/components/ui/button";
 import FiltersBar from "@/components/ui/commonComponent/FiltersBar";
 import { Plus, Crown } from "lucide-react";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import InfluencersRankCard from "./InfluencersRankCard";
 import DeleteConfirmModal from "@/components/ui/commonComponent/DeleteConfirmModal";
 import AddRankModal from "./AddRankForm";
 import EditRankModal from "./EditRankForm";
 import { useDeleteInfluencerRankMutation, useInfluencerRankQuery } from "@/hooks/useInfluencersRankMutations";
 import { toast } from 'react-toastify';
+import { applyFilters } from "@/lib/filterHelper";
 
 
 const InfluencersRank = () => {
@@ -30,18 +31,31 @@ const InfluencersRank = () => {
     {
       key: "status",
       label: "Status",
-      options: ["Active", "Inactive", "Pending"],
+      options: ["All","Active", "Inactive"],
     },
     {
-      key: "create-at",
+      key: "createdAt",
       label: "Created Date",
-      options: ["Active", "Inactive", "Pending"],
+      type: "date",
     },
   ];
 
-  const handleFilterChange = (key: string, value: string) => {
-    setSelectedFilters((prev) => ({ ...prev, [key]: value }));
-  };
+  const filteredInfluencerRank = useMemo(() => {
+    return applyFilters(data, search, selectedFilters, {
+      searchKeys: ["title"],
+      dateKey: "createdAt",
+    });
+  }, [data, search, selectedFilters]);
+   const handleFilterChange = (key: string, value: string) => {
+  setSelectedFilters((prev) => {
+    if (prev[key] === value || value === "All" || value === "") {
+      const updated = { ...prev };
+      delete updated[key]; // clear this filter
+      return updated;
+    }
+    return { ...prev, [key]: value };
+  });
+};
 
   const handleAdd = (data: any) => {
     console.log("New category added:", data);
@@ -81,7 +95,7 @@ const InfluencersRank = () => {
         />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-        {data?.map((influencer: any) => (
+        {filteredInfluencerRank?.map((influencer: any) => (
           <InfluencersRankCard
             key={influencer.id}
             {...influencer}

@@ -48,7 +48,15 @@ export default function AddCountryModal({ open, setOpen, onSave }: AddCountryMod
   const [uploadId, setUploadId] = useState<string>("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-
+   const handleResetForm = () => {
+    reset({
+      name: "",
+      countryCode: "",
+      image: undefined,
+    });
+    setPreviewUrl(null);
+    setUploadId("");
+  };
   const handleFileUpload = async (file: File) => {
     try {
       const { url, fields, uploadId } = await getCountryUploadLink(file.type);
@@ -74,11 +82,7 @@ export default function AddCountryModal({ open, setOpen, onSave }: AddCountryMod
     createCountry(payload, {
       onSuccess: () => {
         toast.success("Country created Successfully !");
-        reset(
-          {
-            name: "",
-          }
-        );
+         handleResetForm();
         setOpen(false);
         onSave?.(payload);
       },
@@ -90,15 +94,7 @@ export default function AddCountryModal({ open, setOpen, onSave }: AddCountryMod
       open={open}
        onOpenChange={(isOpen) => {
         setOpen(isOpen);
-        if (!isOpen) {
-          reset({
-            name: "",
-            countryCode: "",
-            image: undefined,
-          });
-          setPreviewUrl(null);
-          setUploadId("");
-        }
+        if (!isOpen) handleResetForm();
       }}
       title="Add Country"
       footer={

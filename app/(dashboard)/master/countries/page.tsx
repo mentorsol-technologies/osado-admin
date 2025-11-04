@@ -2,13 +2,14 @@
 import { Button } from "@/components/ui/button";
 import FiltersBar from "@/components/ui/commonComponent/FiltersBar";
 import { Flag, Plus } from "lucide-react";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import CountryCard from "./CountryCard";
 import DeleteConfirmModal from "@/components/ui/commonComponent/DeleteConfirmModal";
 import EditCountryModal from "./EditCountryForm";
 import AddCountryModal from "./AddCountryForm";
 import { useCountryQuery, useDeleteCountryMutation } from "@/hooks/useCountryMutations";
 import { toast } from 'react-toastify';
+import { applyFilters } from "@/lib/filterHelper";
 
 const Countries = () => {
   const [selectedFilters, setSelectedFilters] = useState<{
@@ -25,27 +26,39 @@ const Countries = () => {
 
 
   const filters = [
-    { key: "sort-by", label: "Sort by", options: ["Admin", "User", "Manager"] },
+    { key: "sort-by", label: "Sort by", options: ["All","Admin", "User", "Manager"] },
     {
       key: "status",
       label: "Status",
-      options: ["Active", "Inactive", "Pending"],
+      options: ["All","Active", "Inactive",],
     },
     {
-      key: "create-at",
+      key: "createdAt",
       label: "Created Date",
-      options: ["Active", "Inactive", "Pending"],
+      type: "date",
     },
   ];
+  const filteredCountries = useMemo(() => {
+    return applyFilters(data, search, selectedFilters, {
+      searchKeys: ["name", "code"],
+      dateKey: "createdAt",
+    });
+  }, [data, search, selectedFilters]);
 
   const handleFilterChange = (key: string, value: string) => {
-    setSelectedFilters((prev) => ({ ...prev, [key]: value }));
-  };
+  setSelectedFilters((prev) => {
+    if (prev[key] === value || value === "All" || value === "") {
+      const updated = { ...prev };
+      delete updated[key]; 
+      return updated;
+    }
+    return { ...prev, [key]: value };
+  });
+};
+
   const handleAddCountry = (formData: any) => {
     console.log("New Country Added:", formData);
     setAddOpen(false);
-    // ✅ You can later replace this with your mutation:
-    // createCountryMutation.mutate(formData);
   };
   const handleDelete = () => {
     if (!selectedCountry?.id) return;
@@ -82,21 +95,26 @@ const Countries = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-        {data?.map((country: any) => (
-          <CountryCard
-            key={country.id}
-            {...country}
-            onEdit={() => {
-              setSelectedCountry(country);
-              setEditOpen(true);
-            }}
-            onDelete={() => {
-              setSelectedCountry(country);
-              setDeleteOpen(true);
-            }}
-          />
-        ))}
+        {filteredCountries?.length ? (
+          filteredCountries.map((country: any) => (
+            <CountryCard
+              key={country.id}
+              {...country}
+              onEdit={() => {
+                setSelectedCountry(country);
+                setEditOpen(true);
+              }}
+              onDelete={() => {
+                setSelectedCountry(country);
+                setDeleteOpen(true);
+              }}
+            />
+          ))
+        ) : (
+          <p className="text-white text-center col-span-full">No countries found.</p>
+        )}
       </div>
+
 
       {/* Modals */}
       <AddCountryModal

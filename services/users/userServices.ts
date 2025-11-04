@@ -13,6 +13,13 @@ export const getSubAdmin = async () => {
     return response.data;
 };
 
+// Get All Users
+export const getUsersList = async () => {
+    const response = await api.get("/users");
+    return response.data;
+};
+
+
 export const updateSubAdmin = async (id: string | number, data: any,) => {
     const response = await api.patch(`/users/sub-admin/${id}`, data);
     return response;

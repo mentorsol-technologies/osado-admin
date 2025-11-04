@@ -61,6 +61,7 @@ export default function AddRankModal({
     register,
     handleSubmit,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -88,6 +89,17 @@ export default function AddRankModal({
     }
   };
 
+  const handleResetForm = () => {
+    reset({
+      title: "",
+      status: "Active",
+      noOfEventsVisited: "",
+      noOfReviews: "",
+    });
+    setPreviewUrl(null);
+    setUploadId("");
+  };
+
   const onSubmit = async (data: FormData) => {
     try {
       const payload = {
@@ -103,6 +115,7 @@ export default function AddRankModal({
         onSuccess: (res) => {
           toast.success("Influencer Rank created successfully!");
           onSave(data);
+          handleResetForm();
           setOpen(false);
         },
         onError: (error: any) => {
@@ -119,7 +132,10 @@ export default function AddRankModal({
   return (
     <Modal
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={(isOpen) => {
+    setOpen(isOpen);
+    if (!isOpen) handleResetForm();
+  }}
       title="Create Rank"
       footer={
         <div className="flex flex-col sm:flex-row gap-3 w-full">

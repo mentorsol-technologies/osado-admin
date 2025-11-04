@@ -66,18 +66,20 @@ export default function ServiceBookingPage() {
     ];
 
 
-    const filters = [
-        {
-            key: "sort_by",
-            label: "Sort by",
-            options: ["Newest", "Oldest", "A–Z", "Z–A"],
-        },
-        {
-            key: "kyc_status",
-            label: "KYC Status",
-            options: ["Approved", "Pending", "Rejected"],
-        },
-    ];
+   const filters = [
+  {
+    key: "sort_by",
+    label: "Sort by",
+    options: ["Newest", "Oldest", "A–Z", "Z–A"],
+    sortBy: true, 
+  },
+  {
+    key: "kyc_status",
+    mapTo: "status",
+    label: "KYC Status",
+    options: ["All","Approved", "Pending", "Rejected"],
+  },
+];
 
     const handleApprove = () => {
         console.log("Approved:", selectedKYC);

@@ -72,10 +72,18 @@ export default function AddSubAdminModal({
       if (kuwait) setSelectedCountry(kuwait);
     }
   }, [countries, selectedCountry]);
-
-
-  // 🔹 React Query mutation
   const { mutate: createSubAdmin, isPending } = useCreateSubAdminMutation();
+   const handleResetForm = () => {
+    reset({
+      fullName: "",
+      surname: "",
+      email: "",
+      password: "",
+      permissions: [],
+    });
+    setPhoneNumber("");
+    setSelectedCountry(null);
+  };
 
   // 🔹 Submission handler
   const onSubmit = (data: FormData) => {
@@ -93,8 +101,8 @@ export default function AddSubAdminModal({
     };
     createSubAdmin(payload, {
       onSuccess: () => {
-        reset();
-        setOpen(false);
+      handleResetForm();
+      setOpen(false);
       },
     });
   };
@@ -113,19 +121,10 @@ export default function AddSubAdminModal({
     <Modal
       open={open}
       onOpenChange={(isOpen) => {
-      setOpen(isOpen);
-      if (!isOpen) {
-        reset({
-          fullName: "",
-          surname: "",
-          email: "",
-          password: "",
-          permissions: [],
-        });
-        setPhoneNumber("");
-        setSelectedCountry(null);
-      }
-    }}
+        setOpen(isOpen);
+        if (!isOpen) handleResetForm();
+      }}
+
       title="Add Sub Admin"
       footer={
         <div className="flex flex-col sm:flex-row gap-3 w-full">

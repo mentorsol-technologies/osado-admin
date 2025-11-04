@@ -27,13 +27,12 @@ import { useCategoriesQuery } from "@/hooks/useCategoryMutations";
 import { uploadToS3 } from "@/lib/s3Upload";
 import { getSubCategoryUploadLink } from "@/services/sub-categories/subCategoriesService";
 
-// ✅ Schema validation
 const schema = z.object({
   name: z.string().min(2, "Subcategory name is required"),
   status: z.enum(["Active", "Inactive"]),
   description: z.string().optional(),
   image: z.any().optional(),
-  assign_category: z.string().min(1, "Please select a category"), // this will store the category ID
+  assign_category: z.string().min(1, "Please select a category"),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -126,14 +125,24 @@ export default function AddSubCategoryModal({
   };
 
   const handleFormSubmit = (e?: React.FormEvent) => {
-    console.log("🔘 Submit button clicked");
+    console.log(" Submit button clicked");
     handleSubmit(onSubmit)(e);
   };
 
   return (
     <Modal
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        if (!isOpen) {
+          reset({
+            name: "",
+            status: "Active",
+            description: "",
+          });
+          setUploadId("");
+        }
+      }}
       title="Add Subcategory"
       footer={
         <div className="flex flex-col sm:flex-row gap-3 w-full">

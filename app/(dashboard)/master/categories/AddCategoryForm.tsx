@@ -45,7 +45,7 @@ export default function AddCategoryModal({
   setOpen,
   onSave,
 }: AddCategoryModalProps) {
-  const { mutate: createCategory, isPending } = useCreateCategoryMutation(); // ✅ use create
+  const { mutate: createCategory, isPending } = useCreateCategoryMutation();
   const { mutateAsync: uploadFile, isPending: isUploading } =
     useUploadCategoryFileMutation();
 
@@ -68,6 +68,15 @@ export default function AddCategoryModal({
     },
   });
 
+    const handleResetForm = () => {
+    reset({
+      name: "",
+      status: "Active",
+      description: "",
+    });
+    setPreviewUrl(null);
+    setUploadId("");
+  };
   const handleFileUpload = async (file: File) => {
     try {
       const { url, fields, uploadId } = await getCategoryUploadLink(file.type);
@@ -93,8 +102,8 @@ export default function AddCategoryModal({
       onSuccess: () => {
         toast.success("Category created successfully!");
         onSave(formData);
+        handleResetForm();
         setOpen(false);
-        reset(); // ✅ clear form after submit
       },
     });
   };
@@ -102,10 +111,13 @@ export default function AddCategoryModal({
   return (
     <Modal
       open={open}
-      onOpenChange={setOpen}
+       onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        if (!isOpen) handleResetForm(); 
+      }}
       title="Add Category"
       footer={
-        <div className="flex flex-col sm:flex-row gap-3 w-full">
+        < div className="flex flex-col sm:flex-row gap-3 w-full" >
           <Button
             onClick={handleSubmit(onSubmit)}
             className="flex-1"
@@ -120,11 +132,11 @@ export default function AddCategoryModal({
           >
             Cancel
           </Button>
-        </div>
+        </div >
       }
     >
       {/* Category Name + Status */}
-      <div className="flex flex-col sm:flex-row gap-3 w-full">
+      < div className="flex flex-col sm:flex-row gap-3 w-full" >
         <div className="flex-1">
           <label className="block text-sm mb-1">Category Name</label>
           <CommonInput placeholder="Category Name" {...register("name")} />
@@ -148,31 +160,33 @@ export default function AddCategoryModal({
             </SelectContent>
           </Select>
         </div>
-      </div>
+      </div >
 
       {/* Description */}
-      <div className="mt-4">
+      < div className="mt-4" >
         <label className="block text-sm mb-1">Description</label>
         <Textarea
           rows={4}
           placeholder="Enter category description"
           {...register("description")}
         />
-      </div>
+      </div >
 
       {/* File Upload */}
-      <div className="mt-4">
+      < div className="mt-4" >
         <Upload
           label="Upload Icon/Image"
           onFileSelect={async (file) => {
             if (file) await handleFileUpload(file);
           }}
         />
-        {isUploading && (
-          <p className="text-sm text-blue-500 mt-1">Uploading...</p>
-        )}
+        {
+          isUploading && (
+            <p className="text-sm text-blue-500 mt-1">Uploading...</p>
+          )
+        }
 
-      </div>
-    </Modal>
+      </div >
+    </Modal >
   );
 }
