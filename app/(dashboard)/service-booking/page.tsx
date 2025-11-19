@@ -10,8 +10,14 @@ import RefundBookingModal from "./RefundBookingForm";
 import SuspendedBookingModal from "./SuspendedBookingForm";
 import EditBookingModal from "./EditBookingForm";
 import AddBookingModal from "./AddNewBookingForm";
+import { useGetAllServiceBookingListQuery } from "@/hooks/useServiceBookingMutations";
 
 export default function ServiceBookingPage() {
+
+  const { data, isLoading } = useGetAllServiceBookingListQuery()
+
+
+
   const [openViewModal, setOpenViewModal] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [refundOpen, setRefundOpen] = useState(false);
@@ -20,11 +26,17 @@ export default function ServiceBookingPage() {
   const [AddOpen, setAddOpen] = useState(false);
 
   const columns = [
-    { key: "booking_id", label: "Booking ID" },
-    { key: "service_name", label: "Service Name" },
+    { key: "id", label: "Booking ID" },
+    { key: "serviceName", label: "Service Name" },
     { key: "provider", label: "Provider" },
-    { key: "customer", label: "Customer" },
-    { key: "date_time", label: "Date & Time" },
+    {
+      key: "name",
+      label: "Name",
+      render: (row: any) => row.customer?.name || "-",
+    },
+    { key: "bookingDate", label: "Booking Date" },
+    { key: "bookingTime", label: "Booking Time" },
+
     { key: "amount", label: "Amount" },
 
     {
@@ -32,7 +44,9 @@ export default function ServiceBookingPage() {
       label: "Category",
       render: (row: any) => (
         <span className="rounded bg-gray-700/40 px-2 py-1 text-xs">
-          {row.category}
+          {row.category && row.category.length > 0
+            ? row.category.map((c: any) => c.name || "Unnamed").join(", ")
+            : "-"}
         </span>
       ),
     },
@@ -41,13 +55,12 @@ export default function ServiceBookingPage() {
       label: "Status",
       render: (row: any) => (
         <span
-          className={`rounded px-2 py-1 text-xs ${
-            row.status === "Confirmed"
-              ? " text-green-400 border border-green-500/30"
-              : row.status === "Canceled"
+          className={`rounded px-2 py-1 text-xs ${row.status === "Confirmed"
+            ? " text-green-400 border border-green-500/30"
+            : row.status === "Canceled"
               ? " text-red-400 border border-red-500/30"
               : " text-blue-400 border border-blue-500/30"
-          }`}
+            }`}
         >
           {row.status}
         </span>
@@ -77,56 +90,27 @@ export default function ServiceBookingPage() {
             <MdOutlineEdit size={16} />
           </button>
           <button className="p-1 rounded-md  bg-red-600">
-             <BiStop size={16} />
+            <BiStop size={16} />
           </button>
         </div>
       ),
     },
   ];
 
-  const data = [
-    {
-      booking_id: "EV123",
-      service_name: "Launch Party",
-      provider: "Photographer",
-      customer: "Keith White",
-      date_time: "2025/09/15 18:00",
-      amount: "KWD 1200",
-      category: "Music",
-      status: "Confirmed",
-    },
-    {
-      booking_id: "EV456",
-      service_name: "Tech Demo",
-      provider: "Photographer",
-      customer: "Keith White",
-      date_time: "2025/09/20 14:00",
-      amount: "KWD 1200",
-      category: "Tech",
-      status: "Pending",
-    },
-    {
-      booking_id: "EV451",
-      service_name: "Tech Demo",
-      provider: "Photographer",
-      customer: "Keith White",
-      date_time: "2025/09/20 14:00",
-      amount: "KWD 1200",
-      category: "Technology",
-      status: "Canceled",
-    },
-  ];
+
 
   const filters = [
     {
       key: "sort_by",
       label: "Sort by",
-      options: ["Newest", "Oldest", "A–Z", "Z–A"],
+       sortBy: true, 
+      options: ["All", "Newest", "Oldest", "A–Z", "Z–A"],
     },
     {
       key: "status",
       label: "Status",
-      options: ["Confirmed", "Pending", "Canceled"],
+      mapTo: "status",
+      options: ["All", "Confirmed", "Pending", "Canceled"],
     },
 
     {
@@ -137,7 +121,7 @@ export default function ServiceBookingPage() {
     {
       key: "date",
       label: "Date",
-      options: ["2025-09-15", "2025-09-20"],
+      type: "date",
     },
   ];
   const handleRefundSubmit = (data: any) => {
@@ -174,11 +158,11 @@ export default function ServiceBookingPage() {
 
       {/* Make it responsive */}
       <div className="w-full">
-       <CommonTable
+        <CommonTable
           mobileView="card"
           data={data}
           columns={columns}
-          rowsPerPage={5}
+          rowsPerPage={10}
           filters={filters}
           searchable
           renderCardActions={(row) => (
@@ -202,7 +186,7 @@ export default function ServiceBookingPage() {
       <BookingViewForm
         open={openViewModal}
         onOpenChange={setOpenViewModal}
-        booking={selectedBooking}
+        bookingId={selectedBooking?.id}     // <-- IMPORTANT
         onRefundClick={() => setRefundOpen(true)}
       />
       <RefundBookingModal

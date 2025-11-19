@@ -41,6 +41,8 @@ const menuItems: MenuItem[] = [
   { icon: "/images/ci_calendar.svg", label: "Events Management", href: "/events" },
   { icon: "/images/tdesign_user-business-filled.svg", label: "Business Owners", href: "/business-owners" },
   { icon: "/images/tdesign_user-business-filled.svg", label: "KYC Management", href: "/kyc-management" },
+  { icon: "/images/material-symbols_report-rounded.svg", label: "Report Management", href: "/report-management" },
+
 
   {
     label: "Finance Module",

@@ -22,7 +22,6 @@ const Countries = () => {
   const [addOpen, setAddOpen] = useState(false);
   const { data, isLoading, isError } = useCountryQuery();
   const { mutate: deleteCountry, isPending } = useDeleteCountryMutation();
-  console.log("countries listing", data)
 
 
   const filters = [

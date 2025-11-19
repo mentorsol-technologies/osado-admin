@@ -164,7 +164,7 @@ export default function BannersPage() {
         ))}
       </div>
 
-      {/* ✅ Add Promotional Banner Modal */}
+      {/* Add Promotional Banner Modal */}
       <AddPromotionalBannerModal
         open={addOpen}
         setOpen={setAddOpen}

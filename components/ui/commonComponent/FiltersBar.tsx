@@ -14,7 +14,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 
-interface Filter {
+export interface Filter {
   key: string;
   label: string;
   options?: string[];

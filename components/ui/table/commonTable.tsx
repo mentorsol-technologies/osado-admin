@@ -42,7 +42,7 @@ interface Props<T> {
 export function CommonTable<T extends { [key: string]: any }>({
   data,
   columns,
-  rowsPerPage = 8,
+  rowsPerPage = 15,
   filters = [],
   searchable = true,
   title,
