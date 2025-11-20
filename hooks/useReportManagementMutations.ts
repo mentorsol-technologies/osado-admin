@@ -15,7 +15,7 @@ export const useSendWarningMutation = () => {
     return useMutation({
         mutationFn: (id: string) => reportSendWarning(id),
         onSuccess: () => {
-            queryClient.invalidateQueries(["reportManagement"]);
+            queryClient.invalidateQueries({ queryKey: ["reportManagement"] });
         },
     });
 };
@@ -27,7 +27,7 @@ export const useReportResolvedMutation = () => {
         mutationFn: ({ id, adminNotes }: { id: string; adminNotes: string }) =>
             reportResolved(id, adminNotes),
         onSuccess: () => {
-            queryClient.invalidateQueries(["reportManagement"]);
+            queryClient.invalidateQueries({ queryKey: ["reportManagement"] });
         },
     });
 };
@@ -39,7 +39,7 @@ export const useReportDismissalMutation = () => {
         mutationFn: ({ id, adminNotes }: { id: string; adminNotes: string }) =>
             reportDismissal(id, adminNotes),
         onSuccess: () => {
-            queryClient.invalidateQueries(["reportManagement"]);
+            queryClient.invalidateQueries({ queryKey: ["reportManagement"] });
         },
     });
 }

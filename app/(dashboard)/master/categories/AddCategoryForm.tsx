@@ -49,7 +49,8 @@ export default function AddCategoryModal({
   const { mutateAsync: uploadFile, isPending: isUploading } =
     useUploadCategoryFileMutation();
 
-  const [uploadId, setUploadId] = useState<string>("");
+  const [uploadIds, setUploadIds] = useState<string[]>([]);
+
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const {
@@ -68,23 +69,31 @@ export default function AddCategoryModal({
     },
   });
 
-    const handleResetForm = () => {
+  const handleResetForm = () => {
     reset({
       name: "",
       status: "Active",
       description: "",
     });
     setPreviewUrl(null);
-    setUploadId("");
+    setUploadIds([]);
   };
-  const handleFileUpload = async (file: File) => {
+
+  const handleMultipleFileUpload = async (files: File[]) => {
     try {
-      const { url, fields, uploadId } = await getCategoryUploadLink(file.type);
-      setUploadId(uploadId);
-      setValue("image", file);
-      const localPreview = URL.createObjectURL(file);
-      setPreviewUrl(localPreview);
-      await uploadToS3(file, url, fields);
+      const uploadedIds: string[] = [];
+
+      for (const file of files) {
+        const { url, fields, uploadId } = await getCategoryUploadLink(file.type);
+        await uploadToS3(file, url, fields);
+        uploadedIds.push(uploadId);
+
+        setPreviewUrl(URL.createObjectURL(file));
+
+      }
+
+      setUploadIds((prev) => [...prev, ...uploadedIds]);
+      setValue("image", uploadedIds);
     } catch (error) {
       console.error("File upload failed:", error);
     }
@@ -95,7 +104,7 @@ export default function AddCategoryModal({
       name: formData.name,
       status: formData.status.toLowerCase(),
       description: formData.description,
-      iconId: uploadId || undefined,
+      iconId: uploadIds.length ? uploadIds[0] : undefined,
     };
 
     createCategory(payload, {
@@ -111,9 +120,9 @@ export default function AddCategoryModal({
   return (
     <Modal
       open={open}
-       onOpenChange={(isOpen) => {
+      onOpenChange={(isOpen) => {
         setOpen(isOpen);
-        if (!isOpen) handleResetForm(); 
+        if (!isOpen) handleResetForm();
       }}
       title="Add Category"
       footer={
@@ -175,9 +184,11 @@ export default function AddCategoryModal({
       {/* File Upload */}
       < div className="mt-4" >
         <Upload
-          label="Upload Icon/Image"
-          onFileSelect={async (file) => {
-            if (file) await handleFileUpload(file);
+          label="Upload Images"
+          multiple
+          onFileSelect={async (files) => {
+            if (!files?.length) return;
+            await handleMultipleFileUpload(files);
           }}
         />
         {

@@ -19,10 +19,14 @@ export interface Column<T> {
   render?: (item: T) => ReactNode;
 }
 
-interface FilterConfig {
+export interface FilterConfig {
   key: string;
   label: string;
-  options: string[];
+  options?: string[];        
+  type?: "date";             
+  sortBy?: boolean;          
+  mapTo?: string;       
+  customSort?: (a: any, b: any, value: string) => number;
 }
 
 interface Props<T> {

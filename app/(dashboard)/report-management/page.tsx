@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { CommonTable } from "@/components/ui/table/commonTable";
+import { CommonTable, FilterConfig } from "@/components/ui/table/commonTable";
 import { Eye } from "lucide-react";
 import { capitalizeFirstLetter } from "@/lib/utils";
 import { useGetReportManagementListQuery } from "@/hooks/useReportManagementMutations";
@@ -67,7 +67,7 @@ export default function ReportManagementPage() {
         },
     ];
 
-    const filters = [
+      const filters: FilterConfig[] = [
         {
             key: "sort_by",
             label: "Sort by",

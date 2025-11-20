@@ -46,7 +46,7 @@ interface EditRankModalProps {
     noOfEventsVisited?: number;
     noOfReviews?: number;
     image?: string;
-    iconURL?:string;
+    iconURL?: string;
   };
   onSave: (data: FormData) => void;
 }
@@ -62,7 +62,7 @@ export default function EditRankModal({
   const { mutateAsync: uploadInfluencersRankFile, isPending: isUploading } =
     useUploadInfluencerRankFileMutation();
 
-  const [uploadId, setUploadId] = useState<string>("");
+  const [uploadIds, setUploadIds] = useState<string[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
 
@@ -88,35 +88,34 @@ export default function EditRankModal({
     if (selectedInfluencers) {
       reset({
         title: selectedInfluencers.title || "",
-        status:
-          selectedInfluencers.status?.toLowerCase() === "active"
-            ? "Active"
-            : "Inactive",
-        noOfEventsVisited: selectedInfluencers.noOfEventsVisited
-          ? String(selectedInfluencers.noOfEventsVisited)
-          : "",
-        noOfReviews: selectedInfluencers.noOfReviews
-          ? String(selectedInfluencers.noOfReviews)
-          : "",
+        status: selectedInfluencers.status?.toLowerCase() === "active" ? "Active" : "Inactive",
+        noOfEventsVisited: selectedInfluencers.noOfEventsVisited ? String(selectedInfluencers.noOfEventsVisited) : "",
+        noOfReviews: selectedInfluencers.noOfReviews ? String(selectedInfluencers.noOfReviews) : "",
         image: selectedInfluencers.iconURL || undefined,
       });
+      if (selectedInfluencers.iconURL) setPreviewUrl(selectedInfluencers.iconURL);
     }
   }, [selectedInfluencers, reset]);
 
-
-  const handleFileUpload = async (file: File) => {
+  const handleMultipleFileUpload = async (files: File[]) => {
     try {
-      const { url, fields, uploadId } = await getInfluencersRankUploadLink(file.type);
-      setUploadId(uploadId);
-      const localPreview = URL.createObjectURL(file);
-      setPreviewUrl(localPreview);
-      await uploadToS3(file, url, fields);
-      setValue("image", file);
+      const uploadedIds: string[] = [];
+
+      for (const file of files) {
+        const { url, fields, uploadId } = await getInfluencersRankUploadLink(file.type);
+        await uploadToS3(file, url, fields);
+        uploadedIds.push(uploadId);
+        setPreviewUrl(URL.createObjectURL(file)); // preview only first
+      }
+
+      setUploadIds(uploadedIds);
+      setValue("image", uploadedIds);
     } catch (error) {
-      console.error("File upload failed:", error);
-      toast.error("File upload failed");
+      console.error("Upload failed:", error);
+      toast.error("File upload failed!");
     }
   };
+
 
   // ✅ Submit handler
   const onSubmit = (data: FormData) => {
@@ -124,10 +123,12 @@ export default function EditRankModal({
 
     const payload = {
       title: data.title,
-      status: data.status.toLowerCase(), // convert back for backend
+      status: data.status.toLowerCase(), 
       noOfEventsVisited: Number(data.noOfEventsVisited),
       noOfReviews: Number(data.noOfReviews),
-      iconId: uploadId || undefined,
+      iconId: uploadIds.length ? uploadIds[0] : undefined,
+
+
     };
 
     updateInfluencersRank(
@@ -257,33 +258,19 @@ export default function EditRankModal({
       {/* File Upload */}
       <div className="mt-4">
         <Upload
-          label="Upload Icon/Image"
-          onFileSelect={async (file) => {
-            if (file) await handleFileUpload(file);
+          label="Upload Images"
+          multiple
+          onFileSelect={async (files) => {
+            if (!files?.length) return;
+            await handleMultipleFileUpload(files);
           }}
         />
-        {isUploading && (
-          <p className="text-sm text-blue-500 mt-1">Uploading...</p>
-        )}
 
-        {/* Image Preview */}
-        {previewUrl ? (
+        {previewUrl && (
           <div className="mt-2">
-            <img
-              src={previewUrl}
-              alt="New Preview"
-              className="w-16 h-16 rounded-md border"
-            />
+            <img src={previewUrl} className="w-16 h-16 rounded-md border" alt="preview" />
           </div>
-        ) : selectedInfluencers?.iconURL ? (
-          <div className="mt-2">
-            <img
-              src={selectedInfluencers.iconURL}
-              alt="Current Icon"
-              className="w-16 h-16 rounded-md border"
-            />
-          </div>
-        ) : null}
+        )}
       </div>
     </Modal>
   );

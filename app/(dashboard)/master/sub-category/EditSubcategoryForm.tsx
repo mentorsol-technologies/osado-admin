@@ -56,7 +56,7 @@ export default function EditSubCategoryModal({
     useUploadSubCategoryFileMutation();
 
   const { data: categoriesData, isLoading, isError } = useCategoriesQuery();
-  const [uploadId, setUploadId] = useState<string>("");
+  const [uploadIds, setUploadIds] = useState<string[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
 
@@ -83,7 +83,6 @@ export default function EditSubCategoryModal({
   // Re-populate form when modal opens with a different selected subcategory
   useEffect(() => {
     if (selectedCategory && categoriesData?.length) {
-      // find matching category object using categoryId
       const matchedCategory = categoriesData.find(
         (cat: any) => cat.id === selectedCategory.categoryId
       );
@@ -99,22 +98,29 @@ export default function EditSubCategoryModal({
         description: selectedCategory?.description || "",
         assign_category: matchedCategory?.id ? String(matchedCategory.id) : "",
         image: selectedCategory?.image || undefined,
-
       });
-      setUploadId(selectedCategory?.iconId || "");
+
+      setUploadIds(selectedCategory?.iconIds ? [...selectedCategory.iconIds] : []);
+      setPreviewUrl(selectedCategory?.image || null);
     }
   }, [selectedCategory, categoriesData, reset]);
 
-  const handleFileUpload = async (file: File) => {
+  const handleMultipleFileUpload = async (files: File[]) => {
     try {
-      const { url, fields, uploadId } = await getSubCategoryUploadLink(file.type);
-      setUploadId(uploadId);
-      setValue("image", file);
-      const localPreview = URL.createObjectURL(file);
-      setPreviewUrl(localPreview);
-      await uploadToS3(file, url, fields);
+      const uploadedIds: string[] = [];
+
+      for (const file of files) {
+        const { url, fields, uploadId } = await getSubCategoryUploadLink(file.type);
+        await uploadToS3(file, url, fields);
+        uploadedIds.push(uploadId);
+        setPreviewUrl(URL.createObjectURL(file)); // preview only first
+      }
+
+      setUploadIds(uploadedIds);
+      setValue("image", uploadedIds);
     } catch (error) {
-      console.error("File upload failed:", error);
+      console.error("Upload failed:", error);
+      toast.error("File upload failed!");
     }
   };
 
@@ -127,7 +133,7 @@ export default function EditSubCategoryModal({
       name: data.name,
       status: data.status.toLowerCase(),
       description: data.description || "",
-      iconId: uploadId,
+      iconId: uploadIds.length ? uploadIds[0] : undefined,
       categoryId: data.assign_category,
     };
 
@@ -263,32 +269,19 @@ export default function EditSubCategoryModal({
       <div className="mt-4">
         <Upload
           label="Upload Icon/Image"
-          onFileSelect={async (file) => {
-            if (file) await handleFileUpload(file);
+          multiple
+          onFileSelect={async (files) => {
+            if (!files?.length) return;
+            await handleMultipleFileUpload(files);
           }}
         />
-        {isUploading && (
-          <p className="text-sm text-blue-500 mt-1">Uploading...</p>
-        )}
 
-        {/* Image Preview */}
-        {previewUrl ? (
+        {/* Preview */}
+        {previewUrl && (
           <div className="mt-2">
-            <img
-              src={previewUrl}
-              alt="New Preview"
-              className="w-16 h-16 rounded-md border"
-            />
+            <img src={previewUrl} className="w-16 h-16 rounded-md border" alt="preview" />
           </div>
-        ) : selectedCategory?.image ? (
-          <div className="mt-2">
-            <img
-              src={selectedCategory.image}
-              alt="Current Icon"
-              className="w-16 h-16 rounded-md border"
-            />
-          </div>
-        ) : null}
+        )}
       </div>
     </Modal>
   );

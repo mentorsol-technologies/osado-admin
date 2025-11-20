@@ -122,6 +122,7 @@ const Photographers = () => {
               setSelectedInfluencers(influencer);
               // setEditOpen(true)
             }}
+            createdAt={influencer.memberSince} // map memberSince -> createdAt
             onDelete={() => {
               setSelectedInfluencers(influencer);
               setDeleteOpen(true);

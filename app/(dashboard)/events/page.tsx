@@ -34,7 +34,7 @@ const EventsManagement = () => {
     suspendEvent(
       {
         eventId: selectedEvent.id,
-        reason: formData.reason, 
+        reason: formData.reason,
       },
       {
         onSuccess: () => {
@@ -106,7 +106,7 @@ const EventsManagement = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {eventlist?.data?.map((event, idx) => (
+        {eventlist?.data?.map((event: any, idx: any) => (
           <EventCard
             key={idx}
             {...event}

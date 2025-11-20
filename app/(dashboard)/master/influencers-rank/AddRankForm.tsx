@@ -53,7 +53,7 @@ export default function AddRankModal({
 }: AddRankModalProps) {
   const { mutate: createInfluencersRank, isPending } = useCreateInfluencerRankMutation();
   const { mutateAsync: uploadInfluencersRankFile, isPending: isUploading } = useUploadInfluencerRankFileMutation();
-  const [uploadId, setUploadId] = useState<string>("");
+  const [uploadIds, setUploadIds] = useState<string[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
 
@@ -73,19 +73,28 @@ export default function AddRankModal({
     },
   });
 
-
-
-  const handleFileUpload = async (file: File) => {
+  const handleMultipleFileUpload = async (files: File[]) => {
     try {
-      const { url, fields, uploadId } = await getInfluencersRankUploadLink(file.type);
-      setUploadId(uploadId);
-      const localPreview = URL.createObjectURL(file);
-      setPreviewUrl(localPreview);
-      await uploadToS3(file, url, fields);
-      setValue("image", file);
+      const uploadedIds: string[] = [];
+
+      for (const file of files) {
+        const { url, fields, uploadId } = await getInfluencersRankUploadLink(
+          file.type
+        );
+
+        await uploadToS3(file, url, fields);
+
+        uploadedIds.push(uploadId);
+
+        // Preview only first uploaded
+        setPreviewUrl(URL.createObjectURL(file));
+      }
+
+      setUploadIds(uploadedIds);
+      setValue("image", uploadedIds);
     } catch (error) {
-      console.error("File upload failed:", error);
-      toast.error("File upload failed");
+      console.error("Upload failed:", error);
+      toast.error("Image upload failed!");
     }
   };
 
@@ -97,7 +106,7 @@ export default function AddRankModal({
       noOfReviews: "",
     });
     setPreviewUrl(null);
-    setUploadId("");
+    setUploadIds([])
   };
 
   const onSubmit = async (data: FormData) => {
@@ -107,7 +116,9 @@ export default function AddRankModal({
         status: data.status.toLowerCase(),
         noOfEventsVisited: Number(data.noOfEventsVisited),
         noOfReviews: Number(data.noOfReviews),
-        iconId: uploadId || undefined,
+        iconId: uploadIds.length ? uploadIds[0] : undefined,
+
+
 
       };
 
@@ -133,9 +144,9 @@ export default function AddRankModal({
     <Modal
       open={open}
       onOpenChange={(isOpen) => {
-    setOpen(isOpen);
-    if (!isOpen) handleResetForm();
-  }}
+        setOpen(isOpen);
+        if (!isOpen) handleResetForm();
+      }}
       title="Create Rank"
       footer={
         <div className="flex flex-col sm:flex-row gap-3 w-full">
@@ -232,13 +243,19 @@ export default function AddRankModal({
       {/* Upload */}
       <div className="mt-4">
         <Upload
-          label="Upload Icon/Image"
-          onFileSelect={async (file) => {
-            if (file) await handleFileUpload(file);
+          label="Upload Images"
+          multiple
+          onFileSelect={async (files) => {
+            if (!files?.length) return;
+            await handleMultipleFileUpload(files);
           }}
         />
-        {isUploading && (
-          <p className="text-sm text-blue-500 mt-1">Uploading...</p>
+
+        {/* Preview */}
+        {previewUrl && (
+          <div className="mt-2">
+            <img src={previewUrl} className="w-16 h-16 rounded-md border" alt="preview" />
+          </div>
         )}
       </div>
     </Modal>

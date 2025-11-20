@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import FiltersBar from "@/components/ui/commonComponent/FiltersBar";
+import FiltersBar, { Filter } from "@/components/ui/commonComponent/FiltersBar";
 import { Plus, Crown } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import InfluencersRankCard from "./InfluencersRankCard";
@@ -27,11 +27,12 @@ const InfluencersRank = () => {
   const { mutate: deleteInfluencersRank, isPending } = useDeleteInfluencerRankMutation();
 
 
-  const filters = [
+  const filters: Filter[] = [
+
     {
       key: "status",
       label: "Status",
-      options: ["All","Active", "Inactive"],
+      options: ["All", "Active", "Inactive"],
     },
     {
       key: "createdAt",
@@ -46,16 +47,16 @@ const InfluencersRank = () => {
       dateKey: "createdAt",
     });
   }, [data, search, selectedFilters]);
-   const handleFilterChange = (key: string, value: string) => {
-  setSelectedFilters((prev) => {
-    if (prev[key] === value || value === "All" || value === "") {
-      const updated = { ...prev };
-      delete updated[key]; // clear this filter
-      return updated;
-    }
-    return { ...prev, [key]: value };
-  });
-};
+  const handleFilterChange = (key: string, value: string) => {
+    setSelectedFilters((prev) => {
+      if (prev[key] === value || value === "All" || value === "") {
+        const updated = { ...prev };
+        delete updated[key]; // clear this filter
+        return updated;
+      }
+      return { ...prev, [key]: value };
+    });
+  };
 
   const handleAdd = (data: any) => {
     console.log("New category added:", data);

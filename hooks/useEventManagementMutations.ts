@@ -1,4 +1,4 @@
-import { GetAllEventsLIst, UploadEventLink, ViewEventsDetails, getCategories, createEvents, updateEvent, suspendedEvent, deleteEvent, BussinessOwnerInfo,ownerSuspended } from "@/services/event-management/EventManagementServices";
+import { GetAllEventsLIst, UploadEventLink, ViewEventsDetails, getCategories, createEvents, updateEvent, suspendedEvent, deleteEvent, BussinessOwnerInfo, ownerSuspended } from "@/services/event-management/EventManagementServices";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
@@ -12,7 +12,7 @@ export const useGetAllEventsQuery = () => {
 };
 
 export const useViewEventDetailsQuery = (id: string) => {
-    return useQuery({
+    return useQuery<any>({
         queryKey: ["events", id],
         queryFn: () => ViewEventsDetails(id),
         enabled: !!id,
@@ -88,7 +88,7 @@ export const useSuspendBussinessMutation = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ id, data }: { id: string; data: any }) => ownerSuspended(id,data),
+        mutationFn: ({ id, data }: { id: string; data: any }) => ownerSuspended(id, data),
         onSuccess: () => {
             toast.success("Bussiness Owner suspended successfully!");
             queryClient.invalidateQueries({ queryKey: ["business-owner-info"] });
@@ -115,7 +115,7 @@ export const useDeleteEventMutation = () => {
 };
 
 export const useBusinessOwnerInfoQuery = (id: string) => {
-    return useQuery({
+    return useQuery<any>({
         queryKey: ["business-owner-info", id],
         queryFn: () => BussinessOwnerInfo(id),
         enabled: !!id,

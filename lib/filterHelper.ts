@@ -1,7 +1,17 @@
-export const applyFilters = (data = [], search = "", selectedFilters = {}, options = {}) => {
+interface ApplyFiltersOptions {
+    searchKeys?: string[];
+    dateKey?: string;
+}
+
+export const applyFilters = (
+    data: any[] = [],
+    search: string = "",
+    selectedFilters: Record<string, any> = {},
+    options: ApplyFiltersOptions = {}
+) => {
     const { searchKeys = [], dateKey } = options;
 
-    return data?.filter((item) => {
+    return data.filter((item) => {
         // ✅ Search filter
         const matchesSearch =
             !search ||
@@ -11,14 +21,14 @@ export const applyFilters = (data = [], search = "", selectedFilters = {}, optio
 
         // ✅ Other filters (status, role, etc.)
         const matchesFilters = Object.entries(selectedFilters).every(([key, value]) => {
-            // if no value or 'All', skip this filter
             if (!value || value.toLowerCase() === "all") return true;
 
             // ✅ Handle date-based filters
             if (key.toLowerCase().includes("date") || key === dateKey) {
+                if (!dateKey) return false;
                 if (!item[dateKey]) return false;
 
-                const getItemDatePart = (dateValue) => {
+                const getItemDatePart = (dateValue: any) => {
                     if (!dateValue) return "";
                     return dateValue.toString().split("T")[0];
                 };

@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import FiltersBar from "@/components/ui/commonComponent/FiltersBar";
+import FiltersBar, { Filter } from "@/components/ui/commonComponent/FiltersBar";
 import { Flag, Plus } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import CountryCard from "./CountryCard";
@@ -24,12 +24,13 @@ const Countries = () => {
   const { mutate: deleteCountry, isPending } = useDeleteCountryMutation();
 
 
-  const filters = [
-    { key: "sort-by", label: "Sort by", options: ["All","Admin", "User", "Manager"] },
+  const filters: Filter[] = [
+
+    { key: "sort-by", label: "Sort by", options: ["All", "Admin", "User", "Manager"] },
     {
       key: "status",
       label: "Status",
-      options: ["All","Active", "Inactive",],
+      options: ["All", "Active", "Inactive",],
     },
     {
       key: "createdAt",
@@ -45,15 +46,15 @@ const Countries = () => {
   }, [data, search, selectedFilters]);
 
   const handleFilterChange = (key: string, value: string) => {
-  setSelectedFilters((prev) => {
-    if (prev[key] === value || value === "All" || value === "") {
-      const updated = { ...prev };
-      delete updated[key]; 
-      return updated;
-    }
-    return { ...prev, [key]: value };
-  });
-};
+    setSelectedFilters((prev) => {
+      if (prev[key] === value || value === "All" || value === "") {
+        const updated = { ...prev };
+        delete updated[key];
+        return updated;
+      }
+      return { ...prev, [key]: value };
+    });
+  };
 
   const handleAddCountry = (formData: any) => {
     console.log("New Country Added:", formData);

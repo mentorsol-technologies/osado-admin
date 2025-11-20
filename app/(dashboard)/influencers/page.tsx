@@ -41,8 +41,10 @@ const InfluencersRank = () => {
     },
   ];
   const { data, isLoading } = useGetUsersListQuery();
+  console.log("influecers data",data)
   const influencerList = useMemo(() => {
     const users = data || [];
+    console.log("userss",users)
     return users.filter((user: any) => user.role?.role === "influencer");
   }, [data]);
 
