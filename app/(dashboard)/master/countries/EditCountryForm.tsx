@@ -46,7 +46,7 @@ export default function EditCountryModal({
 }: EditCountryModalProps) {
   const { mutate: updateCountry, isPending, } = useUpdateCountryMutation();
 
-  const [uploadId, setUploadId] = useState<string>("");
+  const [uploadIds, setUploadIds] = useState<string[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState("")
 
@@ -78,18 +78,24 @@ export default function EditCountryModal({
   }, [selectedCountry, reset]);
 
 
-  // ✅ Handle file upload (S3 flow)
-  const handleFileUpload = async (file: File) => {
+  const handleMultipleFileUpload = async (files: File[]) => {
     try {
-      const { url, fields, uploadId } = await getCountryUploadLink(file.type);
-      setUploadId(uploadId);
-      const localPreview = URL.createObjectURL(file);
-      setPreviewUrl(localPreview);
-      await uploadToS3(file, url, fields);
-      setValue("image", file);
+      const uploadedIds: string[] = [];
+
+      for (const file of files) {
+        const { url, fields, uploadId } = await getCountryUploadLink(file.type);
+        await uploadToS3(file, url, fields);
+
+        uploadedIds.push(uploadId);
+
+        // Preview only the first uploaded image
+        setPreviewUrl(URL.createObjectURL(file));
+      }
+
+      setUploadIds(uploadedIds);
+      setValue("image", uploadedIds);
     } catch (error) {
       console.error("File upload failed:", error);
-      toast.error("File upload failed");
     }
   };
 
@@ -100,7 +106,9 @@ export default function EditCountryModal({
     const payload = {
       name: data.name,
       countryCode: data.countryCode,
-      iconId: uploadId || undefined,
+      iconId: uploadIds.length ? uploadIds[0] : undefined,
+
+
     };
 
     updateCountry(
@@ -162,36 +170,27 @@ export default function EditCountryModal({
         </div>
       </div>
 
-      {/* Upload Flag */}
+      {/* File Upload */}
       <div className="mt-4">
         <Upload
-          label="Upload Icon/Image"
-          onFileSelect={async (file) => {
-            if (file) await handleFileUpload(file);
+          label="Upload Images"
+          multiple
+          onFileSelect={async (files) => {
+            if (!files?.length) return;
+            await handleMultipleFileUpload(files);
           }}
         />
-        {isUploading && (
-          <p className="text-sm text-blue-500 mt-1">Uploading...</p>
-        )}
 
-        {/* Image Preview */}
-        {previewUrl ? (
+        {/* Preview */}
+        {previewUrl && (
           <div className="mt-2">
             <img
               src={previewUrl}
-              alt="New Preview"
+              alt="Preview"
               className="w-16 h-16 rounded-md border"
             />
           </div>
-        ) : selectedCountry?.image ? (
-          <div className="mt-2">
-            <img
-              src={selectedCountry.image}
-              alt="Current Icon"
-              className="w-16 h-16 rounded-md border"
-            />
-          </div>
-        ) : null}
+        )}
       </div>
     </Modal>
   );

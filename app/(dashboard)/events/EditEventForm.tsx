@@ -1,11 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useState } from "react";
-
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectTrigger,
@@ -13,22 +11,33 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import Modal from "@/components/ui/Modal";
+import { Button } from "@/components/ui/button";
 import CommonInput from "@/components/ui/input";
-import Upload from "@/components/ui/upload";
+import Modal from "@/components/ui/Modal";
+import { toast } from "react-toastify";
 import { Badge } from "@/components/ui/badge";
-import { Bell, LifeBuoy, Utensils, Trash2 } from "lucide-react";
+import Upload from "@/components/ui/upload";
 
+import { uploadToS3 } from "@/lib/s3Upload";
+import { useCategoriesQuery, useUpdateEventMutation } from "@/hooks/useEventManagementMutations";
+import { UploadEventLink } from "@/services/event-management/EventManagementServices";
+import TimeRangePicker from "@/components/ui/commonComponent/TimeRangePicker";
+import { Textarea } from "@/components/ui/textarea";
+
+// ------------------ Schema ------------------
 const schema = z.object({
-  title: z.string().min(2, "Event title is required"),
-  date: z.string().min(1, "Date is required"),
-  time: z.string().min(1, "Time is required"),
-  country: z.string().min(1, "Country is required"),
-  city: z.string().min(1, "City is required"),
-  location: z.string().min(1, "Location is required"),
-  status: z.enum(["Active", "Inactive"]),
   image: z.any().optional(),
-  category: z.string().optional(),
+  title: z.string().min(1, "Title is required"),
+  price: z.number().min(1, "Price is required"),
+  priceType: z.string().min(1, "Price type is required"),
+  date: z.string().min(1, "Select a date"),
+  time: z.string().min(1, "Select a time"),
+  country: z.string().min(1, "Select a country"),
+  city: z.string().min(1, "Enter a city"),
+  location: z.string().min(1, "Enter a location"),
+  status: z.string().min(1, "Select a status"),
+  categoryId: z.string().array().optional(),
+  bio: z.string().min(1, "Bio is required"),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -36,56 +45,155 @@ type FormData = z.infer<typeof schema>;
 interface EditEventModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  selectedEvent?: FormData;
-  onSave: (data: FormData) => void;
+  eventData?: any;
 }
 
 export default function EditEventModal({
   open,
   setOpen,
-  selectedEvent,
-  onSave,
+  eventData,
 }: EditEventModalProps) {
   const {
     register,
     handleSubmit,
     setValue,
+    reset,
+    watch,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      title: selectedEvent?.title || "",
-      date: selectedEvent?.date || "",
-      time: selectedEvent?.time || "1AM - 5AM",
-      country: selectedEvent?.country || "",
-      city: selectedEvent?.city || "",
-      location: selectedEvent?.location || "",
-      status: (selectedEvent?.status as "Active" | "Inactive") || "Active",
-    },
+    defaultValues: { categoryId: [] },
   });
 
-  const [preview, setPreview] = useState<string | null>(
-    selectedEvent?.image || null
-  );
+  const { data: categories } = useCategoriesQuery();
+  const { mutate: updateEvent, isPending } = useUpdateEventMutation();
 
-  const onSubmit = (data: FormData) => {
-    onSave(data);
-    setOpen(false);
+  const [uploadIds, setUploadIds] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [existingFiles, setExistingFiles] = useState<{ id: string; url: string }[]>([]);
+
+  // ------------------ Prefill form ------------------
+  useEffect(() => {
+    if (eventData && categories) {
+      const photoIds = eventData.photos?.map((p: any) => p.id) || [];
+      const categoryIds = eventData.categories?.map((c: any) => c.id) || [];
+
+      reset({
+        title: eventData.title || "",
+        price: Number(eventData.price) || 0,
+        priceType: eventData.priceType || "",
+        date: eventData.date?.split("T")[0] || "",
+        time: eventData.time || "",
+        country: eventData.country || "",
+        city: eventData.city || "",
+        location: eventData.location || "",
+        status: eventData.status || "ACTIVE",
+        bio: eventData.bio || "",
+        categoryId: categoryIds,
+      });
+
+      setSelectedCategories(categoryIds);
+      setUploadIds(photoIds);
+      setExistingFiles(
+        eventData.photos?.map((p: any) => ({ id: p.id, url: p.url })) || []
+      );
+    }
+  }, [eventData, categories, reset]);
+
+  // ------------------ Category toggle ------------------
+  const toggleCategory = (catId: string) => {
+    let updated: string[];
+    if (selectedCategories.includes(catId)) {
+      updated = selectedCategories.filter((id) => id !== catId);
+    } else {
+      updated = [...selectedCategories, catId];
+    }
+    setSelectedCategories(updated);
+    setValue("categoryId", updated);
   };
+
+  // ------------------ Handle image upload ------------------
+  const handleMultipleFileUpload = async (files: File[]) => {
+    try {
+      const uploadedIds: string[] = [];
+      for (const file of files) {
+        const { url, fields, uploadId } = await UploadEventLink(file.type);
+        await uploadToS3(file, url, fields);
+        uploadedIds.push(uploadId);
+        setExistingFiles((prev) => [...prev, { id: uploadId, url }]);
+      }
+      setUploadIds((prev) => [...prev, ...uploadedIds]);
+      setValue("image", files);
+    } catch (error) {
+      console.error("File upload failed:", error);
+    }
+  };
+
+  // ------------------ Submit updated event ------------------
+  const onSubmit = (data: FormData) => {
+    if (!eventData?.id) {
+      toast.error("Event ID is missing!");
+      return;
+    }
+
+    const payload = {
+      title: data.title,
+      date: data.date,
+      time: data.time,
+      country: data.country,
+      city: data.city,
+      location: data.location,
+      status: data.status.toUpperCase(),
+      photoIds: uploadIds,
+      categoryIds: data.categoryId,
+      bio: data.bio,
+      price: Number(data.price),
+      priceType: data.priceType,
+    };
+
+    console.log("Updating Event:", payload);
+
+    updateEvent(
+      { id: String(eventData.id), data: payload },
+      {
+        onSuccess: () => {
+          setOpen(false);
+          reset();
+          setSelectedCategories([]);
+          setExistingFiles([]);
+        },
+        onError: (err: any) => {
+          console.error("Update failed:", err);
+        },
+      }
+    );
+  };
+
 
   return (
     <Modal
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={(val) => {
+        setOpen(val);
+        if (!val) {
+          reset();
+          setSelectedCategories([]);
+          setExistingFiles([]);
+        }
+      }}
       title="Edit Event"
       footer={
         <div className="flex flex-col sm:flex-row gap-3 w-full">
-          <Button onClick={handleSubmit(onSubmit)} className="flex-1">
-            Submit
+          <Button
+            onClick={handleSubmit(onSubmit)}
+            className="flex-1 bg-red-600 hover:bg-red-700"
+            disabled={isPending}
+          >
+            {isPending ? "Saving..." : "Save Changes"}
           </Button>
           <Button
             variant="outline"
-            className="flex-1"
+            className="flex-1 border-gray-600 text-gray-300"
             onClick={() => setOpen(false)}
           >
             Cancel
@@ -93,64 +201,16 @@ export default function EditEventModal({
         </div>
       }
     >
-      {/* Scrollable container */}
       <div className="max-h-[70vh] overflow-y-auto pr-2">
-        {/* Image Previews */}
-        {(selectedEvent?.image || preview) && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-            {/* Existing Event Image */}
-            {selectedEvent?.image && (
-              <div className="relative">
-                <img
-                  src={
-                    typeof selectedEvent.image === "string"
-                      ? selectedEvent.image
-                      : URL.createObjectURL(selectedEvent.image)
-                  }
-                  alt="Existing Event"
-                  className="w-full h-48 object-cover rounded-md"
-                />
-              </div>
-            )}
-
-            {/* Newly Selected Image with Overlay + Delete */}
-            {preview && (
-              <div className="relative w-full h-48 rounded-md overflow-hidden hidden lg:block">
-                <img
-                  src={preview}
-                  alt="New Preview"
-                  className="w-full h-full object-cover"
-                />
-
-                <div className="absolute inset-0 bg-black/50 z-10 pointer-events-none" />
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setPreview(null);
-                    setValue("image", undefined);
-                  }}
-                  className="absolute inset-0 flex items-center justify-center z-20"
-                >
-                  <div className="bg-red-600 hover:bg-red-700 rounded-full p-3">
-                    <Trash2 size={25} />
-                  </div>
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Upload Image */}
+        {/* Upload Section */}
         <div className="mb-4">
-          <label className="block text-sm mb-1">Upload Image</label>
           <Upload
-            onFileSelect={(file) => {
-              if (file) {
-                const url = URL.createObjectURL(file);
-                setPreview(url);
-                setValue("image", file);
-              }
+            label="Upload Images"
+            multiple
+            existingFiles={existingFiles}
+            onFileSelect={async (files) => {
+              if (!files?.length) return;
+              await handleMultipleFileUpload(files);
             }}
           />
         </div>
@@ -158,10 +218,25 @@ export default function EditEventModal({
         {/* Title */}
         <div className="mb-4">
           <label className="block text-sm mb-1">Title</label>
-          <CommonInput placeholder="Event Title" {...register("title")} />
-          {errors.title && (
-            <p className="text-xs text-red-500 mt-1">{errors.title.message}</p>
-          )}
+          <CommonInput placeholder="Enter title" {...register("title")} />
+          {errors.title && <p className="text-xs text-red-500">{errors.title.message}</p>}
+        </div>
+
+        {/* Price & Price type */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block text-sm mb-1">Price</label>
+            <CommonInput
+              placeholder="Enter Price"
+              {...register("price", { valueAsNumber: true })}
+            />
+            {errors.price && <p className="text-xs text-red-500">{errors.price.message}</p>}
+          </div>
+          <div>
+            <label className="block text-sm mb-1">Price Type</label>
+            <CommonInput placeholder="Enter Price Type" {...register("priceType")} />
+            {errors.priceType && <p className="text-xs text-red-500">{errors.priceType.message}</p>}
+          </div>
         </div>
 
         {/* Date & Time */}
@@ -169,26 +244,15 @@ export default function EditEventModal({
           <div>
             <label className="block text-sm mb-1">Date</label>
             <CommonInput type="date" {...register("date")} />
+            {errors.date && <p className="text-xs text-red-500">{errors.date.message}</p>}
           </div>
           <div>
-            <label className="block text-sm mb-1">Time</label>
-            <Select
-              defaultValue={selectedEvent?.time || "1AM - 5AM"}
-              onValueChange={(val) => setValue("time", val)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="1AM - 5AM" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1AM - 5AM">1AM - 5AM</SelectItem>
-                <SelectItem value="6AM - 12PM">6AM - 12PM</SelectItem>
-                <SelectItem value="1PM - 5PM">1PM - 5PM</SelectItem>
-                <SelectItem value="6PM - 12AM">6PM - 12AM</SelectItem>
-              </SelectContent>
-            </Select>
-            {errors.time && (
-              <p className="text-xs text-red-500 mt-1">{errors.time.message}</p>
-            )}
+            <TimeRangePicker
+              label="Time Range"
+              value={watch("time")}
+              onChange={(val) => setValue("time", val)}
+              error={errors.time?.message}
+            />
           </div>
         </div>
 
@@ -196,11 +260,25 @@ export default function EditEventModal({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div>
             <label className="block text-sm mb-1">Country</label>
-            <CommonInput placeholder="Enter country" {...register("country")} />
+            <Select
+              onValueChange={(val) => setValue("country", val)}
+              defaultValue={eventData?.country}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select country" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Kuwait">Kuwait</SelectItem>
+                <SelectItem value="USA">USA</SelectItem>
+                <SelectItem value="UAE">UAE</SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.country && <p className="text-xs text-red-500">{errors.country.message}</p>}
           </div>
           <div>
             <label className="block text-sm mb-1">City</label>
             <CommonInput placeholder="Enter city" {...register("city")} />
+            {errors.city && <p className="text-xs text-red-500">{errors.city.message}</p>}
           </div>
         </div>
 
@@ -208,48 +286,61 @@ export default function EditEventModal({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div>
             <label className="block text-sm mb-1">Location</label>
-            <CommonInput
-              placeholder="Enter location"
-              {...register("location")}
-            />
+            <CommonInput placeholder="Enter location" {...register("location")} />
+            {errors.location && <p className="text-xs text-red-500">{errors.location.message}</p>}
           </div>
           <div>
             <label className="block text-sm mb-1">Status</label>
             <Select
-              defaultValue={selectedEvent?.status || "Active"}
-              onValueChange={(val) =>
-                setValue("status", val as "Active" | "Inactive")
-              }
+              onValueChange={(val) => setValue("status", val)}
+              defaultValue={eventData?.status}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Active">Active</SelectItem>
-                <SelectItem value="Inactive">Inactive</SelectItem>
+                <SelectItem value="DRAFT">Draft</SelectItem>
+                <SelectItem value="INACTIVE">Inactive</SelectItem>
               </SelectContent>
             </Select>
+            {errors.status && <p className="text-xs text-red-500">{errors.status.message}</p>}
           </div>
         </div>
 
-        {/* Category Pills */}
+        {/* Category */}
         <div className="mb-4">
-          <label className="block text-sm mb-1">Category</label>
-          <div className="flex flex-col lg:flex-row flex-wrap gap-2">
-            <Badge>
-              <Bell size={14} className="mr-1" />
-              Business & Networking
-            </Badge>
-            <Badge variant="secondary">
-              <LifeBuoy size={14} className="mr-1" />
-              Sports & Fitness
-            </Badge>
-            <Badge variant="secondary">
-              <Utensils size={14} className="mr-1" />
-              Food & Drink
-            </Badge>
-            <Badge>+15</Badge>
+          <label className="block text-sm mb-2">Category</label>
+          <div className="flex flex-wrap gap-3">
+            {categories?.map((cat: any) => (
+              <Badge
+                key={cat.id}
+                onClick={() => toggleCategory(cat.id)}
+                className={`flex items-center gap-2 cursor-pointer px-3 py-2 border transition-all ${selectedCategories.includes(cat.id)
+                  ? "bg-red-600 text-white border-red-700"
+                  : "bg-gray-800 text-gray-300 border-gray-700 hover:bg-gray-700"
+                  }`}
+              >
+                {cat.iconUrl && (
+                  <img
+                    src={cat.iconUrl}
+                    alt={cat.name}
+                    className="w-5 h-5 rounded-full object-cover"
+                  />
+                )}
+                <span className="text-sm">{cat.name}</span>
+              </Badge>
+            ))}
           </div>
+          {errors.categoryId && (
+            <p className="text-xs text-red-500 mt-1">{errors.categoryId.message}</p>
+          )}
+        </div>
+
+        {/* Bio */}
+        <div className="mb-4">
+          <label className="block text-sm mb-1">Bio</label>
+          <Textarea placeholder="Enter bio..." {...register("bio")} />
+          {errors.bio && <p className="text-xs text-red-500">{errors.bio.message}</p>}
         </div>
       </div>
     </Modal>

@@ -51,16 +51,16 @@ const Chat = () => {
 
 
 
-    // 🧩 Connect & listen for messages
+    //  Connect & listen for messages
     useEffect(() => {
         // Connect to socket
         socket.on("connect", () => {
-            console.log("✅ Connected to WebSocket:", socket.id);
+            console.log(" Connected to WebSocket:", socket.id);
         });
 
         // Listen for incoming messages from backend
         socket.on("receive_message", (data: any) => {
-            console.log("📩 Message received:", data);
+            console.log(" Message received:", data);
             setMessages((prev) => [
                 ...prev,
                 {
@@ -86,7 +86,7 @@ const Chat = () => {
         }
     }, [messages]);
 
-    // 🧩 Send message
+    //  Send message
     const handleSend = (message: string) => {
         if (!message.trim()) return;
         const newMessage: Message = {
@@ -117,7 +117,7 @@ const Chat = () => {
     return (
         <div className="flex min-h-[calc(100vh-120px)] bg-black-500 p-6 rounded-lg text-white">
             <div className="flex flex-1 gap-3">
-                {/* 🧭 Left Sidebar (Inbox List) */}
+                {/* Left Sidebar (Inbox List) */}
                 <div className="w-[280px] flex flex-col">
                     <div className="p-4 text-lg font-semibold">Messages</div>
                     <ScrollArea className="flex-1">
@@ -147,7 +147,7 @@ const Chat = () => {
                     </ScrollArea>
                 </div>
 
-                {/* 💬 Chat Section */}
+                {/* Chat Section */}
                 <div className="flex-1 flex flex-col border-l border-[#1f1f22] border-r border-[#1f1f22]">
                     {/* Header */}
                     <div className="border-b border-[#1f1f22] p-4">
@@ -204,7 +204,7 @@ const Chat = () => {
                 </div>
             </div>
 
-            {/* 👤 Right Sidebar (User Info) */}
+            {/*  Right Sidebar (User Info) */}
             <div className="w-[300px] p-6 flex flex-col items-center text-center">
                 <Image
                     src="/images/Ellipse 5.png"

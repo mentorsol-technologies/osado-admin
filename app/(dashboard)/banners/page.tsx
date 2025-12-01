@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Plus, Search, Filter, Tags } from "lucide-react";
 import CommonInput from "@/components/ui/input";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import FiltersBar from "@/components/ui/commonComponent/FiltersBar";
 import BannerCard from "./BannerCards";
 import DeleteConfirmModal from "@/components/ui/commonComponent/DeleteConfirmModal";
@@ -18,6 +18,7 @@ import AddPromotionalBannerModal from "./AddPromotionalBannerModal";
 import EditPromotionalBannerModal from "./EditPromotionalBannerModal";
 import { useDeleteBannersMutation, useGetBannersQuery, useSuspendBannerMutation } from "@/hooks/useBannersMutations";
 import { toast } from "react-toastify";
+import { applyFilters } from "@/lib/filterHelper";
 
 
 export default function BannersPage() {
@@ -81,7 +82,8 @@ export default function BannersPage() {
     {
       key: "status",
       label: "Status",
-      options: ["Active", "Inactive", "Pending"],
+      options: ["All", "Active", "Inactive","Suspended"],
+
     },
     {
       key: "sort_by",
@@ -90,9 +92,21 @@ export default function BannersPage() {
     },
   ];
 
-
+  const filteredBannerPromotional = useMemo(() => {
+    return applyFilters(data, search, selectedFilters, {
+      searchKeys: ["bannerTitle"],
+      dateKey: "createdAt",
+    });
+  }, [data, search, selectedFilters]);
   const handleFilterChange = (key: string, value: string) => {
-    setSelectedFilters((prev) => ({ ...prev, [key]: value }));
+    setSelectedFilters((prev) => {
+      if (prev[key] === value || value === "All" || value === "") {
+        const updated = { ...prev };
+        delete updated[key]; // clear this filter
+        return updated;
+      }
+      return { ...prev, [key]: value };
+    });
   };
   return (
     <div className="p-6 bg-black-500 !min-h-[calc(100vh-120px)]  rounded-lg">
@@ -123,7 +137,7 @@ export default function BannersPage() {
       </div>
       {/* Render Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {data?.map((banner: any) => (
+        {filteredBannerPromotional?.map((banner: any) => (
           <BannerCard
             key={banner.id}
             image={banner.photoURL}
@@ -150,7 +164,7 @@ export default function BannersPage() {
         ))}
       </div>
 
-      {/* ✅ Add Promotional Banner Modal */}
+      {/* Add Promotional Banner Modal */}
       <AddPromotionalBannerModal
         open={addOpen}
         setOpen={setAddOpen}

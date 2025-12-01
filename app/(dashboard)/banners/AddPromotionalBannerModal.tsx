@@ -44,7 +44,7 @@ export default function AddPromotionalBannerModal({
   setOpen,
   onSave,
 }: AddPromotionalBannerModalProps) {
-  const [uploadId, setUploadId] = useState<string>("");
+  const [uploadIds, setUploadIds] = useState<string[]>([]);
 
 
   const { mutate: createBanner, isPending } = useCreateBannersMutation();
@@ -54,6 +54,7 @@ export default function AddPromotionalBannerModal({
     register,
     handleSubmit,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -66,10 +67,14 @@ export default function AddPromotionalBannerModal({
     "All",
   ]);
   const [preview, setPreview] = useState<string | null>(null);
-  const resetAll = () => {
-    setSelectedCategories(["All"]);
-    setPreview(null);
-    setUploadId("");
+  const handleResetForm = () => {
+    reset({
+      bannerTitle: "",
+      startDate: "",
+      endDate: "",
+      status: "",
+      link: "",
+    });
   };
 
   const toggleCategory = (cat: string) => {
@@ -84,12 +89,18 @@ export default function AddPromotionalBannerModal({
     setSelectedCategories(updated);
     setValue("category", updated);
   };
-  const handleFileUpload = async (file: File) => {
+  const handleMultipleFileUpload = async (files: File[]) => {
     try {
-      const { url, fields, uploadId } = await getBannerUploadLink(file.type);
-      setUploadId(uploadId);
-      setValue("image", file);
-      await uploadToS3(file, url, fields);
+      const uploadedIds: string[] = [];
+
+      for (const file of files) {
+        const { url, fields, uploadId } = await getBannerUploadLink(file.type);
+        await uploadToS3(file, url, fields);
+        uploadedIds.push(uploadId);
+      }
+
+      setUploadIds((prev) => [...prev, ...uploadedIds]);
+      setValue("image", files);
     } catch (error) {
       console.error("File upload failed:", error);
     }
@@ -100,13 +111,15 @@ export default function AddPromotionalBannerModal({
       bannerTitle: data.bannerTitle,
       startDate: new Date(data.startDate).toISOString(),
       endDate: new Date(data.endDate).toISOString(),
-      photoId: uploadId,
+      photoId: uploadIds,
       displayCategories: selectedCategories,
       status: data.status.toLowerCase(),
+      link: data.link
     };
 
     createBanner(payload, {
       onSuccess: () => {
+        handleResetForm();
         setOpen(false);
       },
     });
@@ -118,9 +131,7 @@ export default function AddPromotionalBannerModal({
       open={open}
       onOpenChange={(isOpen) => {
         setOpen(isOpen);
-        if (!isOpen) {
-          resetAll();
-        }
+        if (!isOpen) handleResetForm();
       }}
       title="Add Promotional Banner"
       footer={
@@ -136,7 +147,7 @@ export default function AddPromotionalBannerModal({
             className="flex-1 border-gray-600 text-gray-300"
             onClick={() => {
               setOpen(false);
-              resetAll();
+              handleResetForm();
             }}
           >
             Cancel
@@ -148,17 +159,11 @@ export default function AddPromotionalBannerModal({
         {/* Upload Image */}
         <div className="mb-4">
           <Upload
-            label="Upload Icon/Image"
-            onFileSelect={async (file) => {
-              if (!file) return;
-              console.log("Uploading file:", file);
-
-              try {
-                // ✅ Use your service + reusable S3 upload
-                await handleFileUpload(file);
-              } catch (error) {
-                console.error("File upload failed:", error);
-              }
+            label="Upload Images"
+            multiple
+            onFileSelect={async (files) => {
+              if (!files?.length) return;
+              await handleMultipleFileUpload(files);
             }}
           />
         </div>

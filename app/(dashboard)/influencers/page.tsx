@@ -2,10 +2,12 @@
 
 import DeleteConfirmModal from "@/components/ui/commonComponent/DeleteConfirmModal";
 import FiltersBar from "@/components/ui/commonComponent/FiltersBar";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import InfluencerCard from "./InfluencersCard";
 import { Award, Crown, Star } from "lucide-react";
 import Pagination from "@/components/ui/pagination";
+import { useGetUsersListQuery } from "@/hooks/useUsersMutations";
+import { applyFilters } from "@/lib/filterHelper";
 
 const InfluencersRank = () => {
   const [selectedFilters, setSelectedFilters] = useState<{
@@ -20,78 +22,55 @@ const InfluencersRank = () => {
     {
       key: "rank",
       label: "Rank",
-      options: ["Standard", "High-rank", "Elite"],
+      options: ["All","Standard", "High-rank", "Elite"],
     },
     {
       key: "location",
       label: "Location",
-      options: ["USA", "UK", "Canada", "UAE", "Pakistan"],
+      options: ["All","USA", "UK", "Canada", "UAE", "Pakistan"],
     },
     {
       key: "status",
       label: "Status",
-      options: ["Active", "Inactive", "Pending"],
+      options: ["All","Active", "Inactive",],
     },
     {
       key: "sort_by",
       label: "Sort by",
-      options: ["Newest", "Oldest", "A–Z", "Z–A"],
+      options: ["All","Newest", "Oldest", "A–Z", "Z–A"],
     },
   ];
+  const { data, isLoading } = useGetUsersListQuery();
+  console.log("influecers data",data)
+  const influencerList = useMemo(() => {
+    const users = data || [];
+    console.log("userss",users)
+    return users.filter((user: any) => user.role?.role === "influencer");
+  }, [data]);
+
+  console.log("influencerDataList", influencerList)
+
+  const filteredInfluencers = useMemo(() => {
+    return applyFilters(influencerList, search, selectedFilters, {
+      searchKeys: ["name", "location", "status"], // searchable fields
+      dateKey: "createdAt",
+    });
+  }, [influencerList, search, selectedFilters]);
 
   const handleFilterChange = (key: string, value: string) => {
-    setSelectedFilters((prev) => ({ ...prev, [key]: value }));
+    setSelectedFilters((prev) => {
+      if (prev[key] === value || value === "All" || value === "") {
+        const updated = { ...prev };
+        delete updated[key];
+        return updated;
+      }
+      return { ...prev, [key]: value };
+    });
   };
 
   const handleDelete = () => {
     console.log("Influencer deleted:", selectedInfluencers);
   };
-  const influencers = [
-    {
-      id: 1,
-      icon: Award,
-      title: "Standard",
-      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-      name: "Amara Singh",
-      rating: 4.4,
-      memberSince: "12/07/2025",
-      location: "Paris, France",
-      status: "Active",
-    },
-    {
-      id: 2,
-      icon: Crown,
-      title: "Elite",
-      avatar: "https://randomuser.me/api/portraits/men/46.jpg",
-      name: "Liam Anderson",
-      rating: 4.4,
-      memberSince: "22/06/2025",
-      location: "Liverpool, England",
-      status: "Active",
-    },
-    {
-      id: 3,
-      icon: Crown,
-      title: "Elite",
-      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-      name: "Amara Singh",
-      rating: 4.4,
-      memberSince: "12/07/2025",
-      location: "Paris, France",
-      status: "Active",
-    },
-    {
-      id: 4,
-      icon: Star,
-      title: "High-rank",
-      avatar: "https://randomuser.me/api/portraits/men/46.jpg",
-      name: "Liam Anderson",
-      rating: 4.4,
-      memberSince: "22/06/2025",
-      location: "Liverpool, England",
-      status: "Active",
-    },
-  ];
 
   return (
     <div className="p-6 bg-black-500 !min-h-[calc(100vh-120px)]  rounded-lg">
@@ -112,7 +91,7 @@ const InfluencersRank = () => {
         />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {influencers.map((influencer) => (
+        {filteredInfluencers?.map((influencer: any) => (
           <InfluencerCard
             key={influencer.id}
             {...influencer}
@@ -134,7 +113,7 @@ const InfluencersRank = () => {
         onOpenChange={setDeleteOpen}
         onConfirm={handleDelete}
         title="Delete Influencer"
-        description={`Are you sure you want to delete "${selectedInfluencers?.title}"? This action cannot be undone.`}
+        description={`Are you sure you want to delete "${selectedInfluencers?.name}"? This action cannot be undone.`}
       />
     </div>
   );

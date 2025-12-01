@@ -2,7 +2,7 @@
 
 import DeleteConfirmModal from "@/components/ui/commonComponent/DeleteConfirmModal";
 import FiltersBar from "@/components/ui/commonComponent/FiltersBar";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Award, Crown, Star } from "lucide-react";
 import Pagination from "@/components/ui/pagination";
 import ProvidersCard from "./ProvidersCard";
@@ -11,6 +11,8 @@ import Image from "next/image";
 import { providers } from "@/lib/constant";
 import { useRouter } from "next/navigation";
 import EditServiceProviderModal from "./EditServiceProvidersModal";
+import { useGetUsersListQuery } from "@/hooks/useUsersMutations";
+import { applyFilters } from "@/lib/filterHelper";
 
 const ServiceProviders = () => {
     const router = useRouter()
@@ -31,27 +33,50 @@ const ServiceProviders = () => {
         {
             key: "rank",
             label: "Rank",
-            options: ["Standard", "High-rank", "Elite"],
+            options: ["All", "Standard", "High-rank", "Elite"],
         },
         {
             key: "location",
             label: "Location",
-            options: ["USA", "UK", "Canada", "UAE", "Pakistan"],
+            options: ["All", "Kuwait", "UK", "Canada", "UAE", "Pakistan"],
         },
         {
             key: "status",
             label: "Status",
-            options: ["Active", "Inactive", "Pending"],
+            options: ["All", "Active", "Inactive", "Pending"],
         },
         {
             key: "sort_by",
             label: "Sort by",
-            options: ["Newest", "Oldest", "A–Z", "Z–A"],
+            options: ["All", "Newest", "Oldest", "A–Z", "Z–A"],
         },
     ];
 
+    const { data, isLoading } = useGetUsersListQuery();
+    console.log("provider data", data)
+    const serviceProviderList = useMemo(() => {
+        const users = data || [];
+        return users.filter((user: any) => user.role?.role === "service_provider");
+    }, [data]);
+
+    console.log("serviceProviderList", serviceProviderList)
+
+    const filteredServiceProviders = useMemo(() => {
+        return applyFilters(serviceProviderList, search, selectedFilters, {
+            searchKeys: ["name", "location", "status"],
+            dateKey: "createdAt",
+        });
+    }, [serviceProviderList, search, selectedFilters]);
+
     const handleFilterChange = (key: string, value: string) => {
-        setSelectedFilters((prev) => ({ ...prev, [key]: value }));
+        setSelectedFilters((prev) => {
+            if (prev[key] === value || value === "All" || value === "") {
+                const updated = { ...prev };
+                delete updated[key];
+                return updated;
+            }
+            return { ...prev, [key]: value };
+        });
     };
 
     const handleDelete = () => {
@@ -97,7 +122,7 @@ const ServiceProviders = () => {
 
                 {/* Cards Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-                    {paginatedProvider?.map((provider) => (
+                    {filteredServiceProviders?.map((provider: any) => (
                         <ProvidersCard
                             key={provider.id}
                             {...provider}

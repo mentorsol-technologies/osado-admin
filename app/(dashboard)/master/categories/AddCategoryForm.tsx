@@ -45,11 +45,12 @@ export default function AddCategoryModal({
   setOpen,
   onSave,
 }: AddCategoryModalProps) {
-  const { mutate: createCategory, isPending } = useCreateCategoryMutation(); // ✅ use create
+  const { mutate: createCategory, isPending } = useCreateCategoryMutation();
   const { mutateAsync: uploadFile, isPending: isUploading } =
     useUploadCategoryFileMutation();
 
-  const [uploadId, setUploadId] = useState<string>("");
+  const [uploadIds, setUploadIds] = useState<string[]>([]);
+
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const {
@@ -68,14 +69,31 @@ export default function AddCategoryModal({
     },
   });
 
-  const handleFileUpload = async (file: File) => {
+  const handleResetForm = () => {
+    reset({
+      name: "",
+      status: "Active",
+      description: "",
+    });
+    setPreviewUrl(null);
+    setUploadIds([]);
+  };
+
+  const handleMultipleFileUpload = async (files: File[]) => {
     try {
-      const { url, fields, uploadId } = await getCategoryUploadLink(file.type);
-      setUploadId(uploadId);
-      setValue("image", file);
-      const localPreview = URL.createObjectURL(file);
-      setPreviewUrl(localPreview);
-      await uploadToS3(file, url, fields);
+      const uploadedIds: string[] = [];
+
+      for (const file of files) {
+        const { url, fields, uploadId } = await getCategoryUploadLink(file.type);
+        await uploadToS3(file, url, fields);
+        uploadedIds.push(uploadId);
+
+        setPreviewUrl(URL.createObjectURL(file));
+
+      }
+
+      setUploadIds((prev) => [...prev, ...uploadedIds]);
+      setValue("image", uploadedIds);
     } catch (error) {
       console.error("File upload failed:", error);
     }
@@ -86,15 +104,15 @@ export default function AddCategoryModal({
       name: formData.name,
       status: formData.status.toLowerCase(),
       description: formData.description,
-      iconId: uploadId || undefined,
+      iconId: uploadIds.length ? uploadIds[0] : undefined,
     };
 
     createCategory(payload, {
       onSuccess: () => {
         toast.success("Category created successfully!");
         onSave(formData);
+        handleResetForm();
         setOpen(false);
-        reset(); // ✅ clear form after submit
       },
     });
   };
@@ -102,10 +120,13 @@ export default function AddCategoryModal({
   return (
     <Modal
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        if (!isOpen) handleResetForm();
+      }}
       title="Add Category"
       footer={
-        <div className="flex flex-col sm:flex-row gap-3 w-full">
+        < div className="flex flex-col sm:flex-row gap-3 w-full" >
           <Button
             onClick={handleSubmit(onSubmit)}
             className="flex-1"
@@ -120,11 +141,11 @@ export default function AddCategoryModal({
           >
             Cancel
           </Button>
-        </div>
+        </div >
       }
     >
       {/* Category Name + Status */}
-      <div className="flex flex-col sm:flex-row gap-3 w-full">
+      < div className="flex flex-col sm:flex-row gap-3 w-full" >
         <div className="flex-1">
           <label className="block text-sm mb-1">Category Name</label>
           <CommonInput placeholder="Category Name" {...register("name")} />
@@ -148,31 +169,35 @@ export default function AddCategoryModal({
             </SelectContent>
           </Select>
         </div>
-      </div>
+      </div >
 
       {/* Description */}
-      <div className="mt-4">
+      < div className="mt-4" >
         <label className="block text-sm mb-1">Description</label>
         <Textarea
           rows={4}
           placeholder="Enter category description"
           {...register("description")}
         />
-      </div>
+      </div >
 
       {/* File Upload */}
-      <div className="mt-4">
+      < div className="mt-4" >
         <Upload
-          label="Upload Icon/Image"
-          onFileSelect={async (file) => {
-            if (file) await handleFileUpload(file);
+          label="Upload Images"
+          multiple
+          onFileSelect={async (files) => {
+            if (!files?.length) return;
+            await handleMultipleFileUpload(files);
           }}
         />
-        {isUploading && (
-          <p className="text-sm text-blue-500 mt-1">Uploading...</p>
-        )}
+        {
+          isUploading && (
+            <p className="text-sm text-blue-500 mt-1">Uploading...</p>
+          )
+        }
 
-      </div>
-    </Modal>
+      </div >
+    </Modal >
   );
 }

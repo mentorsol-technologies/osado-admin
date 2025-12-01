@@ -77,7 +77,7 @@ export default function OwnerViewModal({
       title="Business Owner "
       footer={null}
     >
-        
+
       <div className="space-y-6 text-white max-h-[80vh] overflow-y-auto ">
         {/* Header */}
         <div className="flex flex-col items-center text-center">

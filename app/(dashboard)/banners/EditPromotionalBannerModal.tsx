@@ -38,8 +38,8 @@ interface EditPromotionalBannerModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   bannerData:
-    | (FormData & { id?: string; photoURL?: string; photoId?: string })
-    | null;
+  | (FormData & { id?: string; photoURL?: string; photoId?: string })
+  | null;
   onUpdate: (data: FormData) => void;
 }
 
@@ -82,37 +82,36 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
     useUpdateBannersMutation();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [preview, setPreview] = useState<string | null>(null);
-  const [uploadId, setUploadId] = useState<string>("");
+  const [uploadIds, setUploadIds] = useState<string[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (bannerData) {
       reset({
-        bannerTitle: bannerData?.bannerTitle || "",
-        linkType: bannerData?.linkType || "external",
-        link: bannerData?.link || "",
+        bannerTitle: bannerData.bannerTitle || "",
+        linkType: bannerData.linkType || "external",
+        link: bannerData.link || "",
         status:
           bannerData.status === "active"
             ? "Active"
             : bannerData.status === "inactive"
               ? "Inactive"
-              : bannerData.status === "suspended"
-                ? "Suspended"
-                : "",
-        startDate: bannerData?.startDate
+              : "Suspended",
+        startDate: bannerData.startDate
           ? new Date(bannerData.startDate).toISOString().split("T")[0]
           : "",
-        endDate: bannerData?.endDate
+        endDate: bannerData.endDate
           ? new Date(bannerData.endDate).toISOString().split("T")[0]
           : "",
-        displayCategories: bannerData?.displayCategories || ["All"],
+        displayCategories: bannerData.displayCategories || ["All"],
       });
-      setPreviewUrl(bannerData?.photoURL || "");
-      setUploadId(bannerData?.photoId || "");
 
-      setSelectedCategories(bannerData?.displayCategories || ["All"]);
+      setPreviewUrl(bannerData.photoURL || "");
+      setUploadIds(bannerData.photoId ? [bannerData.photoId] : []);
+      setSelectedCategories(bannerData.displayCategories || ["All"]);
     }
   }, [bannerData, reset]);
+
 
   const toggleCategory = (cat: string) => {
     let updated: string[];
@@ -126,15 +125,20 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
     setSelectedCategories(updated);
     setValue("displayCategories", updated);
   };
-  const handleFileUpload = async (file: File) => {
+  const handleMultipleFileUpload = async (files: File[]) => {
     try {
-      const { url, fields, uploadId } = await getBannerUploadLink(file.type);
-      setUploadId(uploadId);
-      setValue("image", file);
-      await uploadToS3(file, url, fields);
-      setPreviewUrl(URL.createObjectURL(file)); // show the uploaded image
-    } catch (error) {
-      console.error("File upload failed:", error);
+      const uploadedIds: string[] = [];
+
+      for (const file of files) {
+        const { url, fields, uploadId } = await getBannerUploadLink(file.type);
+        await uploadToS3(file, url, fields);
+        uploadedIds.push(uploadId);
+      }
+
+      setUploadIds((prev) => [...prev, ...uploadedIds]);
+      setValue("image", files);
+    } catch (err) {
+      console.error("Upload failed", err);
     }
   };
   const onSubmit = (data: FormData) => {
@@ -144,7 +148,7 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
     }
 
     // If no new upload happened, fall back to the existing banner photoId
-    const finalPhotoId = uploadId || bannerData?.photoId;
+    const finalPhotoId = uploadIds || bannerData?.photoId;
 
     const payload = {
       bannerTitle: data.bannerTitle,
@@ -193,14 +197,21 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
 
         <div className="mt-4">
           <Upload
-            label="Upload Icon/Image"
-            onFileSelect={async (file) => {
-              if (file) await handleFileUpload(file);
+            label="Upload Images"
+            multiple
+            onFileSelect={async (files) => {
+              if (files?.length) await handleMultipleFileUpload(files);
             }}
           />
-          {isUploading && (
-            <p className="text-sm text-blue-500 mt-1">Uploading...</p>
+
+          {previewUrl && (
+            <img
+              src={previewUrl}
+              className="w-20 h-20 rounded-md border mt-3"
+              alt="Preview"
+            />
           )}
+
 
           {/* Image Preview */}
           {previewUrl ? (
@@ -324,11 +335,10 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
               <Badge
                 key={cat}
                 onClick={() => toggleCategory(cat)}
-                className={`cursor-pointer px-4 py-1 ${
-                  selectedCategories?.includes(cat)
-                    ? "bg-red-600 text-white"
-                    : "bg-gray-700 text-gray-300"
-                }`}
+                className={`cursor-pointer px-4 py-1 ${selectedCategories?.includes(cat)
+                  ? "bg-red-600 text-white"
+                  : "bg-gray-700 text-gray-300"
+                  }`}
               >
                 {cat}
               </Badge>

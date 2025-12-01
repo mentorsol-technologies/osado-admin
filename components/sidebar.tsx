@@ -38,9 +38,12 @@ const menuItems: MenuItem[] = [
   { icon: "/images/mdi_camera.svg", label: "Photographers", href: "/photographers" },
   { icon: "/images/hugeicons_travel-bag (2).svg", label: "Service Providers", href: "/service-providers" },
   { icon: "/images/mingcute_document-fill (1).svg", label: "Service Booking", href: "/service-booking" },
+  { icon: "/images/mingcute_document-fill (1).svg", label: "Role Management", href: "/role-management" },
   { icon: "/images/ci_calendar.svg", label: "Events Management", href: "/events" },
   { icon: "/images/tdesign_user-business-filled.svg", label: "Business Owners", href: "/business-owners" },
   { icon: "/images/tdesign_user-business-filled.svg", label: "KYC Management", href: "/kyc-management" },
+  { icon: "/images/material-symbols_report-rounded.svg", label: "Report Management", href: "/report-management" },
+
 
   {
     label: "Finance Module",

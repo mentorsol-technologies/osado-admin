@@ -47,7 +47,6 @@ const ForgetPassword = () => {
 
     forgotPasswordMutation.mutate(payload, {
       onSuccess: (res) => {
-        console.log("Forgot password response:", res);
         toast.success("Please check your phone for the verification code.");
 
         const userId = res?.userId;

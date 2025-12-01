@@ -45,21 +45,38 @@ export default function AddCountryModal({ open, setOpen, onSave }: AddCountryMod
   const { mutate: createCountry, isPending } = useCreateCountryMutation();
   const { mutateAsync: uploadCountryFile, isPending: isUploading } = useUploadCountryFileMutation();
 
-  const [uploadId, setUploadId] = useState<string>("");
+  const [uploadIds, setUploadIds] = useState<string[]>([]);
+
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
+  const handleResetForm = () => {
+    reset({
+      name: "",
+      countryCode: "",
+      image: undefined,
+    });
+    setPreviewUrl(null);
+    setUploadIds([]);
+  };
 
-  const handleFileUpload = async (file: File) => {
+
+  const handleMultipleFileUpload = async (files: File[]) => {
     try {
-      const { url, fields, uploadId } = await getCountryUploadLink(file.type);
-      setUploadId(uploadId);
-      const localPreview = URL.createObjectURL(file);
-      setPreviewUrl(localPreview);
-      await uploadToS3(file, url, fields);
-      setValue("image", file);
+      const uploadedIds: string[] = [];
+
+      for (const file of files) {
+        const { url, fields, uploadId } = await getCountryUploadLink(file.type);
+        await uploadToS3(file, url, fields);
+        uploadedIds.push(uploadId);
+
+        setPreviewUrl(URL.createObjectURL(file));
+
+      }
+
+      setUploadIds((prev) => [...prev, ...uploadedIds]);
+      setValue("image", uploadedIds);
     } catch (error) {
       console.error("File upload failed:", error);
-      toast.error("File upload failed");
     }
   };
 
@@ -67,18 +84,14 @@ export default function AddCountryModal({ open, setOpen, onSave }: AddCountryMod
   const onSubmit = (data: FormData) => {
     const payload = {
       name: data.name,
-      iconId: uploadId || undefined,
+      iconId: uploadIds.length ? uploadIds[0] : undefined,
       countryCode: data.countryCode,
     };
 
     createCountry(payload, {
       onSuccess: () => {
         toast.success("Country created Successfully !");
-        reset(
-          {
-            name: "",
-          }
-        );
+        handleResetForm();
         setOpen(false);
         onSave?.(payload);
       },
@@ -88,17 +101,9 @@ export default function AddCountryModal({ open, setOpen, onSave }: AddCountryMod
   return (
     <Modal
       open={open}
-       onOpenChange={(isOpen) => {
+      onOpenChange={(isOpen) => {
         setOpen(isOpen);
-        if (!isOpen) {
-          reset({
-            name: "",
-            countryCode: "",
-            image: undefined,
-          });
-          setPreviewUrl(null);
-          setUploadId("");
-        }
+        if (!isOpen) handleResetForm();
       }}
       title="Add Country"
       footer={
@@ -148,17 +153,23 @@ export default function AddCountryModal({ open, setOpen, onSave }: AddCountryMod
         </div>
       </div>
 
-      <div className="mt-4">
+      {/* File Upload */}
+      < div className="mt-4" >
         <Upload
-          label="Upload Icon/Image"
-          onFileSelect={async (file) => {
-            if (file) await handleFileUpload(file);
+          label="Upload Images"
+          multiple
+          onFileSelect={async (files) => {
+            if (!files?.length) return;
+            await handleMultipleFileUpload(files);
           }}
         />
-        {isUploading && (
-          <p className="text-sm text-blue-500 mt-1">Uploading...</p>
-        )}
-      </div>
-    </Modal>
+        {
+          isUploading && (
+            <p className="text-sm text-blue-500 mt-1">Uploading...</p>
+          )
+        }
+
+      </div >
+    </Modal >
   );
 }

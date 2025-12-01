@@ -20,7 +20,7 @@ export interface CreateNewPasswordPayload {
 }
 
 export const loginService = (data: LoginPayload) =>
-  api.post("auth/signIn", data);
+  api.post("/auth/signIn", data);
 
 export const signupService = (data: any) =>
   api.post("/auth/signup", data);

@@ -3,17 +3,17 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { Star } from "lucide-react";
+import { Award, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 
 interface ProvidersCardProps {
-  icon: LucideIcon;
+  icon?: LucideIcon;
   title: string;
-  avatar: string;
+  photoURL?: string;
   name: string;
   rating: number;
-  memberSince: string;
+  createdAt: string;
   location: string;
   status: string;
   onEdit?: () => void;
@@ -21,30 +21,30 @@ interface ProvidersCardProps {
 }
 
 export default function ProvidersCard({
-  icon: Icon,
+  icon: IconProp,
   title,
-  avatar,
+  photoURL,
   name,
   rating,
-  memberSince,
+  createdAt,
   location,
   status,
   onEdit,
   onDelete,
 }: ProvidersCardProps) {
+  const Icon = IconProp || Award;
+
   return (
     <Card className="bg-black-400 text-white rounded-2xl shadow-md hover:shadow-lg transition w-full">
       <CardContent className="flex flex-col justify-between h-full p-5">
         {/* Top Section */}
         <div className="flex flex-col items-center space-y-4 flex-1">
           {/* Avatar */}
-          <div className="w-25 h-25 rounded-full overflow-hidden">
-            <Image
-              src={avatar}
+         <div className="flex justify-center mt-4">
+            <img
+              src={photoURL || "/images/Ellipse 5.png"}
               alt={name}
-              width={100}
-              height={100}
-              className="object-cover"
+              className="w-24 h-24 rounded-full object-cover"
             />
           </div>
 
@@ -61,13 +61,13 @@ export default function ProvidersCard({
                 <span className="font-semibold">{title}</span>
               </span>
               <span className="flex items-center flex-wrap">
-                <span>{rating.toFixed(1)}/5</span>
+                <span>{rating?.toFixed(1)}/5</span>
                 <Star className="w-4 h-4 text-red-500 ml-1 fill-red-500" />
               </span>
             </p>
             <p className="flex justify-between flex-wrap">
               <span className="font-semibold">Member Since</span>
-              <span>{memberSince}</span>
+              <span>{new Date(createdAt).toLocaleDateString()}</span>
             </p>
             <p className="flex justify-between flex-wrap">
               <span className="font-semibold">Location</span>

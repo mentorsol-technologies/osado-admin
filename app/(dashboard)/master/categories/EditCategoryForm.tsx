@@ -58,7 +58,7 @@ export default function EditCategoryModal({
   const { mutateAsync: uploadFile, isPending: isUploading } =
     useUploadCategoryFileMutation();
 
-  const [uploadId, setUploadId] = useState<string>("");
+  const [uploadIds, setUploadIds] = useState<string[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
 
@@ -94,14 +94,22 @@ export default function EditCategoryModal({
       });
     }
   }, [selectedCategory, reset]);
-   const handleFileUpload = async (file: File) => {
+  const handleMultipleFileUpload = async (files: File[]) => {
     try {
-      const { url, fields, uploadId } = await getCategoryUploadLink(file.type);
-      setUploadId(uploadId);
-      setValue("image", file);
-        const localPreview = URL.createObjectURL(file);
-        setPreviewUrl(localPreview);
-      await uploadToS3(file, url, fields);
+      const uploadedIds: string[] = [];
+
+      for (const file of files) {
+        const { url, fields, uploadId } = await getCategoryUploadLink(file.type);
+        await uploadToS3(file, url, fields);
+
+        uploadedIds.push(uploadId);
+
+        // Preview only the first uploaded image
+        setPreviewUrl(URL.createObjectURL(file));
+      }
+
+      setUploadIds(uploadedIds);
+      setValue("image", uploadedIds);
     } catch (error) {
       console.error("File upload failed:", error);
     }
@@ -114,7 +122,7 @@ export default function EditCategoryModal({
       name: formData.name,
       status: formData.status.toLowerCase(),
       description: formData.description,
-      iconId: uploadId || undefined,
+      iconId: uploadIds.length ? uploadIds[0] : undefined,
     };
 
     updateCategory(
@@ -193,34 +201,25 @@ export default function EditCategoryModal({
 
       {/* File Upload */}
       <div className="mt-4">
-         <Upload
-          label="Upload Icon/Image"
-          onFileSelect={async (file) => {
-            if (file) await handleFileUpload(file);
+        <Upload
+          label="Upload Images"
+          multiple
+          onFileSelect={async (files) => {
+            if (!files?.length) return;
+            await handleMultipleFileUpload(files);
           }}
         />
-          {isUploading && (
-            <p className="text-sm text-blue-500 mt-1">Uploading...</p>
-          )}
 
-          {/* Image Preview */}
-          {previewUrl ? (
-            <div className="mt-2">
-              <img
-                src={previewUrl}
-                alt="New Preview"
-                className="w-16 h-16 rounded-md border"
-              />
-            </div>
-          ) : selectedCategory?.image ? (
-            <div className="mt-2">
-              <img
-                src={selectedCategory.image}
-                alt="Current Icon"
-                className="w-16 h-16 rounded-md border"
-              />
-            </div>
-  ) : null}
+        {/* Preview */}
+        {previewUrl && (
+          <div className="mt-2">
+            <img
+              src={previewUrl}
+              alt="Preview"
+              className="w-16 h-16 rounded-md border"
+            />
+          </div>
+        )}
       </div>
     </Modal>
   );

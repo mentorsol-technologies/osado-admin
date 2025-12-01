@@ -27,13 +27,12 @@ import { useCategoriesQuery } from "@/hooks/useCategoryMutations";
 import { uploadToS3 } from "@/lib/s3Upload";
 import { getSubCategoryUploadLink } from "@/services/sub-categories/subCategoriesService";
 
-// ✅ Schema validation
 const schema = z.object({
   name: z.string().min(2, "Subcategory name is required"),
   status: z.enum(["Active", "Inactive"]),
   description: z.string().optional(),
   image: z.any().optional(),
-  assign_category: z.string().min(1, "Please select a category"), // this will store the category ID
+  assign_category: z.string().min(1, "Please select a category"),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -63,7 +62,8 @@ export default function AddSubCategoryModal({
   // ✅ Fetch categories list from API
   const { data: categoriesData, isLoading, isError } = useCategoriesQuery();
 
-  const [uploadId, setUploadId] = useState<string>("");
+  const [uploadIds, setUploadIds] = useState<string[]>([]);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const {
     register,
@@ -79,13 +79,36 @@ export default function AddSubCategoryModal({
       description: selectedCategory?.description || "",
     },
   });
+  const handleMultipleFileUpload = async (files: File[]) => {
+    try {
+      const uploadedIds: string[] = [];
 
+      for (const file of files) {
+        const { url, fields, uploadId } = await getSubCategoryUploadLink(
+          file.type
+        );
+
+        await uploadToS3(file, url, fields);
+
+        uploadedIds.push(uploadId);
+
+        // Preview only first uploaded
+        setPreviewUrl(URL.createObjectURL(file));
+      }
+
+      setUploadIds(uploadedIds);
+      setValue("image", uploadedIds);
+    } catch (error) {
+      console.error("Upload failed:", error);
+      toast.error("Image upload failed!");
+    }
+  };
   const onSubmit = (data: FormData) => {
     const payload = {
       name: data.name,
       status: data.status.toLowerCase(),
       description: data.description || "",
-      iconId: uploadId,
+      iconId: uploadIds.length ? uploadIds[0] : undefined,
       categoryId: data.assign_category,
     };
     createSubCategory(payload, {
@@ -113,27 +136,28 @@ export default function AddSubCategoryModal({
       },
     });
   };
-  const handleFileUpload = async (file: File) => {
-    try {
-      const { url, fields, uploadId } = await getSubCategoryUploadLink(file.type);
-      setUploadId(uploadId);
-      setValue("image", file);
-      await uploadToS3(file, url, fields);
-      // Store values in state for API use
-    } catch (error) {
-      console.error("File upload failed:", error);
-    }
-  };
+
 
   const handleFormSubmit = (e?: React.FormEvent) => {
-    console.log("🔘 Submit button clicked");
+    console.log(" Submit button clicked");
     handleSubmit(onSubmit)(e);
   };
 
   return (
     <Modal
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        if (!isOpen) {
+          reset({
+            name: "",
+            status: "Active",
+            description: "",
+          });
+          setUploadIds([]);
+          setPreviewUrl(null);
+        }
+      }}
       title="Add Subcategory"
       footer={
         <div className="flex flex-col sm:flex-row gap-3 w-full">
@@ -221,25 +245,22 @@ export default function AddSubCategoryModal({
         )}
       </div>
 
-      {/* File Upload */}
+      {/* Upload */}
       <div className="mt-4">
         <Upload
-          label="Upload Icon/Image"
-          onFileSelect={async (file) => {
-            if (!file) return;
-
-            console.log("Uploading file:", file);
-
-            try {
-              await handleFileUpload(file);
-            } catch (error) {
-              console.error("File upload failed:", error);
-              toast.error("File upload failed");
-            }
+          label="Upload Images"
+          multiple
+          onFileSelect={async (files) => {
+            if (!files?.length) return;
+            await handleMultipleFileUpload(files);
           }}
         />
-        {isUploading && (
-          <p className="text-sm text-blue-500 mt-1">Uploading...</p>
+
+        {/* Preview */}
+        {previewUrl && (
+          <div className="mt-2">
+            <img src={previewUrl} className="w-16 h-16 rounded-md border" alt="preview" />
+          </div>
         )}
       </div>
     </Modal>
