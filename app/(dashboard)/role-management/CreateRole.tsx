@@ -9,13 +9,12 @@ import { Button } from "@/components/ui/button";
 import Modal from "@/components/ui/Modal";
 import CommonInput from "@/components/ui/input";
 import Upload from "@/components/ui/upload";
-import { toast } from 'react-toastify';
 
 
 import { uploadToS3 } from "@/lib/s3Upload";
 import { useCreateRoleMutation } from "@/hooks/useRolesMutations";
 import { uploadRoleIcon } from "@/services/roles/rolesService";
-import { Textarea } from "@/components/ui/textarea";
+import { toast } from "react-toastify";
 
 // ✅ Schema validation
 const schema = z.object({
@@ -85,7 +84,7 @@ export default function AddRoleModal({ open, setOpen, onSave }: AddRoleModalProp
         const payload = {
             role: data.role,
             iconId: uploadIds.length ? uploadIds[0] : undefined,
-            description: data.description,
+            roleDescription: data.description,
         };
 
         createRole(payload, {

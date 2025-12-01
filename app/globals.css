@@ -145,3 +145,29 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 #react-day-picker-17{
   color:white;
 }
+
+
+.embla {
+  overflow: hidden;
+}
+
+.embla__viewport {
+  overflow: hidden;
+}
+
+.embla__container {
+  display: flex;
+  touch-action: pan-y;
+}
+
+.embla__slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  position: relative;
+}
+
+.embla__slide--snapped {
+  /* Optional: Add subtle scale or shadow to snapped slide */
+  transform: scale(1.02);
+  z-index: 1;
+}

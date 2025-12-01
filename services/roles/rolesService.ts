@@ -7,8 +7,8 @@ export const getRoles = async () => {
     return response.data;
 };
 
-export const createRole = async ()=>{
-    const response = await api.post("/roles");
+export const createRole = async (data: any)=>{
+    const response = await api.post("/roles",data);
     return response.data;
 }
 

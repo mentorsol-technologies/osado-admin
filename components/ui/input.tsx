@@ -1,10 +1,13 @@
 "use client";
 
 import React, { ReactNode, useState } from "react";
-import { Eye, ChevronDown } from "lucide-react";
+import { Eye, ChevronDown, CalendarIcon } from "lucide-react";
 import { Label } from "./label";
 import Image from "next/image";
 import { Country } from "@/components/ui/CountryPicker";
+import { Popover, PopoverContent, PopoverTrigger } from "@radix-ui/react-popover";
+import { format } from "date-fns";
+import { Calendar } from "./calendar";
 
 type CommonInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label?: string;
@@ -24,7 +27,9 @@ type CommonInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   | "password"
   | "tel"
   | "url"
-  | "week";
+  | "week"
+  | "calendar";
+
   name?: string;
   autoComplete?: string;
   className?: string;
@@ -171,22 +176,57 @@ const CommonInput = React.forwardRef<HTMLInputElement, CommonInputProps>(
             </span>
           )}
 
-          <input
-            ref={ref}
-            id={inputId}
-            name={name}
-            type={actualType}
-            value={value}
-            onChange={onChange}
-            placeholder={placeholder}
-            readOnly={readonly}
-            className={`w-full bg-black-500 outline-none text-sm text-white-100 font-normal placeholder:text-white
-              hover:outline-none hover:ring-0 focus:outline-none focus:ring-0 
-              ${showCountryDropdown && selectedCountry ? "ml-3 pl-2" : "ml-0"}`}
-            maxLength={maxLength}
-            autoComplete={autoComplete}
-            {...rest}
-          />
+          {/* If type = calendar → show custom calendar input */}
+          {type === "calendar" ? (
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="w-full text-left flex items-center justify-between  text-white-100 text-sm outline-none"
+                >
+                  {value
+                    ? format(new Date(value), "dd MMM yyyy")
+                    : placeholder || "Select date"}
+
+                  <CalendarIcon size={18} className="opacity-70" />
+                </button>
+              </PopoverTrigger>
+
+          <PopoverContent className="p-0 bg-black-500 border border-gray-700 rounded-md shadow-xl">
+          <div className="bg-black-500 p-2 rounded-md">
+            <Calendar
+              mode="single"
+              selected={value ? new Date(value) : undefined}
+              onSelect={(date) => {
+                if (date) {
+                  const iso = date.toISOString().split("T")[0];
+                  onChange?.({ target: { value: iso } } as any);
+                }
+              }}
+            />
+          </div>
+        </PopoverContent>
+            </Popover>
+          ) : (
+            // NORMAL INPUT
+            <input
+              ref={ref}
+              id={inputId}
+              name={name}
+              type={actualType}
+              value={value}
+              onChange={onChange}
+              placeholder={placeholder}
+              readOnly={readonly}
+              className={`w-full bg-black-500 outline-none text-sm text-white-100 font-normal placeholder:text-white
+      hover:outline-none hover:ring-0 focus:outline-none focus:ring-0 
+      ${showCountryDropdown && selectedCountry ? "ml-3 pl-2" : "ml-0"}`}
+              maxLength={maxLength}
+              autoComplete={autoComplete}
+              {...rest}
+            />
+          )}
+
 
           {isPasswordType && (
             <button

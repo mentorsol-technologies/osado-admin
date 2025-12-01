@@ -14,7 +14,6 @@ interface EventCardProps {
   city: string;
   time: string;
 
-  // Organizer info (fixed)
   creator?: {
     name?: string;
     photoURL?: string;
