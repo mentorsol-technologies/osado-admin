@@ -28,7 +28,7 @@ export const GetServicesName = async (id: string) => {
   const response = await api.get(
     `/provider-portfolio/user/${id}/portfolios-with-packages`
   );
-  return response.data;
+  return response as any;
 };
 
 export const GetServiceProviderList = async ({
@@ -56,7 +56,7 @@ export const GetServiceProviderList = async ({
   const response = await api.get(
     `/admin-bookings/service-providers?${params.toString()}`
   );
-  return response.data;
+  return response as any;
 };
 
 export const GetServiceUsersList = async ({
