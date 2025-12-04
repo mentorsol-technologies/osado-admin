@@ -21,10 +21,10 @@ import {
   useUpdateCategoryMutation,
   useUploadCategoryFileMutation,
 } from "@/hooks/useCategoryMutations";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 import { uploadToS3 } from "@/lib/s3Upload";
 import { getCategoryUploadLink } from "@/services/categories/categoriesService";
-
+import { set } from "date-fns";
 
 const schema = z.object({
   name: z.string().min(2, "Category name is required"),
@@ -61,7 +61,6 @@ export default function EditCategoryModal({
   const [uploadIds, setUploadIds] = useState<string[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-
   const {
     register,
     handleSubmit,
@@ -94,17 +93,22 @@ export default function EditCategoryModal({
       });
     }
   }, [selectedCategory, reset]);
+
+  useEffect(() => {
+    if (selectedCategory?.image) {
+      setPreviewUrl(selectedCategory.image);
+    }
+  }, [selectedCategory]);
   const handleMultipleFileUpload = async (files: File[]) => {
     try {
       const uploadedIds: string[] = [];
 
       for (const file of files) {
-        const { url, fields, uploadId } = await getCategoryUploadLink(file.type);
+        const { url, fields, uploadId } = await getCategoryUploadLink(
+          file.type
+        );
         await uploadToS3(file, url, fields);
-
         uploadedIds.push(uploadId);
-
-        // Preview only the first uploaded image
         setPreviewUrl(URL.createObjectURL(file));
       }
 
@@ -129,14 +133,13 @@ export default function EditCategoryModal({
       { categoryId: selectedCategory.id, data: payload },
       {
         onSuccess: () => {
-          toast.success("category updated successfully!")
+          toast.success("category updated successfully!");
           onSave(formData);
           setOpen(false);
         },
       }
     );
   };
-
 
   return (
     <Modal
@@ -176,7 +179,9 @@ export default function EditCategoryModal({
           <label className="block text-sm mb-1">Status</label>
           <Select
             defaultValue={watch("status")}
-            onValueChange={(val) => setValue("status", val as "Active" | "Inactive")}
+            onValueChange={(val) =>
+              setValue("status", val as "Active" | "Inactive")
+            }
           >
             <SelectTrigger>
               <SelectValue placeholder="Select status" />

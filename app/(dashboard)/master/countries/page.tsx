@@ -7,8 +7,11 @@ import CountryCard from "./CountryCard";
 import DeleteConfirmModal from "@/components/ui/commonComponent/DeleteConfirmModal";
 import EditCountryModal from "./EditCountryForm";
 import AddCountryModal from "./AddCountryForm";
-import { useCountryQuery, useDeleteCountryMutation } from "@/hooks/useCountryMutations";
-import { toast } from 'react-toastify';
+import {
+  useCountryQuery,
+  useDeleteCountryMutation,
+} from "@/hooks/useCountryMutations";
+import { toast } from "react-toastify";
 import { applyFilters } from "@/lib/filterHelper";
 
 const Countries = () => {
@@ -23,14 +26,16 @@ const Countries = () => {
   const { data, isLoading, isError } = useCountryQuery();
   const { mutate: deleteCountry, isPending } = useDeleteCountryMutation();
 
-
   const filters: Filter[] = [
-
-    { key: "sort-by", label: "Sort by", options: ["All", "Admin", "User", "Manager"] },
+    {
+      key: "sort-by",
+      label: "Sort by",
+      options: ["All", "Newest", "Oldest", "A–Z", "Z–A"],
+    },
     {
       key: "status",
       label: "Status",
-      options: ["All", "Active", "Inactive",],
+      options: ["All", "Active", "Inactive"],
     },
     {
       key: "createdAt",
@@ -65,19 +70,23 @@ const Countries = () => {
 
     deleteCountry(selectedCountry.id, {
       onSuccess: () => {
-        toast.error("Country deleted Successfully !")
+        toast.error("Country deleted Successfully !");
         setDeleteOpen(false);
         setSelectedCountry(null);
       },
     });
-  }
+  };
 
   return (
     <div className="p-6 bg-black-500 !min-h-[calc(100vh-120px)]  rounded-lg">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="lg:text-3xl text-xl  font-medium text-white">Countries</h2>
+        <h2 className="lg:text-3xl text-xl  font-medium text-white">
+          Countries
+        </h2>
         <Button leftIcon={<Plus size={18} />}>
-          <span className="hidden md:inline" onClick={() => setAddOpen(true)}>Add Country</span>
+          <span className="hidden md:inline" onClick={() => setAddOpen(true)}>
+            Add Country
+          </span>
         </Button>
       </div>
       <div className="hidden lg:block">
@@ -111,10 +120,11 @@ const Countries = () => {
             />
           ))
         ) : (
-          <p className="text-white text-center col-span-full">No countries found.</p>
+          <p className="text-white text-center col-span-full">
+            No countries found.
+          </p>
         )}
       </div>
-
 
       {/* Modals */}
       <AddCountryModal

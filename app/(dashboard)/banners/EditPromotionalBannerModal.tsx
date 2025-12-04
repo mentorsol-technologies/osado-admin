@@ -38,8 +38,8 @@ interface EditPromotionalBannerModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   bannerData:
-  | (FormData & { id?: string; photoURL?: string; photoId?: string })
-  | null;
+    | (FormData & { id?: string; photoURL?: string; photoId?: string })
+    | null;
   onUpdate: (data: FormData) => void;
 }
 
@@ -112,7 +112,6 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
     }
   }, [bannerData, reset]);
 
-
   const toggleCategory = (cat: string) => {
     let updated: string[];
     if (cat === "All") {
@@ -154,7 +153,7 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
       bannerTitle: data.bannerTitle,
       startDate: new Date(data.startDate).toISOString(),
       endDate: new Date(data.endDate).toISOString(),
-      photoId: finalPhotoId,
+      photoId: finalPhotoId[0],
       displayCategories: selectedCategories,
       status: data.status.toLowerCase(),
       linkType: data.linkType,
@@ -211,7 +210,6 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
               alt="Preview"
             />
           )}
-
 
           {/* Image Preview */}
           {previewUrl ? (
@@ -335,10 +333,11 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
               <Badge
                 key={cat}
                 onClick={() => toggleCategory(cat)}
-                className={`cursor-pointer px-4 py-1 ${selectedCategories?.includes(cat)
-                  ? "bg-red-600 text-white"
-                  : "bg-gray-700 text-gray-300"
-                  }`}
+                className={`cursor-pointer px-4 py-1 ${
+                  selectedCategories?.includes(cat)
+                    ? "bg-red-600 text-white"
+                    : "bg-gray-700 text-gray-300"
+                }`}
               >
                 {cat}
               </Badge>

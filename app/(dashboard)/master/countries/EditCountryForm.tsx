@@ -11,9 +11,7 @@ import CommonInput from "@/components/ui/input";
 import Upload from "@/components/ui/upload";
 import { toast } from "react-toastify";
 
-import {
-  useUpdateCountryMutation,
-} from "@/hooks/useCountryMutations";
+import { useUpdateCountryMutation } from "@/hooks/useCountryMutations";
 import { getCountryUploadLink } from "@/services/country/countryService";
 import { uploadToS3 } from "@/lib/s3Upload";
 
@@ -44,11 +42,11 @@ export default function EditCountryModal({
   selectedCountry,
   onSave,
 }: EditCountryModalProps) {
-  const { mutate: updateCountry, isPending, } = useUpdateCountryMutation();
+  const { mutate: updateCountry, isPending } = useUpdateCountryMutation();
 
   const [uploadIds, setUploadIds] = useState<string[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState("")
+  const [isUploading, setIsUploading] = useState("");
 
   const {
     register,
@@ -76,7 +74,6 @@ export default function EditCountryModal({
       setPreviewUrl(selectedCountry.iconURL || null);
     }
   }, [selectedCountry, reset]);
-
 
   const handleMultipleFileUpload = async (files: File[]) => {
     try {
@@ -107,8 +104,6 @@ export default function EditCountryModal({
       name: data.name,
       countryCode: data.countryCode,
       iconId: uploadIds.length ? uploadIds[0] : undefined,
-
-
     };
 
     updateCountry(

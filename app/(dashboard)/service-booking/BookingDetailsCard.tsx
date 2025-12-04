@@ -1,3 +1,4 @@
+// BookingDetailsCard.tsx (Updated)
 "use client";
 
 import Image from "next/image";
@@ -6,19 +7,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate, formatTime } from "@/lib/utils";
 
-interface EventCardProps {
+interface BookingCardProps {
   photos?: { url: string }[];
   createdAt: string;
   title: string;
   categories?: { id: string; name: string }[];
   city: string;
   time: string;
-
   creator?: {
     name?: string;
     photoURL?: string;
   };
-
   priceType: string;
   price: string;
   onEdit?: () => void;
@@ -26,7 +25,7 @@ interface EventCardProps {
   onClick?: () => void;
 }
 
-export default function EventCard({
+export default function BookingDetailsCard({
   photos = [],
   createdAt,
   title,
@@ -36,38 +35,41 @@ export default function EventCard({
   time,
   creator,
   price,
-  onEdit,
-  onSuspend,
   onClick,
-}: EventCardProps) {
-  const image = photos.length > 0 ? photos[0].url : "/images/Ellipse 4.png";
+}: BookingCardProps) {
+  const image = photos.length > 0 ? photos[0].url : "/images/default-event.jpg";
 
   // Organizer fixed
-  const organizerName = creator?.name || "Unknown Organizer";
-  const organizerPhoto = creator?.photoURL || "/images/Ellipse 4.png";
+  const organizerName = creator?.name || "Unknown Client";
+  const organizerPhoto = creator?.photoURL || "/images/default-event.jpg";
 
   return (
-    <div className="rounded-xl bg-black-500 border border-black-200 text-white shadow-lg overflow-hidden flex flex-col cursor-pointer">
+    <div
+      className="rounded-xl bg-black-500 border border-black-200 text-white shadow-lg overflow-hidden flex flex-col cursor-pointer relative"
+      onClick={onClick}
+    >
       {/* Image */}
-      <div className="relative h-48 w-full" onClick={onClick}>
+      <div className="relative h-48 w-full">
         <Image src={image} alt={title} fill className="object-cover" />
 
-        {/* Date badge */}
+        {/* Date badge - Top Left */}
         <div className="absolute top-3 left-3">
-          <Badge variant="default" className="flex items-center gap-1">
+          <Badge className="flex items-center gap-1 px-2 py-1">
             <Calendar size={14} />
             <span>{formatDate(createdAt)}</span>
           </Badge>
+        </div>
+
+        {/* Price badge - Bottom Right */}
+        <div className="absolute bottom-3 right-3">
+          <Badge className="px-2 py-1">{`${price} ${priceType}`}</Badge>
         </div>
       </div>
 
       {/* Card Body */}
       <div className="p-4 flex flex-col gap-3 flex-1">
-        {/* Title + Price */}
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          <h3 className="lg:text-lg font-semibold">{title}</h3>
-          <Badge className="w-fit sm:w-auto">{`${price} ${priceType}`}</Badge>
-        </div>
+        {/* Title */}
+        <h3 className="lg:text-lg font-semibold">{title}</h3>
 
         {/* Categories */}
         <div className="flex flex-wrap gap-2">
@@ -75,8 +77,18 @@ export default function EventCard({
             <Badge
               key={cat.id}
               variant="secondary"
-              className="flex items-center gap-1 w-fit"
+              className="flex items-center gap-1 px-2 py-1"
             >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="mr-1"
+              >
+                <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
+              </svg>
               {cat.name}
             </Badge>
           ))}
@@ -93,8 +105,8 @@ export default function EventCard({
           <span>{formatTime(time)}</span>
         </p>
 
-        {/* Organizer */}
-        <div className="flex items-center gap-3">
+        {/* Client */}
+        <div className="flex items-center gap-3 pt-2">
           <Image
             src={organizerPhoto}
             alt={organizerName}
@@ -106,28 +118,10 @@ export default function EventCard({
           <div className="flex flex-col">
             <p className="text-sm font-medium">{organizerName}</p>
             <p className="flex items-center text-xs gap-1 text-red-600">
-              <User size={14} /> Organizer
+              <User size={14} /> Client
             </p>
           </div>
         </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex justify-between gap-2 p-4 pt-0 w-full flex-wrap">
-        <Button variant="default" onClick={onEdit} className="flex-1">
-          Edit
-        </Button>
-
-        <Button
-          variant="outline"
-          onClick={(e) => {
-            e.stopPropagation();
-            onSuspend?.();
-          }}
-          className="flex-1"
-        >
-          Suspend
-        </Button>
       </div>
     </div>
   );

@@ -12,12 +12,11 @@ export interface BusinessOwnerRow {
   full_name: string;
   email: string;
   registration_date: string;
-  kyc_status: string;
+  // kyc_status: string;
   active_events: number;
   disputes: number;
   status: string;
-  phone?: string;
-  country?: string;
+  phone_number?: string;
   avatar_url?: string;
   total_events?: number;
   completed_events?: number;
@@ -46,13 +45,11 @@ export default function OwnerViewModal({
   // ✅ Normalize here, so parent passes raw data only once
   const data = {
     name: owner.full_name,
-    id: owner.id,
     email: owner.email,
-    phone: owner.phone ?? "5495 0427",
+    phone: owner.phone_number,
     regDate: owner.registration_date,
-    country: owner.country ?? "USA",
     status: owner.status,
-    kycStatus: owner.kyc_status,
+    // kycStatus: owner.kyc_status,
     totalEvents: owner.total_events ?? 0,
     activeEvents: owner.active_events,
     completedEvents: owner.completed_events ?? 0,
@@ -77,7 +74,6 @@ export default function OwnerViewModal({
       title="Business Owner "
       footer={null}
     >
-
       <div className="space-y-6 text-white max-h-[80vh] overflow-y-auto ">
         {/* Header */}
         <div className="flex flex-col items-center text-center">
@@ -91,7 +87,6 @@ export default function OwnerViewModal({
             />
           </div>
           <h2 className="mt-4 text-xl font-semibold">{data.name}</h2>
-          <p className="text-sm ">ID: {data.id}</p>
         </div>
 
         {/* Info Grid */}
@@ -112,20 +107,15 @@ export default function OwnerViewModal({
           </div>
 
           <div className="flex justify-between items-center">
-            <span>Country</span>
-            <span className="font-normal">{data.country}</span>
-          </div>
-
-          <div className="flex justify-between items-center">
             <span>Status</span>
             <span className={statusClasses}>{data.status}</span>
           </div>
         </div>
 
         {/* KYC Status */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg ">
-          {/* Left side with icon + text */}
-          <div className="flex items-center gap-3">
+        {/* <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg "> */}
+        {/* Left side with icon + text */}
+        {/* <div className="flex items-center gap-3">
             <div className="w-[45px] h-[45px] flex items-center justify-center rounded-lg bg-red-600">
               <Shield size={22} className="text-white" />
             </div>{" "}
@@ -142,10 +132,10 @@ export default function OwnerViewModal({
               </p>
               <p className="text-xs ">KYC Status</p>
             </div>
-          </div>
+          </div> */}
 
-          {/* Right side actions */}
-          <div className="flex gap-2">
+        {/* Right side actions */}
+        {/* <div className="flex gap-2">
             <Button onClick={onApprove} className="flex-1">
               Approve
             </Button>
@@ -153,7 +143,7 @@ export default function OwnerViewModal({
               Reject
             </Button>
           </div>
-        </div>
+        </div> */}
 
         {/* Events Info */}
         <div className="rounded-lg">

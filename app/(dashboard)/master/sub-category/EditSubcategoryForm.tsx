@@ -17,8 +17,7 @@ import {
 import Modal from "@/components/ui/Modal";
 import CommonInput from "@/components/ui/input";
 import Upload from "@/components/ui/upload";
-import { toast } from 'react-toastify';
-
+import { toast } from "react-toastify";
 
 import {
   useUpdateSubCategoryMutation,
@@ -51,14 +50,14 @@ export default function EditSubCategoryModal({
   selectedCategory,
   onSave,
 }: EditSubCategoryModalProps) {
-  const { mutate: updateSubCategory, isPending } = useUpdateSubCategoryMutation();
+  const { mutate: updateSubCategory, isPending } =
+    useUpdateSubCategoryMutation();
   const { mutateAsync: uploadFile, isPending: isUploading } =
     useUploadSubCategoryFileMutation();
 
   const { data: categoriesData, isLoading, isError } = useCategoriesQuery();
   const [uploadIds, setUploadIds] = useState<string[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
 
   const {
     register,
@@ -80,7 +79,6 @@ export default function EditSubCategoryModal({
     },
   });
 
-  // Re-populate form when modal opens with a different selected subcategory
   useEffect(() => {
     if (selectedCategory && categoriesData?.length) {
       const matchedCategory = categoriesData.find(
@@ -100,8 +98,10 @@ export default function EditSubCategoryModal({
         image: selectedCategory?.image || undefined,
       });
 
-      setUploadIds(selectedCategory?.iconIds ? [...selectedCategory.iconIds] : []);
-      setPreviewUrl(selectedCategory?.image || null);
+      setUploadIds(
+        selectedCategory?.iconIds ? [...selectedCategory.iconIds] : []
+      );
+      setPreviewUrl(selectedCategory?.iconUrl || null);
     }
   }, [selectedCategory, categoriesData, reset]);
 
@@ -110,7 +110,9 @@ export default function EditSubCategoryModal({
       const uploadedIds: string[] = [];
 
       for (const file of files) {
-        const { url, fields, uploadId } = await getSubCategoryUploadLink(file.type);
+        const { url, fields, uploadId } = await getSubCategoryUploadLink(
+          file.type
+        );
         await uploadToS3(file, url, fields);
         uploadedIds.push(uploadId);
         setPreviewUrl(URL.createObjectURL(file)); // preview only first
@@ -124,7 +126,6 @@ export default function EditSubCategoryModal({
     }
   };
 
-
   // Submit Handler
   const onSubmit = (data: FormData) => {
     if (!selectedCategory?.id) return;
@@ -136,7 +137,6 @@ export default function EditSubCategoryModal({
       iconId: uploadIds.length ? uploadIds[0] : undefined,
       categoryId: data.assign_category,
     };
-
 
     updateSubCategory(
       {
@@ -152,7 +152,7 @@ export default function EditSubCategoryModal({
           setOpen(false);
         },
         onError: (error: any) => {
-          toast.error(error)
+          toast.error(error);
           console.error("Update Error:", error);
         },
       }
@@ -160,7 +160,6 @@ export default function EditSubCategoryModal({
   };
 
   const handleFormSubmit = (e?: React.FormEvent) => {
-    console.log("Save button clicked");
     handleSubmit(onSubmit)(e);
   };
 
@@ -208,7 +207,9 @@ export default function EditSubCategoryModal({
           <label className="block text-sm mb-1">Status</label>
           <Select
             defaultValue={watch("status")}
-            onValueChange={(val) => setValue("status", val as "Active" | "Inactive")}
+            onValueChange={(val) =>
+              setValue("status", val as "Active" | "Inactive")
+            }
           >
             <SelectTrigger>
               <SelectValue placeholder="Select status" />
@@ -263,8 +264,6 @@ export default function EditSubCategoryModal({
         )}
       </div>
 
-
-
       {/* File Upload */}
       <div className="mt-4">
         <Upload
@@ -279,7 +278,11 @@ export default function EditSubCategoryModal({
         {/* Preview */}
         {previewUrl && (
           <div className="mt-2">
-            <img src={previewUrl} className="w-16 h-16 rounded-md border" alt="preview" />
+            <img
+              src={previewUrl}
+              className="w-16 h-16 rounded-md border"
+              alt="preview"
+            />
           </div>
         )}
       </div>

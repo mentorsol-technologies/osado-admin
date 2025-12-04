@@ -46,9 +46,7 @@ export default function AddPromotionalBannerModal({
 }: AddPromotionalBannerModalProps) {
   const [uploadIds, setUploadIds] = useState<string[]>([]);
 
-
   const { mutate: createBanner, isPending } = useCreateBannersMutation();
-
 
   const {
     register,
@@ -111,10 +109,10 @@ export default function AddPromotionalBannerModal({
       bannerTitle: data.bannerTitle,
       startDate: new Date(data.startDate).toISOString(),
       endDate: new Date(data.endDate).toISOString(),
-      photoId: uploadIds,
+      photoId: uploadIds[0],
       displayCategories: selectedCategories,
       status: data.status.toLowerCase(),
-      link: data.link
+      link: data.link,
     };
 
     createBanner(payload, {
@@ -124,7 +122,6 @@ export default function AddPromotionalBannerModal({
       },
     });
   };
-
 
   return (
     <Modal
@@ -257,10 +254,11 @@ export default function AddPromotionalBannerModal({
               <Badge
                 key={cat}
                 onClick={() => toggleCategory(cat)}
-                className={`cursor-pointer px-4 py-1 ${selectedCategories.includes(cat)
-                  ? "bg-red-600 text-white"
-                  : "bg-gray-700 text-gray-300"
-                  }`}
+                className={`cursor-pointer px-4 py-1 ${
+                  selectedCategories.includes(cat)
+                    ? "bg-red-600 text-white"
+                    : "bg-gray-700 text-gray-300"
+                }`}
               >
                 {cat}
               </Badge>
