@@ -12,10 +12,15 @@ interface BookingViewFormProps {
   onRefundClick: () => void;
 }
 
-const BookingViewForm = ({ open, onOpenChange, bookingId, onRefundClick }: BookingViewFormProps) => {
-  
-  const { data: bookingView, isLoading } = useGetServiceBookingDetailsQuery(bookingId || "");
-
+const BookingViewForm = ({
+  open,
+  onOpenChange,
+  bookingId,
+  onRefundClick,
+}: BookingViewFormProps) => {
+  const { data: bookingView, isLoading } = useGetServiceBookingDetailsQuery(
+    bookingId || ""
+  );
   const getStatusClasses = (status: string) =>
     clsx("px-3 py-1 rounded-md border text-sm font-medium w-fit", {
       "text-green-400 border border-green-500/30": status === "Confirmed",
@@ -41,62 +46,65 @@ const BookingViewForm = ({ open, onOpenChange, bookingId, onRefundClick }: Booki
           >
             Cancel & Refund
           </Button>
-          <Button className="flex-1" variant="outline" onClick={() => onOpenChange(false)}>
+          <Button
+            className="flex-1"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+          >
             Back
           </Button>
         </div>
       }
     >
       <div className="space-y-4 text-sm">
-        
         {/* Booking ID */}
         <div className="flex justify-between">
           <span className="font-medium">Booking ID</span>
-          <span>{bookingView?.id}</span>
+          <span>{bookingView?.[0]?.id}</span>
         </div>
 
         {/* Service Name */}
         <div className="flex justify-between">
           <span className="font-medium">Service</span>
-          <span>{bookingView?.serviceName}</span>
+          <span>{bookingView?.[0]?.serviceName}</span>
         </div>
 
         {/* Customer */}
         <div className="flex justify-between">
           <span className="font-medium">Customer</span>
-          <span>{bookingView?.customer?.name}</span>
+          <span>{bookingView?.[0]?.customer?.name}</span>
         </div>
 
         {/* Provider */}
         <div className="flex justify-between">
           <span className="font-medium">Provider</span>
-          <span>{bookingView?.provider}</span>
+          <span>{bookingView?.[0]?.provider}</span>
         </div>
 
         {/* Date */}
         <div className="flex justify-between">
           <span className="font-medium">Booking Date</span>
-          <span>{bookingView?.bookingDate}</span>
+          <span>{bookingView?.[0]?.bookingDate}</span>
         </div>
 
         {/* Time */}
         <div className="flex justify-between">
           <span className="font-medium">Booking Time</span>
-          <span>{bookingView?.bookingTime}</span>
+          <span>{bookingView?.[0]?.bookingTime}</span>
         </div>
 
         {/* Amount */}
         <div className="flex justify-between">
           <span className="font-medium">Amount</span>
-          <span>{bookingView?.amount}</span>
+          <span>{bookingView?.[0]?.amount}</span>
         </div>
 
         {/* Category */}
         <div className="flex justify-between">
           <span className="font-medium">Category</span>
           <span>
-            {bookingView?.category?.length
-              ? bookingView.category.map((c: any) => c.name).join(", ")
+            {bookingView?.[0]?.category?.length
+              ? bookingView?.[0].category.map((c: any) => c.name).join(", ")
               : "-"}
           </span>
         </div>
@@ -104,11 +112,10 @@ const BookingViewForm = ({ open, onOpenChange, bookingId, onRefundClick }: Booki
         {/* Status */}
         <div className="flex justify-between">
           <span className="font-medium">Status</span>
-          <span className={getStatusClasses(bookingView?.status)}>
-            {bookingView?.status}
+          <span className={getStatusClasses(bookingView?.[0].status)}>
+            {bookingView?.[0].status}
           </span>
         </div>
-
       </div>
     </Modal>
   );

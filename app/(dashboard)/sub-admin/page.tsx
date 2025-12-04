@@ -9,9 +9,11 @@ import DeleteConfirmModal from "@/components/ui/commonComponent/DeleteConfirmMod
 import SuspendedSubAdminModal from "./SuspendedSubAdminModal";
 import { BiStop } from "react-icons/bi";
 import { MdOutlineEdit } from "react-icons/md";
-import { useDeleteSubAdminMutation, useGetSubAdminsQuery } from "@/hooks/useSubAdminMutations";
+import {
+  useDeleteSubAdminMutation,
+  useGetSubAdminsQuery,
+} from "@/hooks/useSubAdminMutations";
 import { formatDate } from "@/lib/utils";
-
 
 export default function SubAdminPage() {
   const [selectedAdmin, setSelectedAdmin] = useState<any>(null);
@@ -21,7 +23,6 @@ export default function SubAdminPage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const { data, isLoading, isError } = useGetSubAdminsQuery();
   const { mutate: deleteSubAdmin, isPending } = useDeleteSubAdminMutation();
-
 
   const handleDelete = () => {
     if (!selectedAdmin?.id) return;
@@ -34,9 +35,12 @@ export default function SubAdminPage() {
     });
   };
 
-
   const columns = [
-    { key: "name", label: "Full Name" },
+    {
+      key: "fullName",
+      label: "Full Name",
+      render: (row: any) => `${row.name ?? ""} ${row.surName ?? ""}`.trim(),
+    },
     { key: "phoneNumber", label: "Phone Number" },
     { key: "email", label: "Email" },
     {
@@ -50,10 +54,11 @@ export default function SubAdminPage() {
       label: "Status",
       render: (row: any) => (
         <span
-          className={`rounded px-4 py-1 text-sm ${row.status === "active"
-            ? "text-green-400 border border-green-500/30"
-            : "text-red-400 border border-red-500/30"
-            }`}
+          className={`rounded px-4 py-1 text-sm ${
+            row.status === "active"
+              ? "text-green-400 border border-green-500/30"
+              : "text-red-400 border border-red-500/30"
+          }`}
         >
           {row.status}
         </span>
@@ -75,10 +80,10 @@ export default function SubAdminPage() {
           </button>
           <button
             className="p-1 border border-black-600"
-          // onClick={() => {
-          //   setSelectedAdmin(row);
-          //   setEditOpen(true);
-          // }}
+            // onClick={() => {
+            //   setSelectedAdmin(row);
+            //   setEditOpen(true);
+            // }}
           >
             <BiStop size={16} />
           </button>
@@ -97,26 +102,18 @@ export default function SubAdminPage() {
   ];
   const filters = [
     {
-      key: "type",
-      label: "Type",
-      options: ["Credit", "Debit"],
-    },
-    {
       key: "status",
       label: "Status",
       mapTo: "status",
-      options: ["All","Active", "Inactive"],
+      options: ["All", "Active", "Inactive"],
     },
     {
       key: "sort_by",
       label: "Sort by",
-      options: ["Newest", "Oldest", "A–Z", "Z–A"],
-      sortBy: true, 
-
+      options: ["All", "Newest", "Oldest", "A–Z", "Z–A"],
+      sortBy: true,
     },
   ];
-
-
 
   const handleSuspendSubmit = (data: any) => {
     console.log("Suspended Sub Admin Reason:", data);
@@ -125,7 +122,9 @@ export default function SubAdminPage() {
   return (
     <div className="p-4 bg-black-500 !min-h-[calc(100vh-120px)] rounded-lg">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
-        <h2 className="lg:text-3xl text-xl  font-medium text-white">Sub Admin</h2>
+        <h2 className="lg:text-3xl text-xl  font-medium text-white">
+          Sub Admin
+        </h2>
         <Button
           leftIcon={<Plus size={18} />}
           className="w-full sm:w-auto"
@@ -174,9 +173,9 @@ export default function SubAdminPage() {
       <AddSubAdminModal
         open={addOpen}
         setOpen={setAddOpen}
-      // onSave={(data) => {
-      //   console.log("New Sub Admin Data:", data);
-      // }}
+        // onSave={(data) => {
+        //   console.log("New Sub Admin Data:", data);
+        // }}
       />
 
       {/* Edit Modal */}

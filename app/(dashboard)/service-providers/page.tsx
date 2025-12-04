@@ -15,159 +15,147 @@ import { useGetUsersListQuery } from "@/hooks/useUsersMutations";
 import { applyFilters } from "@/lib/filterHelper";
 
 const ServiceProviders = () => {
-    const router = useRouter()
-    const [selectedFilters, setSelectedFilters] = useState<{
-        [key: string]: string;
-    }>({});
-    const [search, setSearch] = useState("");
-    const [selectedProviders, setSelectedProviders] = useState<any>(null);
-    const [deleteOpen, setDeleteOpen] = useState(false);
-    const [editOpen, setEditOpen] = useState(false)
-    const [currentPage, setCurrentPage] = useState(1);
-    const pageSize = 8;
-    const totalPages = Math.ceil(providers.length / pageSize);
-    const startIndex = (currentPage - 1) * pageSize;
-    const paginatedProvider = providers.slice(startIndex, startIndex + pageSize);
+  const router = useRouter();
+  const [selectedFilters, setSelectedFilters] = useState<{
+    [key: string]: string;
+  }>({});
+  const [search, setSearch] = useState("");
+  const [selectedProviders, setSelectedProviders] = useState<any>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 8;
+  const totalPages = Math.ceil(providers.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedProvider = providers.slice(startIndex, startIndex + pageSize);
 
-    const filters = [
-        {
-            key: "rank",
-            label: "Rank",
-            options: ["All", "Standard", "High-rank", "Elite"],
-        },
-        {
-            key: "location",
-            label: "Location",
-            options: ["All", "Kuwait", "UK", "Canada", "UAE", "Pakistan"],
-        },
-        {
-            key: "status",
-            label: "Status",
-            options: ["All", "Active", "Inactive", "Pending"],
-        },
-        {
-            key: "sort_by",
-            label: "Sort by",
-            options: ["All", "Newest", "Oldest", "A–Z", "Z–A"],
-        },
-    ];
+  const filters = [
+    {
+      key: "status",
+      label: "Status",
+      options: ["All", "Active", "Inactive", "Pending"],
+    },
+    {
+      key: "sort_by",
+      label: "Sort by",
+      options: ["All", "Newest", "Oldest", "A–Z", "Z–A"],
+    },
+  ];
 
-    const { data, isLoading } = useGetUsersListQuery();
-    console.log("provider data", data)
-    const serviceProviderList = useMemo(() => {
-        const users = data || [];
-        return users.filter((user: any) => user.role?.role === "service_provider");
-    }, [data]);
+  const { data, isLoading } = useGetUsersListQuery();
+  console.log("provider data", data);
+  const serviceProviderList = useMemo(() => {
+    const users = data || [];
+    return users.filter((user: any) => user.role?.role === "service_provider");
+  }, [data]);
 
-    console.log("serviceProviderList", serviceProviderList)
+  console.log("serviceProviderList", serviceProviderList);
 
-    const filteredServiceProviders = useMemo(() => {
-        return applyFilters(serviceProviderList, search, selectedFilters, {
-            searchKeys: ["name", "location", "status"],
-            dateKey: "createdAt",
-        });
-    }, [serviceProviderList, search, selectedFilters]);
+  const filteredServiceProviders = useMemo(() => {
+    return applyFilters(serviceProviderList, search, selectedFilters, {
+      searchKeys: ["name", "location", "status"],
+      dateKey: "createdAt",
+    });
+  }, [serviceProviderList, search, selectedFilters]);
 
-    const handleFilterChange = (key: string, value: string) => {
-        setSelectedFilters((prev) => {
-            if (prev[key] === value || value === "All" || value === "") {
-                const updated = { ...prev };
-                delete updated[key];
-                return updated;
+  const handleFilterChange = (key: string, value: string) => {
+    setSelectedFilters((prev) => {
+      if (prev[key] === value || value === "All" || value === "") {
+        const updated = { ...prev };
+        delete updated[key];
+        return updated;
+      }
+      return { ...prev, [key]: value };
+    });
+  };
+
+  const handleDelete = () => {
+    console.log("Influencer deleted:", selectedProviders);
+  };
+  const handleAnalyticsClick = () => {
+    router.push("/service-analytics");
+  };
+
+  return (
+    <div className="flex flex-col min-h-[calc(100vh-120px)] bg-black-500 p-6 rounded-lg">
+      {/* Top Section */}
+      <div className="flex-1">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="lg:text-3xl text-xl font-medium text-white">
+            Service Providers
+          </h2>
+          <Button
+            onClick={handleAnalyticsClick}
+            leftIcon={
+              <Image
+                src="/images/Vector (1).svg"
+                alt="analytics icon"
+                width={18}
+                height={18}
+              />
             }
-            return { ...prev, [key]: value };
-        });
-    };
-
-    const handleDelete = () => {
-        console.log("Influencer deleted:", selectedProviders);
-    };
-    const handleAnalyticsClick = () => {
-        router.push("/service-analytics");
-    };
-
-
-    return (
-        <div className="flex flex-col min-h-[calc(100vh-120px)] bg-black-500 p-6 rounded-lg">
-            {/* Top Section */}
-            <div className="flex-1">
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="lg:text-3xl text-xl font-medium text-white">
-                        Service Providers
-                    </h2>
-                    <Button
-                        onClick={handleAnalyticsClick}
-                        leftIcon={
-                            <Image
-                                src="/images/Vector (1).svg"
-                                alt="analytics icon"
-                                width={18}
-                                height={18}
-                            />
-                        }
-                    >
-                        <span className="hidden md:inline">See Analytics</span>
-                    </Button>
-                </div>
-
-                {/* Filters */}
-                <FiltersBar
-                    filters={filters}
-                    selectedFilters={selectedFilters}
-                    onFilterChange={handleFilterChange}
-                    searchable
-                    search={search}
-                    onSearchChange={(val) => setSearch(val)}
-                />
-
-                {/* Cards Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-                    {filteredServiceProviders?.map((provider: any) => (
-                        <ProvidersCard
-                            key={provider.id}
-                            {...provider}
-                            onEdit={() => {
-                                setSelectedProviders(provider);
-                                setEditOpen(true);
-                            }} onDelete={() => {
-                                setSelectedProviders(provider);
-                                setDeleteOpen(true);
-                            }}
-                        />
-                    ))}
-                </div>
-            </div>
-
-            {/* Pagination at bottom */}
-            <div className="mt-8">
-                <Pagination
-                    totalPages={totalPages}
-                    currentPage={currentPage}
-                    onPageChange={setCurrentPage}
-                />
-            </div>
-
-            {/* Delete Modal */}
-            <DeleteConfirmModal
-                open={deleteOpen}
-                onOpenChange={setDeleteOpen}
-                onConfirm={handleDelete}
-                title="Delete Influencer"
-                description={`Are you sure you want to delete "${selectedProviders?.title}"? This action cannot be undone.`}
-            />
-            {/* Edit Provider Modal */}
-            <EditServiceProviderModal
-                open={editOpen}
-                setOpen={setEditOpen}
-                providerData={selectedProviders}
-                onUpdate={(updatedData) => {
-                    console.log("Updated Provider:", updatedData);
-
-                }}
-            />
+          >
+            <span className="hidden md:inline">See Analytics</span>
+          </Button>
         </div>
-    );
 
+        {/* Filters */}
+        <FiltersBar
+          filters={filters}
+          selectedFilters={selectedFilters}
+          onFilterChange={handleFilterChange}
+          searchable
+          search={search}
+          onSearchChange={(val) => setSearch(val)}
+        />
+
+        {/* Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+          {filteredServiceProviders?.map((provider: any) => (
+            <ProvidersCard
+              key={provider.id}
+              {...provider}
+              onEdit={() => {
+                setSelectedProviders(provider);
+                setEditOpen(true);
+              }}
+              onDelete={() => {
+                setSelectedProviders(provider);
+                setDeleteOpen(true);
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Pagination at bottom */}
+      <div className="mt-8">
+        <Pagination
+          totalPages={totalPages}
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+        />
+      </div>
+
+      {/* Delete Modal */}
+      <DeleteConfirmModal
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        onConfirm={handleDelete}
+        title="Delete Influencer"
+        description={`Are you sure you want to delete "${selectedProviders?.title}"? This action cannot be undone.`}
+      />
+      {/* Edit Provider Modal */}
+      <EditServiceProviderModal
+        open={editOpen}
+        setOpen={setEditOpen}
+        providerData={selectedProviders}
+        onUpdate={(updatedData) => {
+          console.log("Updated Provider:", updatedData);
+        }}
+      />
+    </div>
+  );
 };
 
 export default ServiceProviders;

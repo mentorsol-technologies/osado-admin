@@ -8,51 +8,45 @@ import { Award, Crown, Star } from "lucide-react";
 import Pagination from "@/components/ui/pagination";
 import { useGetUsersListQuery } from "@/hooks/useUsersMutations";
 import { applyFilters } from "@/lib/filterHelper";
+import EditInfluencerModal from "./EditInfluencersModal";
 
 const InfluencersRank = () => {
   const [selectedFilters, setSelectedFilters] = useState<{
     [key: string]: string;
   }>({});
   const [search, setSearch] = useState("");
+  const [editOpen, setEditOpen] = useState(false);
   const [selectedInfluencers, setSelectedInfluencers] = useState<any>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [page, setPage] = useState(2);
 
   const filters = [
     {
-      key: "rank",
+      key: "title",
       label: "Rank",
-      options: ["All","Standard", "High-rank", "Elite"],
-    },
-    {
-      key: "location",
-      label: "Location",
-      options: ["All","USA", "UK", "Canada", "UAE", "Pakistan"],
+      options: ["All", "Standard", "High-rank", "Elite"],
     },
     {
       key: "status",
       label: "Status",
-      options: ["All","Active", "Inactive",],
+      options: ["All", "Active", "Inactive"],
     },
     {
       key: "sort_by",
       label: "Sort by",
-      options: ["All","Newest", "Oldest", "A–Z", "Z–A"],
+      options: ["All", "Newest", "Oldest", "A–Z", "Z–A"],
     },
   ];
   const { data, isLoading } = useGetUsersListQuery();
-  console.log("influecers data",data)
+  console.log("influecers data", data);
   const influencerList = useMemo(() => {
     const users = data || [];
-    console.log("userss",users)
     return users.filter((user: any) => user.role?.role === "influencer");
   }, [data]);
 
-  console.log("influencerDataList", influencerList)
-
   const filteredInfluencers = useMemo(() => {
     return applyFilters(influencerList, search, selectedFilters, {
-      searchKeys: ["name", "location", "status"], // searchable fields
+      searchKeys: ["name", "location", "status"],
       dateKey: "createdAt",
     });
   }, [influencerList, search, selectedFilters]);
@@ -75,7 +69,9 @@ const InfluencersRank = () => {
   return (
     <div className="p-6 bg-black-500 !min-h-[calc(100vh-120px)]  rounded-lg">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="lg:text-3xl text-xl  font-medium text-white">Influencers</h2>
+        <h2 className="lg:text-3xl text-xl  font-medium text-white">
+          Influencers
+        </h2>
       </div>
       <div>
         <FiltersBar
@@ -91,22 +87,27 @@ const InfluencersRank = () => {
         />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {filteredInfluencers?.map((influencer: any) => (
-          <InfluencerCard
-            key={influencer.id}
-            {...influencer}
-            onEdit={() => {
-              setSelectedInfluencers(influencer);
-              // setEditOpen(true)
-            }}
-            onDelete={() => {
-              setSelectedInfluencers(influencer);
-              setDeleteOpen(true);
-            }}
-          />
-        ))}
+        {filteredInfluencers?.length ? (
+          filteredInfluencers.map((influencer: any) => (
+            <InfluencerCard
+              key={influencer.id}
+              {...influencer}
+              onEdit={() => {
+                setSelectedInfluencers(influencer);
+                setEditOpen(true);
+              }}
+              onDelete={() => {
+                setSelectedInfluencers(influencer);
+                setDeleteOpen(true);
+              }}
+            />
+          ))
+        ) : (
+          <p className="text-white text-center col-span-full">
+            No influencers found.
+          </p>
+        )}
       </div>
-
       {/* Delete Modal */}
       <DeleteConfirmModal
         open={deleteOpen}
@@ -114,6 +115,15 @@ const InfluencersRank = () => {
         onConfirm={handleDelete}
         title="Delete Influencer"
         description={`Are you sure you want to delete "${selectedInfluencers?.name}"? This action cannot be undone.`}
+      />
+      {/* Edit Provider Modal */}
+      <EditInfluencerModal
+        open={editOpen}
+        setOpen={setEditOpen}
+        influencerData={selectedInfluencers}
+        onUpdate={(updatedData) => {
+          console.log("Updated Provider:", updatedData);
+        }}
       />
     </div>
   );

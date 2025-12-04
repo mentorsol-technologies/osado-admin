@@ -10,13 +10,14 @@ import RefundBookingModal from "./RefundBookingForm";
 import SuspendedBookingModal from "./SuspendedBookingForm";
 import EditBookingModal from "./EditBookingForm";
 import AddBookingModal from "./AddNewBookingForm";
-import { useGetAllServiceBookingListQuery } from "@/hooks/useServiceBookingMutations";
+import {
+  useGetAllServiceBookingListQuery,
+  useSuspendBookingMutation,
+} from "@/hooks/useServiceBookingMutations";
 
 export default function ServiceBookingPage() {
-
-  const { data, isLoading } = useGetAllServiceBookingListQuery()
-
-
+  const { data, isLoading } = useGetAllServiceBookingListQuery();
+  const { mutate: suspendBooking } = useSuspendBookingMutation();
 
   const [openViewModal, setOpenViewModal] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
@@ -26,7 +27,6 @@ export default function ServiceBookingPage() {
   const [AddOpen, setAddOpen] = useState(false);
 
   const columns = [
-    { key: "id", label: "Booking ID" },
     { key: "serviceName", label: "Service Name" },
     { key: "provider", label: "Provider" },
     {
@@ -37,30 +37,18 @@ export default function ServiceBookingPage() {
     { key: "bookingDate", label: "Booking Date" },
     { key: "bookingTime", label: "Booking Time" },
 
-    { key: "amount", label: "Amount" },
-
-    {
-      key: "category",
-      label: "Category",
-      render: (row: any) => (
-        <span className="rounded bg-gray-700/40 px-2 py-1 text-xs">
-          {row.category && row.category.length > 0
-            ? row.category.map((c: any) => c.name || "Unnamed").join(", ")
-            : "-"}
-        </span>
-      ),
-    },
     {
       key: "status",
       label: "Status",
       render: (row: any) => (
         <span
-          className={`rounded px-2 py-1 text-xs ${row.status === "Confirmed"
-            ? " text-green-400 border border-green-500/30"
-            : row.status === "Canceled"
-              ? " text-red-400 border border-red-500/30"
-              : " text-blue-400 border border-blue-500/30"
-            }`}
+          className={`rounded px-2 py-1 text-xs ${
+            row.status === "Confirmed"
+              ? " text-green-400 border border-green-500/30"
+              : row.status === "Canceled"
+                ? " text-red-400 border border-red-500/30"
+                : " text-blue-400 border border-blue-500/30"
+          }`}
         >
           {row.status}
         </span>
@@ -89,15 +77,19 @@ export default function ServiceBookingPage() {
           >
             <MdOutlineEdit size={16} />
           </button>
-          <button className="p-1 rounded-md  bg-red-600">
+          <button
+            className="p-1 rounded-md bg-red-600"
+            onClick={() => {
+              setSelectedBooking(row);
+              setSuspendOpen(true);
+            }}
+          >
             <BiStop size={16} />
           </button>
         </div>
       ),
     },
   ];
-
-
 
   const filters: FilterConfig[] = [
     {
@@ -116,7 +108,14 @@ export default function ServiceBookingPage() {
     {
       key: "provider",
       label: "Provider",
-      options: ["John Doe", "Jane Smith", "Waheed"],
+      options: [
+        "All",
+        "service_provider",
+        "admin",
+        "subAdmin",
+        "business_owner",
+        "user",
+      ],
     },
     {
       key: "date",
@@ -127,7 +126,6 @@ export default function ServiceBookingPage() {
   const handleRefundSubmit = (data: any) => {
     console.log("Refund Data:", data);
 
-    // Close refund modal and open suspended modal
     setRefundOpen(false);
     setSuspendOpen(true);
   };
@@ -136,9 +134,18 @@ export default function ServiceBookingPage() {
     setEditOpen(false);
   };
 
-  // 👇 handler when suspended booking is submitted
   const handleSuspendSubmit = (data: any) => {
-    console.log("Suspended Booking Reason:", data);
+    suspendBooking(
+      {
+        id: selectedBooking?.id,
+        reason: data.reason,
+      },
+      {
+        onSuccess: () => {
+          setSuspendOpen(false);
+        },
+      }
+    );
   };
 
   return (
@@ -167,26 +174,34 @@ export default function ServiceBookingPage() {
           searchable
           renderCardActions={(row) => (
             <div className="flex gap-2 w-full">
-              <Button className="flex-1" onClick={() => { setSelectedBooking(row); setEditOpen(true); }}>
+              <Button
+                className="flex-1"
+                onClick={() => {
+                  setSelectedBooking(row);
+                  setEditOpen(true);
+                }}
+              >
                 Edit
               </Button>
               <Button
                 variant="outline"
                 className="flex-1"
-                onClick={() => { setSelectedBooking(row); setSuspendOpen(true); }}
+                onClick={() => {
+                  setSelectedBooking(row);
+                  setSuspendOpen(true);
+                }}
               >
                 Suspend
               </Button>
             </div>
           )}
         />
-
       </div>
       {/* Modal for viewing booking */}
       <BookingViewForm
         open={openViewModal}
         onOpenChange={setOpenViewModal}
-        bookingId={selectedBooking?.id}     // <-- IMPORTANT
+        bookingId={selectedBooking?.id}
         onRefundClick={() => setRefundOpen(true)}
       />
       <RefundBookingModal
@@ -212,27 +227,32 @@ export default function ServiceBookingPage() {
         open={AddOpen}
         setOpen={setAddOpen}
         selectedBooking={{
-          bookingId: "",
-          serviceName: "",
-          amount: "",
+          service: "",
+          bookingDate: "",
+          bookingTime: "",
+          location: "",
+          city: "",
+          country: "",
           status: "Confirmed",
+          providerId: "",
+          userId: "",
         }}
+        providerId={selectedBooking?.providerId}
         onSave={(data: any) => {
           console.log("New Booking Data:", data);
-          setAddOpen(false); // close modal after save
+          setAddOpen(false);
         }}
       />
       {/* Edit Modal */}
       <EditBookingModal
         open={editOpen}
         setOpen={setEditOpen}
-        selectedBooking={{
-          bookingId: selectedBooking?.booking_id ?? "",
-          serviceName: selectedBooking?.service_name ?? "",
-          amount: selectedBooking?.amount ?? "",
-          status: selectedBooking?.status ?? "Confirmed",
+        selectedBookingId={selectedBooking?.id}
+        onSave={(updated) => {
+          console.log("Edited Booking Data:", updated);
+          // REFRESH your list or re-fetch query here (e.g. react-query refetch)
+          setEditOpen(false);
         }}
-        onSave={handleEditSave}
       />
     </div>
   );

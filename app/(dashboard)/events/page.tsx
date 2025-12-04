@@ -1,18 +1,21 @@
 "use client";
-import FiltersBar from "@/components/ui/commonComponent/FiltersBar";
-import React, { useState } from "react";
+import FiltersBar, { Filter } from "@/components/ui/commonComponent/FiltersBar";
+import React, { useMemo, useState } from "react";
 import EventCard from "./EventCard";
 import EventInfoModal from "./EventInfoModalForm";
 import SuspendedEventModal from "./SuspendEventModal";
 import EditEventModal from "./EditEventForm";
-import { useGetAllEventsQuery, useSuspendEventMutation } from "@/hooks/useEventManagementMutations";
+import {
+  useGetAllEventsQuery,
+  useSuspendEventMutation,
+} from "@/hooks/useEventManagementMutations";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import AddEventModal from "./CreateEventForm";
+import { applyFilters } from "@/lib/filterHelper";
 
 const EventsManagement = () => {
-
-  const { data: eventlist } = useGetAllEventsQuery()
+  const { data: eventlist } = useGetAllEventsQuery();
   const { mutate: suspendEvent } = useSuspendEventMutation();
 
   const [selectedFilters, setSelectedFilters] = useState<{
@@ -33,61 +36,65 @@ const EventsManagement = () => {
 
     suspendEvent(
       {
-        eventId: selectedEvent.id,
+        id: selectedEvent.id,
         reason: formData.reason,
       },
       {
         onSuccess: () => {
           setSuspendOpen(false);
           setSelectedEvent(null);
-        }
+        },
       }
     );
   };
   const handleEditSave = (data: any) => {
     console.log("Edited Event Data:", data);
-    // ✅ Update your events list or send API call here
   };
-  const filters = [
+  const filters: Filter[] = [
     {
       key: "sort_by",
       label: "Sort by",
-      options: ["Newest", "Oldest", "A–Z", "Z–A"],
+      options: ["All", "Newest", "Oldest", "A–Z", "Z–A"],
     },
     {
-      key: "categories",
-      label: "Categories",
-      options: ["Photography", "Fashion", "Music", "Sports", "Technology"],
-    },
-    {
-      key: "location",
-      label: "Location",
-      options: ["USA", "UK", "Canada", "UAE", "Pakistan"],
-    },
-    {
-      key: "date",
+      key: "createdAt",
       label: "Date",
-      options: [
-        "Today",
-        "This Week",
-        "This Month",
-        "Last Month",
-        "This Year",
-      ],
+      type: "date",
     },
   ];
 
+  // Apply filters to event list
+  const filteredEvents = useMemo(() => {
+    const events = eventlist?.data || [];
+    return applyFilters(events, search, selectedFilters, {
+      searchKeys: ["title", "city"],
+      dateKey: "createdAt",
+      nameKey: "title",
+    });
+  }, [eventlist?.data, search, selectedFilters]);
 
   const handleFilterChange = (key: string, value: string) => {
-    setSelectedFilters((prev) => ({ ...prev, [key]: value }));
+    setSelectedFilters((prev) => {
+      if (prev[key] === value || value === "All" || value === "") {
+        const updated = { ...prev };
+        delete updated[key];
+        return updated;
+      }
+      return { ...prev, [key]: value };
+    });
   };
 
   return (
     <div className="p-6 bg-black-500 !min-h-[calc(100vh-120px)]  rounded-lg">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="lg:text-3xl text-xl  font-medium text-white">Events Management</h2>
-        <Button leftIcon={<Plus size={18} />} className="w-full sm:w-auto order-3 mt-[-1rem] lg:mt-0 sm:order-2"
-          onClick={() => setIsAddModalOpen(true)}>
+        <h2 className="lg:text-3xl text-xl  font-medium text-white">
+          Events Management
+        </h2>
+        <Button
+          leftIcon={<Plus size={18} />}
+          className="w-full sm:w-auto order-3 mt-[-1rem] lg:mt-0 sm:order-2"
+          onClick={() => setIsAddModalOpen(true)}
+        >
           Add New Event
         </Button>
       </div>
@@ -106,21 +113,27 @@ const EventsManagement = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {eventlist?.data?.map((event: any, idx: any) => (
-          <EventCard
-            key={idx}
-            {...event}
-            onClick={() => handleCardClick(event)}
-            onEdit={() => {
-              setSelectedEvent(event);
-              setIsEditModalOpen(true); // ✅ open edit modal
-            }}
-            onSuspend={() => {
-              setSelectedEvent(event);
-              setSuspendOpen(true);
-            }}
-          />
-        ))}
+        {filteredEvents?.length ? (
+          filteredEvents.map((event: any, idx: any) => (
+            <EventCard
+              key={event.id || idx}
+              {...event}
+              onClick={() => handleCardClick(event)}
+              onEdit={() => {
+                setSelectedEvent(event);
+                setIsEditModalOpen(true);
+              }}
+              onSuspend={() => {
+                setSelectedEvent(event);
+                setSuspendOpen(true);
+              }}
+            />
+          ))
+        ) : (
+          <p className="text-white text-center col-span-full">
+            No events found.
+          </p>
+        )}
       </div>
       {/* Event Info Modal */}
       {selectedEvent && (

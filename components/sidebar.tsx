@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  X,
-  ChevronDown,
-} from "lucide-react";
+import { X, ChevronDown } from "lucide-react";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -23,7 +20,11 @@ interface MenuItem {
 }
 
 const menuItems: MenuItem[] = [
-  { icon: "/images/si_dashboard-fill.svg", label: "Dashboard", href: "/dashboard" },
+  {
+    icon: "/images/si_dashboard-fill.svg",
+    label: "Dashboard",
+    href: "/dashboard",
+  },
   {
     label: "Master",
     icon: "/images/material-symbols_admin-panel-settings-rounded.svg",
@@ -34,16 +35,51 @@ const menuItems: MenuItem[] = [
       { label: "Influencers Rank", href: "/master/influencers-rank" },
     ],
   },
-  { icon: "/images/noun-influencer-7727039 1 (1).svg", label: "Influencers", href: "/influencers" },
-  { icon: "/images/mdi_camera.svg", label: "Photographers", href: "/photographers" },
-  { icon: "/images/hugeicons_travel-bag (2).svg", label: "Service Providers", href: "/service-providers" },
-  { icon: "/images/mingcute_document-fill (1).svg", label: "Service Booking", href: "/service-booking" },
-  { icon: "/images/mingcute_document-fill (1).svg", label: "Role Management", href: "/role-management" },
-  { icon: "/images/ci_calendar.svg", label: "Events Management", href: "/events" },
-  { icon: "/images/tdesign_user-business-filled.svg", label: "Business Owners", href: "/business-owners" },
-  { icon: "/images/tdesign_user-business-filled.svg", label: "KYC Management", href: "/kyc-management" },
-  { icon: "/images/material-symbols_report-rounded.svg", label: "Report Management", href: "/report-management" },
-
+  {
+    icon: "/images/noun-influencer-7727039 1 (1).svg",
+    label: "Influencers",
+    href: "/influencers",
+  },
+  // {
+  //   icon: "/images/mdi_camera.svg",
+  //   label: "Photographers",
+  //   href: "/photographers",
+  // },
+  {
+    icon: "/images/hugeicons_travel-bag (2).svg",
+    label: "Service Providers",
+    href: "/service-providers",
+  },
+  {
+    icon: "/images/mingcute_document-fill (1).svg",
+    label: "Service Booking",
+    href: "/service-booking",
+  },
+  {
+    icon: "/images/mingcute_document-fill (1).svg",
+    label: "Role Management",
+    href: "/role-management",
+  },
+  {
+    icon: "/images/ci_calendar.svg",
+    label: "Events Management",
+    href: "/events",
+  },
+  {
+    icon: "/images/tdesign_user-business-filled.svg",
+    label: "Business Owners",
+    href: "/business-owners",
+  },
+  {
+    icon: "/images/tdesign_user-business-filled.svg",
+    label: "KYC Management",
+    href: "/kyc-management",
+  },
+  {
+    icon: "/images/material-symbols_report-rounded.svg",
+    label: "Report Management",
+    href: "/report-management",
+  },
 
   {
     label: "Finance Module",
@@ -53,10 +89,16 @@ const menuItems: MenuItem[] = [
       { label: "Payouts", href: "/finance/payout" },
     ],
   },
-  { icon: "/images/eos-icons_admin.svg", label: "Sub Admin", href: "/sub-admin" },
+  {
+    icon: "/images/eos-icons_admin.svg",
+    label: "Sub Admin",
+    href: "/sub-admin",
+  },
   { icon: "/images/tabler_message-filled.svg", label: "Chat", href: "/chat" },
   {
-    icon: "/images/mdi_image-edit.svg", label: "Banners Manager", href: "/banners"
+    icon: "/images/mdi_image-edit.svg",
+    label: "Banners Manager",
+    href: "/banners",
   },
   // { icon: Settings, label: "Settings", href: "/settings" },
 ];
@@ -113,10 +155,11 @@ export function Sidebar({ onClose }: SidebarProps) {
                   {/* Parent button */}
                   <button
                     onClick={() => handleAccordion(item.label)}
-                    className={`sidebar-item w-full justify-between ${isActive
-                      ? "bg-red-600 text-white"
-                      : "text-gray-300 hover:text-white"
-                      }`}
+                    className={`sidebar-item w-full justify-between ${
+                      isActive
+                        ? "bg-red-600 text-white"
+                        : "text-gray-300 hover:text-white"
+                    }`}
                   >
                     <div className="flex items-center gap-3">
                       <Image
@@ -129,8 +172,9 @@ export function Sidebar({ onClose }: SidebarProps) {
                     </div>
                     <ChevronDown
                       size={16}
-                      className={`transition-transform ${openMenu === item.label ? "rotate-180" : ""
-                        }`}
+                      className={`transition-transform ${
+                        openMenu === item.label ? "rotate-180" : ""
+                      }`}
                     />
                   </button>
 
@@ -144,14 +188,16 @@ export function Sidebar({ onClose }: SidebarProps) {
                             <Link
                               href={child.href ?? ""}
                               onClick={onClose}
-                              className={`sidebar-item w-full justify-between ${childActive
-                                ? "bg-black-300 text-white"
-                                : "text-gray-300 hover:text-white"
-                                }`}
+                              className={`sidebar-item w-full justify-between ${
+                                childActive
+                                  ? "bg-black-300 text-white"
+                                  : "text-gray-300 hover:text-white"
+                              }`}
                             >
                               <div
-                                className={`flex items-center gap-3 ${child?.icon ? "" : "pl-2"
-                                  }`}
+                                className={`flex items-center gap-3 ${
+                                  child?.icon ? "" : "pl-2"
+                                }`}
                               >
                                 {child?.icon && (
                                   <Image
@@ -179,10 +225,11 @@ export function Sidebar({ onClose }: SidebarProps) {
                 <Link
                   href={item.href ?? ""}
                   onClick={onClose}
-                  className={`sidebar-item ${isActive
-                    ? "bg-red-600 text-white"
-                    : "text-gray-300 hover:text-white"
-                    }`}
+                  className={`sidebar-item ${
+                    isActive
+                      ? "bg-red-600 text-white"
+                      : "text-gray-300 hover:text-white"
+                  }`}
                 >
                   <Image
                     src={item.icon}

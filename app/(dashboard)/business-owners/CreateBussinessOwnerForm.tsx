@@ -13,14 +13,15 @@ import {
 import { Button } from "@/components/ui/button";
 import CommonInput from "@/components/ui/input";
 import Modal from "@/components/ui/Modal";
+import { useCreateBussinessOwnerMutation } from "@/hooks/useBussinessOwnerMutations";
+import { useState } from "react";
+import { Country, useCountries } from "@/components/ui/CountryPicker";
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
-  surname: z.string().min(1, "Surname is required"),
+  surName: z.string().min(1, "Surname is required"),
   email: z.string().email("Valid email required"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  country: z.string().min(1, "Country is required"),
-  kycStatus: z.string().min(1, "KYC status is required"),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -45,17 +46,38 @@ export default function AddBusinessOwnerModal({
     resolver: zodResolver(schema),
     defaultValues: {
       name: "",
-      surname: "",
+      surName: "",
       email: "",
       password: "",
-      country: "",
-      kycStatus: "",
     },
   });
 
+  const { mutate: createOwner, isPending } = useCreateBussinessOwnerMutation();
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const countries = useCountries();
+  const [selectedCountry, setSelectedCountry] = useState<Country | null>(
+    countries.find((c) => c.iso3 === "KWT") || null
+  );
+
   const onSubmit = (data: FormData) => {
-    onSave(data);
-    setOpen(false);
+    const payload = {
+      name: data.name,
+      surName: data.surName,
+      email: data.email,
+      phoneNumber,
+      callingCode: selectedCountry?.code || "+965",
+      countryCode: selectedCountry?.iso3 || "KWT",
+      password: data.password,
+    };
+
+    createOwner(payload, {
+      onSuccess: () => {
+        setOpen(false);
+      },
+      onError: (err) => {
+        console.error("Create Owner Error:", err);
+      },
+    });
   };
 
   return (
@@ -68,9 +90,11 @@ export default function AddBusinessOwnerModal({
           <Button
             onClick={handleSubmit(onSubmit)}
             className="flex-1 bg-red-600 hover:bg-red-700 rounded-lg"
+            disabled={isPending}
           >
-            Submit
+            {isPending ? "Submitting..." : "Submit"}
           </Button>
+
           <Button
             variant="outline"
             className="flex-1 rounded-lg"
@@ -85,82 +109,61 @@ export default function AddBusinessOwnerModal({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {/* Name */}
         <div>
-          <label className="block text-sm mb-1">Name</label>
-          <CommonInput placeholder="Write name" {...register("name")} />
+          <CommonInput
+            label="Name"
+            placeholder="Write name"
+            {...register("name")}
+          />
           {errors.name && (
             <p className="text-xs text-red-500">{errors.name.message}</p>
           )}
         </div>
         {/* Surname */}
         <div>
-          <label className="block text-sm mb-1">Surname</label>
-          <CommonInput placeholder="Write surname" {...register("surname")} />
-          {errors.surname && (
-            <p className="text-xs text-red-500">{errors.surname.message}</p>
+          <CommonInput
+            label="Surname"
+            placeholder="Write surname"
+            {...register("surName")}
+          />
+          {errors.surName && (
+            <p className="text-xs text-red-500">{errors.surName.message}</p>
           )}
         </div>
 
         {/* Email */}
         <div>
-          <label className="block text-sm mb-1">Email address</label>
-          <CommonInput placeholder="Write email" {...register("email")} />
+          <CommonInput
+            label="Email address"
+            placeholder="Write email"
+            {...register("email")}
+          />
           {errors.email && (
             <p className="text-xs text-red-500">{errors.email.message}</p>
           )}
         </div>
-        {/* Country */}
-        <div>
-          <label className="block text-sm mb-1">Country</label>
-          <Select
-            onValueChange={(val) => setValue("country", val)}
-            defaultValue=""
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select country" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="USA">USA</SelectItem>
-              <SelectItem value="UK">UK</SelectItem>
-              <SelectItem value="Pakistan">Pakistan</SelectItem>
-            </SelectContent>
-          </Select>
-          {errors.country && (
-            <p className="text-xs text-red-500">{errors.country.message}</p>
-          )}
-        </div>
-
-        {/* Password */}
-        <div>
-          <label className="block text-sm mb-1">Password</label>
-          <CommonInput
-            type="password"
-            placeholder="Write password"
-            {...register("password")}
-          />
-          {errors.password && (
-            <p className="text-xs text-red-500">{errors.password.message}</p>
-          )}
-        </div>
-        {/* KYC Status */}
-        <div>
-          <label className="block text-sm mb-1">Kyc Status</label>
-          <Select
-            onValueChange={(val) => setValue("kycStatus", val)}
-            defaultValue=""
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Pending">Pending</SelectItem>
-              <SelectItem value="Approved">Approved</SelectItem>
-              <SelectItem value="Rejected">Rejected</SelectItem>
-            </SelectContent>
-          </Select>
-          {errors.kycStatus && (
-            <p className="text-xs text-red-500">{errors.kycStatus.message}</p>
-          )}
-        </div>
+        <CommonInput
+          label="Phone Number"
+          type="tel"
+          value={phoneNumber}
+          onChange={(e) => setPhoneNumber(e.target.value)}
+          maxLength={15}
+          countries={countries}
+          selectedCountry={selectedCountry || undefined}
+          onCountryChange={setSelectedCountry}
+          showCountryDropdown
+        />
+      </div>
+      {/* Password */}
+      <div>
+        <CommonInput
+          label="Password"
+          type="password"
+          placeholder="Write password"
+          {...register("password")}
+        />
+        {errors.password && (
+          <p className="text-xs text-red-500">{errors.password.message}</p>
+        )}
       </div>
     </Modal>
   );

@@ -40,7 +40,7 @@ export default function ProvidersCard({
         {/* Top Section */}
         <div className="flex flex-col items-center space-y-4 flex-1">
           {/* Avatar */}
-         <div className="flex justify-center mt-4">
+          <div className="flex justify-center mt-4">
             <img
               src={photoURL || "/images/Ellipse 5.png"}
               alt={name}
@@ -53,18 +53,18 @@ export default function ProvidersCard({
 
           {/* Info */}
           <div className="text-sm space-y-1 text-gray-300 w-full">
-            <p className="flex justify-between flex-wrap">
-              <span className="flex items-center gap-1">
-                <span className="p-1 bg-red-700 rounded-lg">
+            {/* <p className="flex justify-between flex-wrap"> */}
+            {/* <span className="flex items-center gap-1"> */}
+            {/* <span className="p-1 bg-red-700 rounded-lg">
                   <Icon className="text-white h-4 w-4" />
-                </span>
-                <span className="font-semibold">{title}</span>
-              </span>
-              <span className="flex items-center flex-wrap">
+                </span> */}
+            {/* <span className="font-semibold">{title}</span> */}
+            {/* </span> */}
+            {/* <span className="flex items-center flex-wrap">
                 <span>{rating?.toFixed(1)}/5</span>
                 <Star className="w-4 h-4 text-red-500 ml-1 fill-red-500" />
-              </span>
-            </p>
+              </span> */}
+            {/* </p> */}
             <p className="flex justify-between flex-wrap">
               <span className="font-semibold">Member Since</span>
               <span>{new Date(createdAt).toLocaleDateString()}</span>
@@ -98,6 +98,5 @@ export default function ProvidersCard({
         </div>
       </CardContent>
     </Card>
-
   );
 }
