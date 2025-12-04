@@ -80,7 +80,11 @@ export const applyFilters = (
   });
 
   // Sorting logic
-  const sortBy = selectedFilters["sort-by"] || selectedFilters["sortBy"];
+  const sortBy =
+    selectedFilters["sort-by"] ||
+    selectedFilters["sortBy"] ||
+    selectedFilters["sort_by"] ||
+    selectedFilters["sort"];
   if (sortBy && sortBy.toLowerCase() !== "all") {
     const sortValue = sortBy.toLowerCase();
 
