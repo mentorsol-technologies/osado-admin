@@ -9,17 +9,19 @@ import { Button } from "@/components/ui/button";
 import Modal from "@/components/ui/Modal";
 import CommonInput from "@/components/ui/input";
 import Upload from "@/components/ui/upload";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 
-
-import { useCreateCountryMutation, useUploadCountryFileMutation } from "@/hooks/useCountryMutations";
+import {
+  useCreateCountryMutation,
+  useUploadCountryFileMutation,
+} from "@/hooks/useCountryMutations";
 import { getCountryUploadLink } from "@/services/country/countryService";
 import { uploadToS3 } from "@/lib/s3Upload";
 
 // ✅ Schema validation
 const schema = z.object({
   name: z.string().min(2, "Country name is required"),
-  countryCode: z.string().optional(),
+  countryCode: z.string().min(1, "Country code is required"),
   image: z.any().optional(),
 });
 
@@ -31,7 +33,11 @@ interface AddCountryModalProps {
   onSave: (formData: any) => void;
 }
 
-export default function AddCountryModal({ open, setOpen, onSave }: AddCountryModalProps) {
+export default function AddCountryModal({
+  open,
+  setOpen,
+  onSave,
+}: AddCountryModalProps) {
   const {
     register,
     handleSubmit,
@@ -43,7 +49,8 @@ export default function AddCountryModal({ open, setOpen, onSave }: AddCountryMod
   });
 
   const { mutate: createCountry, isPending } = useCreateCountryMutation();
-  const { mutateAsync: uploadCountryFile, isPending: isUploading } = useUploadCountryFileMutation();
+  const { mutateAsync: uploadCountryFile, isPending: isUploading } =
+    useUploadCountryFileMutation();
 
   const [uploadIds, setUploadIds] = useState<string[]>([]);
 
@@ -59,7 +66,6 @@ export default function AddCountryModal({ open, setOpen, onSave }: AddCountryMod
     setUploadIds([]);
   };
 
-
   const handleMultipleFileUpload = async (files: File[]) => {
     try {
       const uploadedIds: string[] = [];
@@ -70,7 +76,6 @@ export default function AddCountryModal({ open, setOpen, onSave }: AddCountryMod
         uploadedIds.push(uploadId);
 
         setPreviewUrl(URL.createObjectURL(file));
-
       }
 
       setUploadIds((prev) => [...prev, ...uploadedIds]);
@@ -132,10 +137,7 @@ export default function AddCountryModal({ open, setOpen, onSave }: AddCountryMod
       <div className="flex flex-col sm:flex-row gap-3 w-full">
         <div className="flex-1">
           <label className="block text-sm mb-1">Country Name</label>
-          <CommonInput
-            placeholder="Country Name"
-            {...register("name")}
-          />
+          <CommonInput placeholder="Country Name" {...register("name")} />
           {errors.name && (
             <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>
           )}
@@ -144,17 +146,20 @@ export default function AddCountryModal({ open, setOpen, onSave }: AddCountryMod
         <div className="flex-1">
           <label className="block text-sm mb-1">Country Code</label>
           <CommonInput
+            type="number"
             placeholder="+965"
             {...register("countryCode")}
           />
           {errors.countryCode && (
-            <p className="text-xs text-red-500 mt-1">{errors.countryCode.message}</p>
+            <p className="text-xs text-red-500 mt-1">
+              {errors.countryCode.message}
+            </p>
           )}
         </div>
       </div>
 
       {/* File Upload */}
-      < div className="mt-4" >
+      <div className="mt-4">
         <Upload
           label="Upload Images"
           multiple
@@ -163,13 +168,10 @@ export default function AddCountryModal({ open, setOpen, onSave }: AddCountryMod
             await handleMultipleFileUpload(files);
           }}
         />
-        {
-          isUploading && (
-            <p className="text-sm text-blue-500 mt-1">Uploading...</p>
-          )
-        }
-
-      </div >
-    </Modal >
+        {isUploading && (
+          <p className="text-sm text-blue-500 mt-1">Uploading...</p>
+        )}
+      </div>
+    </Modal>
   );
 }

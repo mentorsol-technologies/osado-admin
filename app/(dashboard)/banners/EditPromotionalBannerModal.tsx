@@ -203,14 +203,6 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
             }}
           />
 
-          {previewUrl && (
-            <img
-              src={previewUrl}
-              className="w-20 h-20 rounded-md border mt-3"
-              alt="Preview"
-            />
-          )}
-
           {/* Image Preview */}
           {previewUrl ? (
             <div className="mt-2">

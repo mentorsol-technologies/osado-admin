@@ -17,7 +17,7 @@ import {
 import Modal from "@/components/ui/Modal";
 import CommonInput from "@/components/ui/input";
 import Upload from "@/components/ui/upload";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 
 import {
   useCreateSubCategoryMutation,
@@ -55,7 +55,8 @@ export default function AddSubCategoryModal({
   selectedCategory,
   onSave,
 }: AddSubCategoryModalProps) {
-  const { mutate: createSubCategory, isPending } = useCreateSubCategoryMutation();
+  const { mutate: createSubCategory, isPending } =
+    useCreateSubCategoryMutation();
   const { mutateAsync: uploadFile, isPending: isUploading } =
     useUploadSubCategoryFileMutation();
 
@@ -120,12 +121,13 @@ export default function AddSubCategoryModal({
           status: "Active",
           description: "",
         });
+        setUploadIds([]);
+        setPreviewUrl(null);
         setOpen(false);
       },
       onError: (error: any) => {
         console.error("API Error:", error);
         console.error("Error response:", error?.response);
-
 
         const message =
           error?.response?.data?.message ||
@@ -136,7 +138,6 @@ export default function AddSubCategoryModal({
       },
     });
   };
-
 
   const handleFormSubmit = (e?: React.FormEvent) => {
     console.log(" Submit button clicked");
@@ -184,7 +185,10 @@ export default function AddSubCategoryModal({
         {/* Name */}
         <div className="flex-1">
           <label className="block text-sm mb-1">Subcategory Name</label>
-          <CommonInput placeholder="Write subcategory name" {...register("name")} />
+          <CommonInput
+            placeholder="Write subcategory name"
+            {...register("name")}
+          />
           {errors.name && (
             <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>
           )}
@@ -216,7 +220,11 @@ export default function AddSubCategoryModal({
       {/* Description */}
       <div className="mt-4">
         <label className="block text-sm mb-1">Description</label>
-        <Textarea rows={4} placeholder="Write description" {...register("description")} />
+        <Textarea
+          rows={4}
+          placeholder="Write description"
+          {...register("description")}
+        />
       </div>
 
       {/* Assign to Category */}
@@ -259,7 +267,11 @@ export default function AddSubCategoryModal({
         {/* Preview */}
         {previewUrl && (
           <div className="mt-2">
-            <img src={previewUrl} className="w-16 h-16 rounded-md border" alt="preview" />
+            <img
+              src={previewUrl}
+              className="w-16 h-16 rounded-md border"
+              alt="preview"
+            />
           </div>
         )}
       </div>

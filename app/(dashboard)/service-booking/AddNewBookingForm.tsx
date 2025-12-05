@@ -322,8 +322,8 @@ export default function AddBookingModal({
             <div className=" mt-2 w-64 bg-[#111] border border-gray-700 rounded-md shadow-lg z-50 max-h-64 overflow-y-auto">
               {isFetching ? (
                 <p className="p-3 text-gray-300">Loading...</p>
-              ) : serviceProviderList?.length > 0 ? (
-                serviceProviderList.map((item: any) => (
+              ) : serviceProviderList?.data.length > 0 ? (
+                serviceProviderList.data.map((item: any) => (
                   <div
                     key={item.id}
                     onClick={() => {

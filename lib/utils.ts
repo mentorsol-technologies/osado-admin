@@ -5,6 +5,9 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export const passwordRegex =
+  /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+
 export const passwordRules: string[] = [
   "At least 8 characters",
   "Include an uppercase letter",
@@ -24,7 +27,6 @@ export const FormatDate = (dateString?: string) => {
 export const capitalizeFirstLetter = (str: string = ""): string => {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 };
-
 
 export const formatDate = (
   dateString: string,
@@ -59,5 +61,7 @@ export const formatTime = (timeString: string): string => {
   };
 
   // Return formatted range
-  return end ? `${formatSingleTime(start)} - ${formatSingleTime(end)}` : formatSingleTime(start);
+  return end
+    ? `${formatSingleTime(start)} - ${formatSingleTime(end)}`
+    : formatSingleTime(start);
 };

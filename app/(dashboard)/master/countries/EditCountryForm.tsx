@@ -161,7 +161,11 @@ export default function EditCountryModal({
         {/* Country Code */}
         <div className="flex-1">
           <label className="block text-sm mb-1">Country Code</label>
-          <CommonInput placeholder="+965" {...register("countryCode")} />
+          <CommonInput
+            placeholder="+965"
+            {...register("countryCode")}
+            type="number"
+          />
         </div>
       </div>
 
