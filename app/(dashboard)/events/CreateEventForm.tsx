@@ -31,7 +31,10 @@ const schema = z.object({
   image: z.any().optional(),
   title: z.string().min(1, "Title is required"),
   price: z.number().min(1, "Price is required"),
-  priceType: z.string().min(1, "Price type is required"),
+  priceType: z
+    .string()
+    .regex(/^[A-Za-z\s]+$/, "Only alphabets are allowed")
+    .min(1, "Price type is required"),
   date: z.string().min(1, "Select a date"),
   time: z.string().min(1, "Select a time"),
   country: z.string().min(1, "Select a country"),
@@ -203,6 +206,7 @@ export default function AddEventModal({ open, setOpen }: AddEventModalProps) {
           <div>
             <label className="block text-sm mb-1">Price</label>
             <CommonInput
+              type="number"
               placeholder="Enter Price"
               {...register("price", { valueAsNumber: true })}
             />
@@ -213,8 +217,13 @@ export default function AddEventModal({ open, setOpen }: AddEventModalProps) {
           <div>
             <label className="block text-sm mb-1">Price Type</label>
             <CommonInput
+              type="text"
               placeholder="Enter Price Type"
               {...register("priceType")}
+              onChange={(e) => {
+                const value = e.target.value.replace(/[^A-Za-z\s]/g, "");
+                setValue("priceType", value);
+              }}
             />
             {errors?.priceType && (
               <p className="text-xs text-red-500">{errors.priceType.message}</p>

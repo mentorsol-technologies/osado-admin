@@ -10,12 +10,19 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useCreateSubAdminMutation } from "@/hooks/useSubAdminMutations";
 import { useEffect, useState } from "react";
 import { Country, useCountries } from "@/components/ui/CountryPicker";
+import { passwordRegex } from "@/lib/utils";
 
 const schema = z.object({
   fullName: z.string().min(1, "Full name is required"),
   surname: z.string().min(1, "Surname is required"),
   email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .regex(
+      passwordRegex,
+      "Password must contain at least 1 uppercase, 1 lowercase, 1 number, and 1 special character"
+    ),
   permissions: z.array(z.string()).optional(),
 });
 
@@ -43,8 +50,6 @@ export default function AddSubAdminModal({
   setOpen,
   selectedAdmin,
 }: AddSubAdminModalProps) {
-
-
   const {
     register,
     handleSubmit,
@@ -73,7 +78,7 @@ export default function AddSubAdminModal({
     }
   }, [countries, selectedCountry]);
   const { mutate: createSubAdmin, isPending } = useCreateSubAdminMutation();
-   const handleResetForm = () => {
+  const handleResetForm = () => {
     reset({
       fullName: "",
       surname: "",
@@ -101,8 +106,8 @@ export default function AddSubAdminModal({
     };
     createSubAdmin(payload, {
       onSuccess: () => {
-      handleResetForm();
-      setOpen(false);
+        handleResetForm();
+        setOpen(false);
       },
     });
   };
@@ -124,7 +129,6 @@ export default function AddSubAdminModal({
         setOpen(isOpen);
         if (!isOpen) handleResetForm();
       }}
-
       title="Add Sub Admin"
       footer={
         <div className="flex flex-col sm:flex-row gap-3 w-full">
@@ -149,14 +153,20 @@ export default function AddSubAdminModal({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div>
           <label className="block text-sm mb-1">Full Name</label>
-          <CommonInput placeholder="Write full name" {...register("fullName")} />
+          <CommonInput
+            placeholder="Write full name"
+            {...register("fullName")}
+          />
           {errors.fullName && (
             <p className="text-xs text-red-500">{errors.fullName.message}</p>
           )}
         </div>
         <div>
           <label className="block text-sm mb-1">Surname</label>
-          <CommonInput placeholder="Write your surname" {...register("surname")} />
+          <CommonInput
+            placeholder="Write your surname"
+            {...register("surname")}
+          />
           {errors.surname && (
             <p className="text-xs text-red-500">{errors.surname.message}</p>
           )}
@@ -169,7 +179,7 @@ export default function AddSubAdminModal({
           type="tel"
           value={phoneNumber}
           onChange={(e) => setPhoneNumber(e.target.value)}
-          maxLength={15}
+          maxLength={8}
           countries={countries}
           selectedCountry={selectedCountry || undefined}
           onCountryChange={setSelectedCountry}
@@ -180,7 +190,10 @@ export default function AddSubAdminModal({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div>
           <label className="block text-sm mb-1">Email Address</label>
-          <CommonInput placeholder="Write email address" {...register("email")} />
+          <CommonInput
+            placeholder="Write email address"
+            {...register("email")}
+          />
           {errors.email && (
             <p className="text-xs text-red-500">{errors.email.message}</p>
           )}
