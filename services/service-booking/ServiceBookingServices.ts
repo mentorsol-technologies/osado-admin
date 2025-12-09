@@ -85,3 +85,8 @@ export const SuspendBookingService = async (id: string, reason: string) => {
   });
   return response.data;
 };
+
+export const ProviderDetailsInformation = async (id: string) => {
+  const response = await api.get(`/bookings/service-provider/${id}`);
+  return response as any;
+};

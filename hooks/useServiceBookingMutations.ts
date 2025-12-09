@@ -4,6 +4,7 @@ import {
   GetServicesName,
   GetServiceUsersList,
   PopulatedBookingDetails,
+  ProviderDetailsInformation,
   ServiceBookingList,
   SuspendBookingService,
   UpdateServiceBooking,
@@ -128,5 +129,14 @@ export const useSuspendBookingMutation = () => {
         error?.response?.data?.message || "Failed to suspend Service Booking!"
       );
     },
+  });
+};
+
+export const useGetProviderDetailsInformationQuery = (id: string) => {
+  return useQuery({
+    queryKey: ["providerDetailsInformation", id],
+    queryFn: () => ProviderDetailsInformation(id),
+    enabled: !!id,
+    refetchOnWindowFocus: false,
   });
 };
