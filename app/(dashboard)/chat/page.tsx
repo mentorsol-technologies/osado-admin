@@ -16,89 +16,11 @@ import { ChatMessage, ChatConversation } from "@/types/chat";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/app/store/authStore";
 
-// Mock data for testing when no conversations exist
-const mockConversations: ChatConversation[] = [
-    {
-        id: "mock-conv-1",
-        user1Id: "admin-user",
-        user2Id: "user-1",
-        lastMessage: "Hi! Sure, that's fine with me",
-        lastMessageAt: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-        user2: {
-            id: "user-1",
-            name: "Liam Anderson",
-            avatar: "/images/Ellipse 5.png",
-            role: "Admin",
-            location: "Liverpool, England",
-            status: "Active",
-            memberSince: "22/06/2025",
-        },
-    },
-    {
-        id: "mock-conv-2",
-        user1Id: "admin-user",
-        user2Id: "user-2",
-        lastMessage: "Hi! Sure, that's fine with me",
-        lastMessageAt: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-        user2: {
-            id: "user-2",
-            name: "Olivia Martinez",
-            avatar: "/images/Ellipse 5.png",
-            role: "User",
-            location: "New York, USA",
-            status: "Active",
-            memberSince: "15/03/2025",
-        },
-    },
-];
-
-const mockMessages: ChatMessage[] = [
-    {
-        id: "msg-1",
-        conversationId: "mock-conv-1",
-        senderId: "admin-user",
-        content: "Hi! We'd like to invite you to the upcoming Music Festival this weekend.",
-        messageType: "text",
-        status: "sent",
-        createdAt: new Date(Date.now() - 60000).toISOString(),
-    },
-    {
-        id: "msg-2",
-        conversationId: "mock-conv-1",
-        senderId: "user-1",
-        content: "Hello! That sounds exciting.",
-        messageType: "text",
-        status: "sent",
-        createdAt: new Date(Date.now() - 50000).toISOString(),
-    },
-    {
-        id: "msg-3",
-        conversationId: "mock-conv-1",
-        senderId: "admin-user",
-        content: "You'll get a media pass and a reward for coverage.",
-        messageType: "text",
-        status: "sent",
-        createdAt: new Date(Date.now() - 40000).toISOString(),
-    },
-    {
-        id: "msg-4",
-        conversationId: "mock-conv-1",
-        senderId: "user-1",
-        content: "Can you send me the schedule and reward details?",
-        messageType: "text",
-        status: "sent",
-        createdAt: new Date(Date.now() - 30000).toISOString(),
-    },
-];
-
 const Chat = () => {
     const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
     const [localMessages, setLocalMessages] = useState<ChatMessage[]>([]);
     const [isTyping, setIsTyping] = useState(false);
     const [typingUser, setTypingUser] = useState<string | null>(null);
-    const [useMockData, setUseMockData] = useState(false);
     const [socketConnected, setSocketConnected] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
     const queryClient = useQueryClient();
@@ -153,13 +75,12 @@ const Chat = () => {
         ? rawData
         : rawData?.data || rawData?.conversations || rawData?.result || [];
     
-    // Use mock data if API returns empty or useMockData is true
-    const conversations = useMockData || apiConversations.length === 0 ? mockConversations : apiConversations;
+    // Use conversations from API only
+    const conversations = apiConversations;
 
-    // Fetch messages for active conversation (skip for mock conversations)
-    const isMockConversation = activeConversationId?.startsWith("mock-");
+    // Fetch messages for active conversation
     const { data: conversationData, isLoading: messagesLoading } = useChatConversationById(
-        isMockConversation ? undefined : activeConversationId || undefined
+        activeConversationId || undefined
     );
 
     // Handle different API response formats for messages
@@ -167,11 +88,8 @@ const Chat = () => {
     const apiMessages: ChatMessage[] = Array.isArray(rawConvData?.messages)
         ? rawConvData.messages
         : rawConvData?.data?.messages || (Array.isArray(rawConvData) ? rawConvData : []);
-    
-    // Use mock messages for mock conversations
-    const conversationMessages = isMockConversation 
-        ? mockMessages.filter(m => m.conversationId === activeConversationId)
-        : apiMessages;
+
+    const conversationMessages = apiMessages;
 
     // Send message mutation
     const sendMessageMutation = useSendMessage();
@@ -317,12 +235,6 @@ const Chat = () => {
             // Optimistically add message to local state
             setLocalMessages((prev) => [...prev, newMessage]);
 
-            // For mock conversations, just keep the message locally
-            if (activeConversationId.startsWith("mock-")) {
-                console.log("Mock message sent:", newMessage);
-                return;
-            }
-
             try {
                 console.log("📤 Sending message via API...", {
                     conversationId: activeConversationId,
@@ -423,7 +335,6 @@ const Chat = () => {
 
     // Check if user can send messages
     const canSendMessage = !!activeConversationId && !!currentUserId && !sendMessageMutation.isPending;
-    const isMockMode = activeConversationId?.startsWith("mock-") || useMockData;
 
     return (
         <div className="flex min-h-[calc(100vh-120px)] bg-black-500 rounded-lg text-white">
@@ -609,9 +520,6 @@ const Chat = () => {
                                 {socketConnected ? "Connected" : "Disconnected"}
                             </span>
                         </div>
-                        {isMockMode && (
-                            <p className="text-xs text-blue-400">Demo mode - messages are local only</p>
-                        )}
                     </div>
                 </div>
             </div>

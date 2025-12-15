@@ -9,6 +9,7 @@ import AddSubCategoryModal from "./AddSubcategoryForm";
 import SubCategoryCard from "./SubCategoryCard";
 import { useDeleteSubCategoryMutation, useSubCategoriesQuery } from "@/hooks/useSubCategoriesMutations";
 import { toast } from 'react-toastify';
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SubCategories() {
   const [editOpen, setEditOpen] = useState(false);
@@ -49,25 +50,49 @@ export default function SubCategories() {
 
       {/* Responsive Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {data?.map((cat: any) => (
-          <SubCategoryCard
-            key={cat.id}
-            iconUrl={cat.iconUrl}
-            name={cat.name}
-            subCategoryID={cat.subCategoryID}
-            createdDate={cat.createdAt}
-            subCategoriesCount={cat.subCategoriesCount}
-            status={cat.status}
-            onEdit={() => {
-              setSelectedCategory(cat);
-              setEditOpen(true);
-            }}
-            onDelete={() => {
-              setSelectedCategory(cat);
-              setDeleteOpen(true);
-            }}
-          />
-        ))}
+        {isLoading
+          ? Array.from({ length: 8 }).map((_, index) => (
+              <div
+                key={index}
+                className="bg-black-400 rounded-xl shadow-md p-4 space-y-4"
+              >
+                <div className="flex items-center gap-3">
+                  <Skeleton className="w-12 h-12 rounded-lg bg-black-300" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-3/4 bg-black-300" />
+                    <Skeleton className="h-3 w-1/2 bg-black-300" />
+                  </div>
+                </div>
+                <div className="space-y-2 mt-2">
+                  <Skeleton className="h-3 w-full bg-black-300" />
+                  <Skeleton className="h-3 w-5/6 bg-black-300" />
+                  <Skeleton className="h-3 w-2/3 bg-black-300" />
+                </div>
+                <div className="flex gap-3 pt-2">
+                  <Skeleton className="h-9 w-full bg-black-300" />
+                  <Skeleton className="h-9 w-full bg-black-300" />
+                </div>
+              </div>
+            ))
+          : data?.map((cat: any) => (
+              <SubCategoryCard
+                key={cat.id}
+                iconUrl={cat.iconUrl}
+                name={cat.name}
+                subCategoryID={cat.subCategoryID}
+                createdDate={cat.createdAt}
+                subCategoriesCount={cat.subCategoriesCount}
+                status={cat.status}
+                onEdit={() => {
+                  setSelectedCategory(cat);
+                  setEditOpen(true);
+                }}
+                onDelete={() => {
+                  setSelectedCategory(cat);
+                  setDeleteOpen(true);
+                }}
+              />
+            ))}
       </div>
       {/* Add Modal */}
       <AddSubCategoryModal

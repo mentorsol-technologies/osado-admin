@@ -13,6 +13,7 @@ import {
 } from "@/hooks/useCountryMutations";
 import { toast } from "react-toastify";
 import { applyFilters } from "@/lib/filterHelper";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Countries = () => {
   const [selectedFilters, setSelectedFilters] = useState<{
@@ -104,7 +105,31 @@ const Countries = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-        {filteredCountries?.length ? (
+        {isLoading ? (
+          Array.from({ length: 4 }).map((_, index) => (
+            <div
+              key={index}
+              className="bg-black-400 rounded-xl shadow-md p-4 space-y-4"
+            >
+              <div className="flex items-center gap-3">
+                <Skeleton className="w-12 h-12 rounded-lg bg-black-300" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-3/4 bg-black-300" />
+                  <Skeleton className="h-3 w-1/2 bg-black-300" />
+                </div>
+              </div>
+              <div className="space-y-2 mt-2">
+                <Skeleton className="h-3 w-full bg-black-300" />
+                <Skeleton className="h-3 w-5/6 bg-black-300" />
+                <Skeleton className="h-3 w-2/3 bg-black-300" />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Skeleton className="h-9 w-full bg-black-300" />
+                <Skeleton className="h-9 w-full bg-black-300" />
+              </div>
+            </div>
+          ))
+        ) : filteredCountries?.length ? (
           filteredCountries.map((country: any) => (
             <CountryCard
               key={country.id}
