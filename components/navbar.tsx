@@ -15,8 +15,8 @@ import CommonInput from "./ui/input";
 import Image from "next/image";
 import { useAuthStore } from "@/app/store/authStore";
 import { useRouter } from "next/navigation";
-import { toast } from 'react-toastify';
-
+import { toast } from "react-toastify";
+import { useCurrentAdminQuery } from "@/hooks/useProfileMutations";
 
 interface NavbarProps {
   onMenuClick?: () => void;
@@ -25,9 +25,34 @@ interface NavbarProps {
 export function Navbar({ onMenuClick }: NavbarProps) {
   const router = useRouter();
   const { user, logout } = useAuthStore();
+  const { data: adminData } = useCurrentAdminQuery();
+
+  // Get user data from query or fallback to auth store
+  const currentUser = adminData?.data || adminData || user;
+
+  // Get display name
+  const displayName = currentUser?.name
+    ? `${currentUser.name}${currentUser.surName ? ` ${currentUser.surName}` : ""}`
+    : "User";
+
+  // Get initials for avatar fallback
+  const getInitials = () => {
+    if (currentUser?.name && currentUser?.surName) {
+      return `${currentUser.name[0]}${currentUser.surName[0]}`.toUpperCase();
+    }
+    if (currentUser?.name) {
+      return currentUser.name[0].toUpperCase();
+    }
+    return "U";
+  };
+
+  // Get profile photo
+  const profilePhoto =
+    currentUser?.photoURL || currentUser?.photo?.url || undefined;
+
   const handleLogout = () => {
     logout();
-    toast.success("Logout Successfully")
+    toast.success("Logout Successfully");
     router.push("/login");
     router.refresh(); // ✅ ensures no stale auth state remains
   };
@@ -86,11 +111,11 @@ export function Navbar({ onMenuClick }: NavbarProps) {
               // variant="ghost"
               className="flex items-center gap-2 bg-transparent hover:bg-transparent text-white p-1 lg:p-2"
             >
-              <span className="text-sm hidden lg:block">Sean Taylor</span>
+              <span className="text-sm hidden lg:block">{displayName}</span>
               {/* Avatar */}
               <Avatar className="h-9 w-9">
-                <AvatarImage src="https://randomuser.me/api/portraits/men/46.jpg" />
-                <AvatarFallback>ST</AvatarFallback>
+                <AvatarImage src={profilePhoto} />
+                <AvatarFallback>{getInitials()}</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
@@ -109,7 +134,10 @@ export function Navbar({ onMenuClick }: NavbarProps) {
               My Account
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-gray-700" />
-            <DropdownMenuItem className="text-white">
+            <DropdownMenuItem
+              className="text-white"
+              onClick={() => router.push("/profile")}
+            >
               <User className="mr-2 h-4 w-4" />
               Profile
             </DropdownMenuItem>
@@ -117,7 +145,9 @@ export function Navbar({ onMenuClick }: NavbarProps) {
               Settings
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-gray-700" />
-            <DropdownMenuItem className="text-white" onClick={handleLogout}>Log out</DropdownMenuItem>
+            <DropdownMenuItem className="text-white" onClick={handleLogout}>
+              Log out
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

@@ -32,3 +32,13 @@ export const deleteSubAdmin = async (id: string | number) => {
   const response = await api.delete(`/users/sub-admin/${id}`);
   return response;
 };
+
+export const getUserUploadLink = async (fileType: string) => {
+  const response = await api.post("/users/profile/upload-link?linkType=photo", {
+    fileType,
+  });
+  const data = response.data ?? response;
+  if (!data?.url || !data?.fields)
+    throw new Error("Upload link missing URL or fields");
+  return data;
+};
