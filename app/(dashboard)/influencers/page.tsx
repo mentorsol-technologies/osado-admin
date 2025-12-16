@@ -19,7 +19,8 @@ const InfluencersRank = () => {
   const [editOpen, setEditOpen] = useState(false);
   const [selectedInfluencers, setSelectedInfluencers] = useState<any>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [page, setPage] = useState(2);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 8;
 
   const filters = [
     {
@@ -39,7 +40,6 @@ const InfluencersRank = () => {
     },
   ];
   const { data, isLoading } = useGetUsersListQuery();
-  console.log("influecers data", data);
   const influencerList = useMemo(() => {
     const users = data || [];
     return users.filter((user: any) => user.role?.role === "influencer");
@@ -54,21 +54,34 @@ const InfluencersRank = () => {
 
   const handleFilterChange = (key: string, value: string) => {
     setSelectedFilters((prev) => {
-      if (prev[key] === value || value === "All" || value === "") {
-        const updated = { ...prev };
-        delete updated[key];
-        return updated;
-      }
-      return { ...prev, [key]: value };
+      const updated =
+        prev[key] === value || value === "All" || value === ""
+          ? (() => {
+              const copy = { ...prev };
+              delete copy[key];
+              return copy;
+            })()
+          : { ...prev, [key]: value };
+
+      return updated;
     });
+
+    setCurrentPage(1);
   };
+  const totalPages = Math.ceil(filteredInfluencers.length / pageSize);
+
+  const paginatedInfluencers = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    const end = start + pageSize;
+    return filteredInfluencers.slice(start, end);
+  }, [filteredInfluencers, currentPage]);
 
   const handleDelete = () => {
     console.log("Influencer deleted:", selectedInfluencers);
   };
 
   return (
-    <div className="p-6 bg-black-500 !min-h-[calc(100vh-120px)]  rounded-lg">
+    <div className="p-6 bg-black-500 min-h-[calc(100vh-120px)] rounded-lg flex flex-col">
       <div className="flex justify-between items-center mb-6">
         <h2 className="lg:text-3xl text-xl  font-medium text-white">
           Influencers
@@ -119,7 +132,7 @@ const InfluencersRank = () => {
             </div>
           ))
         ) : filteredInfluencers?.length ? (
-          filteredInfluencers.map((influencer: any) => (
+          paginatedInfluencers.map((influencer: any) => (
             <InfluencerCard
               key={influencer.id}
               {...influencer}
@@ -138,6 +151,13 @@ const InfluencersRank = () => {
             No influencers found.
           </p>
         )}
+      </div>
+      <div className="mt-auto pt-8">
+        <Pagination
+          totalPages={totalPages}
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+        />
       </div>
       {/* Delete Modal */}
       <DeleteConfirmModal
