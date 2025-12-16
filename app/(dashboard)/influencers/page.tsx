@@ -9,6 +9,7 @@ import Pagination from "@/components/ui/pagination";
 import { useGetUsersListQuery } from "@/hooks/useUsersMutations";
 import { applyFilters } from "@/lib/filterHelper";
 import EditInfluencerModal from "./EditInfluencersModal";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const InfluencersRank = () => {
   const [selectedFilters, setSelectedFilters] = useState<{
@@ -87,7 +88,37 @@ const InfluencersRank = () => {
         />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {filteredInfluencers?.length ? (
+        {isLoading ? (
+          Array.from({ length: 8 }).map((_, index) => (
+            <div
+              key={index}
+              className="bg-black-400 rounded-2xl shadow-md p-5 space-y-4"
+            >
+              <div className="flex flex-col items-center space-y-4">
+                <Skeleton className="w-24 h-24 rounded-full bg-black-300" />
+                <Skeleton className="h-4 w-1/2 bg-black-300" />
+                <div className="w-full space-y-2">
+                  <div className="flex justify-between">
+                    <Skeleton className="h-3 w-1/3 bg-black-300" />
+                    <Skeleton className="h-3 w-1/4 bg-black-300" />
+                  </div>
+                  <div className="flex justify-between">
+                    <Skeleton className="h-3 w-1/3 bg-black-300" />
+                    <Skeleton className="h-3 w-1/4 bg-black-300" />
+                  </div>
+                  <div className="flex justify-between">
+                    <Skeleton className="h-3 w-1/3 bg-black-300" />
+                    <Skeleton className="h-3 w-1/4 bg-black-300" />
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-3 w-full pt-2">
+                <Skeleton className="h-9 w-full bg-black-300" />
+                <Skeleton className="h-9 w-full bg-black-300" />
+              </div>
+            </div>
+          ))
+        ) : filteredInfluencers?.length ? (
           filteredInfluencers.map((influencer: any) => (
             <InfluencerCard
               key={influencer.id}

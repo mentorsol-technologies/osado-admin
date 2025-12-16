@@ -24,6 +24,11 @@ export const useAuthMutations = () => {
       if (user && accessToken) {
         setUser(user);
         setToken(accessToken);
+        // Also set the userId for easy access
+        const userId = user.id || user.uid || user._id || user.userId;
+        if (userId) {
+          useAuthStore.getState().setUserId(userId);
+        }
       }
     },
     onError: (error: any) => {

@@ -485,7 +485,11 @@ export default function AddBookingModal({
         </form>
       </Modal>
 
-      <ViewProviderDetails open={viewModalOpen} setOpen={setViewModalOpen} />
+      <ViewProviderDetails
+        open={viewModalOpen}
+        setOpen={setViewModalOpen}
+        providerId={selectedProvider?.id}
+      />
     </>
   );
 }

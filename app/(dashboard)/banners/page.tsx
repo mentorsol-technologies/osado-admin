@@ -19,6 +19,7 @@ import EditPromotionalBannerModal from "./EditPromotionalBannerModal";
 import { useDeleteBannersMutation, useGetBannersQuery, useSuspendBannerMutation } from "@/hooks/useBannersMutations";
 import { toast } from "react-toastify";
 import { applyFilters } from "@/lib/filterHelper";
+import { Skeleton } from "@/components/ui/skeleton";
 
 
 export default function BannersPage() {
@@ -137,31 +138,53 @@ export default function BannersPage() {
       </div>
       {/* Render Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredBannerPromotional?.map((banner: any) => (
-          <BannerCard
-            key={banner.id}
-            image={banner.photoURL}
-            bannerTitle={banner.bannerTitle}
-            bannerId={banner.bannerId}
-            startDate={new Date(banner.startDate).toLocaleDateString()}
-            endDate={new Date(banner.endDate).toLocaleDateString()}
-            displayCategories={banner.displayCategories}
-            status={banner.status}
-            onEdit={() => {
-              setSelectedBanner(banner);
-              setEditOpen(true); // 👈 open edit modal
-            }}
-            onSuspend={() => {
-              setSelectedBanner(banner);
-              setSuspendOpen(true);
-            }}
-
-            onDelete={() => {
-              setSelectedBanner(banner);
-              setDeleteOpen(true);
-            }}
-          />
-        ))}
+        {isLoading ? (
+          Array.from({ length: 6 }).map((_, index) => (
+            <div
+              key={index}
+              className="bg-black-400 rounded-xl shadow-md p-4 space-y-4"
+            >
+              <Skeleton className="h-32 w-full rounded-lg bg-black-300" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-3/4 bg-black-300" />
+                <Skeleton className="h-3 w-1/2 bg-black-300" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-full bg-black-300" />
+                <Skeleton className="h-3 w-5/6 bg-black-300" />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Skeleton className="h-9 w-full bg-black-300" />
+                <Skeleton className="h-9 w-full bg-black-300" />
+              </div>
+            </div>
+          ))
+        ) : (
+          filteredBannerPromotional?.map((banner: any) => (
+            <BannerCard
+              key={banner.id}
+              image={banner.photoURL}
+              bannerTitle={banner.bannerTitle}
+              bannerId={banner.bannerId}
+              startDate={new Date(banner.startDate).toLocaleDateString()}
+              endDate={new Date(banner.endDate).toLocaleDateString()}
+              displayCategories={banner.displayCategories}
+              status={banner.status}
+              onEdit={() => {
+                setSelectedBanner(banner);
+                setEditOpen(true); // 👈 open edit modal
+              }}
+              onSuspend={() => {
+                setSelectedBanner(banner);
+                setSuspendOpen(true);
+              }}
+              onDelete={() => {
+                setSelectedBanner(banner);
+                setDeleteOpen(true);
+              }}
+            />
+          ))
+        )}
       </div>
 
       {/* Add Promotional Banner Modal */}

@@ -13,9 +13,10 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import AddEventModal from "./CreateEventForm";
 import { applyFilters } from "@/lib/filterHelper";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const EventsManagement = () => {
-  const { data: eventlist } = useGetAllEventsQuery();
+  const { data: eventlist, isLoading } = useGetAllEventsQuery();
   const { mutate: suspendEvent } = useSuspendEventMutation();
 
   const [selectedFilters, setSelectedFilters] = useState<{
@@ -113,7 +114,28 @@ const EventsManagement = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {filteredEvents?.length ? (
+        {isLoading ? (
+          Array.from({ length: 8 }).map((_, index) => (
+            <div
+              key={index}
+              className="bg-black-400 rounded-xl shadow-md p-4 space-y-4"
+            >
+              <Skeleton className="h-40 w-full rounded-lg bg-black-300" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-3/4 bg-black-300" />
+                <Skeleton className="h-3 w-1/2 bg-black-300" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-full bg-black-300" />
+                <Skeleton className="h-3 w-5/6 bg-black-300" />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Skeleton className="h-9 w-full bg-black-300" />
+                <Skeleton className="h-9 w-full bg-black-300" />
+              </div>
+            </div>
+          ))
+        ) : filteredEvents?.length ? (
           filteredEvents.map((event: any, idx: any) => (
             <EventCard
               key={event.id || idx}

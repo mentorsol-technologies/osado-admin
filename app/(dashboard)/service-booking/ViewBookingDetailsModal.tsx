@@ -1,163 +1,181 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import Modal from "@/components/ui/Modal";
-import BookingDetailsCard from "./BookingDetailsCard";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
+import BookingCarousel from "./BookingCarousel";
+import { useGetProviderDetailsInformationQuery } from "@/hooks/useServiceBookingMutations";
+import { Loader2 } from "lucide-react";
 
 interface ViewProviderDetailsProps {
   open: boolean;
   setOpen: (value: boolean) => void;
+  providerId?: string;
 }
 
 export default function ViewProviderDetails({
   open,
   setOpen,
+  providerId,
 }: ViewProviderDetailsProps) {
-  const dummyData = [
-    {
-      photos: [{ url: "/images/Ellipse 4.png" }],
-      createdAt: "2025-11-25",
-      title: "Music Concert",
-      categories: [
-        { id: "1", name: "Music" },
-        { id: "2", name: "Live" },
-      ],
-      city: "New York",
-      time: "18:30",
-      creator: {
-        name: "John Doe",
-        photoURL: "/images/Ellipse 4.png",
-      },
-      priceType: "USD",
-      price: "50",
-    },
-    {
-      photos: [{ url: "/images/Ellipse 4.png" }],
-      createdAt: "2025-11-26",
-      title: "Art Exhibition",
-      categories: [{ id: "3", name: "Art" }],
-      city: "Los Angeles",
-      time: "14:00",
-      creator: {
-        name: "Jane Smith",
-        photoURL: "/images/Ellipse 4.png",
-      },
-      priceType: "USD",
-      price: "30",
-    },
-    {
-      photos: [{ url: "/images/Ellipse 4.png" }],
-      createdAt: "2025-11-26",
-      title: "Art Exhibition",
-      categories: [{ id: "3", name: "Art" }],
-      city: "Los Angeles",
-      time: "14:00",
-      creator: {
-        name: "Jane Smith",
-        photoURL: "/images/Ellipse 4.png",
-      },
-      priceType: "USD",
-      price: "30",
-    },
-    {
-      photos: [{ url: "/images/Ellipse 4.png" }],
-      createdAt: "2025-11-27",
-      title: "Tech Meetup",
-      categories: [{ id: "4", name: "Technology" }],
-      city: "San Francisco",
-      time: "10:00",
-      creator: {},
-      priceType: "USD",
-      price: "Free",
-    },
+  const { data: providerDetailsData, isLoading } =
+    useGetProviderDetailsInformationQuery(providerId || "");
+
+  const bookingsArray = Array.isArray(providerDetailsData)
+    ? providerDetailsData
+    : [];
+
+  const firstBooking = bookingsArray?.[0];
+  const firstDetail = firstBooking?.bookingServiceDetails?.[0];
+  const providerUser = firstDetail?.providerPortfolio?.user || null;
+
+  const bookingCards = bookingsArray.flatMap(
+    (booking: any) =>
+      booking?.bookingServiceDetails?.map((detail: any) => {
+        const portfolio = detail.providerPortfolio;
+        const pkg = detail.providerPackage;
+        const user = portfolio?.user;
+
+        return {
+          photos:
+            pkg?.providerPackageImages?.map((img: any) => ({ url: img.url })) ||
+            portfolio?.portfolioImages?.map((img: any) => ({ url: img.url })) ||
+            [],
+          createdAt: booking?.bookingDate || "",
+          title: pkg?.packageName || portfolio?.caseTitle || "Service",
+          categories:
+            pkg?.providerPackagesCategories?.map((cat: any) => ({
+              id: cat.id,
+              name: cat.name,
+            })) || [],
+          city: booking?.city || user?.city || "",
+          time: booking?.bookingTime || "",
+          creator: {
+            name: user?.name || "Unknown",
+            photoURL: user?.profileImage || "",
+          },
+          priceType: "KWD",
+          price: pkg?.customPrice || pkg?.minPrice || "N/A",
+          status: booking?.status,
+          bookingId: booking?.id,
+        };
+      }) || []
+  );
+
+  const socialLinks = [
+    { name: "Website", url: providerUser?.websiteUrl },
+    { name: "Instagram", url: providerUser?.instagramUrl },
+    { name: "TikTok", url: providerUser?.tiktokUrl },
+    { name: "Facebook", url: providerUser?.facebookUrl },
   ];
+
   return (
     <Modal open={open} onOpenChange={setOpen} title="" size="xl">
       <div className="p-6 text-white space-y-6 max-h-[90vh] overflow-y-auto">
-        {/* HEADER */}
-        <div className="flex items-center gap-4">
-          <img
-            src="https://randomuser.me/api/portraits/women/30.jpg"
-            className="w-20 h-20 rounded-full object-cover"
-          />
-          <div>
-            <h2 className="text-xl font-semibold">Emily Carter</h2>
-            <p className="text-sm text-gray-400">Professional Photographer</p>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
           </div>
-        </div>
-
-        {/* INFO GRID */}
-        <div className="flex flex-col gap-4">
-          <div className="flex justify-between">
-            <p>Member Since</p>
-            <p className="font-medium">12/07/2025</p>
+        ) : bookingsArray.length === 0 ? (
+          <div className="flex items-center justify-center py-12">
+            <p className="text-gray-400">No provider details found</p>
           </div>
-          <div className="flex justify-between">
-            <p>Location</p>
-            <p className="font-medium">Paris, France</p>
-          </div>
-          <div className="flex justify-between">
-            <p>Status</p>
-            <p className="font-medium">Active</p>
-          </div>
-        </div>
-        <hr />
-
-        {/* BIO */}
-        <div>
-          <h3 className="text-lg font-semibold mb-2">Bio</h3>
-          <p className="text-gray-300 text-sm leading-relaxed">
-            Passionate lifestyle and fashion influencer with over 4 years of
-            experience in creating engaging content for global audiences.
-            Collaborated with top brands in fashion, beauty, and travel,
-            delivering high‑quality visuals and storytelling.
-          </p>
-        </div>
-
-        {/* CONTACT */}
-        <div className="flex gap-10">
-          <p>
-            <p>Email</p> someemail@gmail.com
-          </p>
-          <p>
-            <p>Phone:</p> +965 5584 9201
-          </p>
-        </div>
-
-        {/* SOCIAL ICONS */}
-        <div className="flex gap-3 flex-wrap">
-          {["Instagram", "YouTube", "TikTok", "Snapchat"].map((s) => (
-            <Button key={s}>{s}</Button>
-          ))}
-        </div>
-        <hr />
-
-        {/* BOOKING DETAILS */}
-        <div className="mt-6">
-          <h3 className="text-xl font-semibold mb-4">Booking Details</h3>
-          <div className="flex ">
-            {dummyData.map((event, index) => (
-              <BookingDetailsCard
-                photos={event.photos}
-                createdAt={event.createdAt}
-                title={event.title}
-                categories={event.categories}
-                city={event.city}
-                time={event.time}
-                creator={event.creator}
-                priceType={event.priceType}
-                price={event.price}
-                onClick={() => console.log(`Clicked on ${event.title}`)}
+        ) : (
+          <>
+            {/* HEADER */}
+            <div className="flex items-center gap-4">
+              <img
+                src={
+                  providerUser?.profileImage ||
+                  "https://via.placeholder.com/150"
+                }
+                className="w-20 h-20 rounded-full object-cover"
+                alt={providerUser?.name || "Provider"}
               />
-            ))}
-          </div>
-        </div>
+              <div>
+                <h2 className="text-xl font-semibold">
+                  {providerUser?.name || "Unknown Provider"}
+                </h2>
+                <p className="text-sm text-gray-400">Service Provider</p>
+              </div>
+            </div>
+
+            {/* INFO GRID */}
+            <div className="flex flex-col gap-4">
+              <div className="flex justify-between">
+                <p>Total Bookings</p>
+                <p className="font-medium">{bookingsArray.length}</p>
+              </div>
+
+              {providerUser?.city && (
+                <div className="flex justify-between">
+                  <p> Location</p>
+                  <p className="font-medium">
+                    {providerUser?.city}
+                    {providerUser?.state && providerUser.state !== "string"
+                      ? `, ${providerUser.state}`
+                      : ""}
+                  </p>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <p>Status</p>
+                <p className="font-medium capitalize">
+                  {bookingsArray?.[0]?.status ?? "N/A"}
+                </p>
+              </div>
+            </div>
+            <hr className="border-gray-700" />
+
+            {/* BIO */}
+            {providerUser?.bio && (
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Bio</h3>
+                <p className="text-gray-300 text-sm leading-relaxed">
+                  {providerUser.bio}
+                </p>
+              </div>
+            )}
+
+            {/* CONTACT */}
+            <div className="flex gap-10 flex-wrap">
+              {providerUser?.email && (
+                <div>
+                  <p className="text-gray-400 text-sm">Email</p>
+                  <p className="text-white">{providerUser.email}</p>
+                </div>
+              )}
+              {providerUser?.phoneNumber && (
+                <div>
+                  <p className="text-gray-400 text-sm">Phone</p>
+                  <p className="text-white">{providerUser.phoneNumber}</p>
+                </div>
+              )}
+            </div>
+
+            {/* SOCIAL ICONS */}
+            {socialLinks.length > 0 && (
+              <div className="flex gap-3 flex-wrap">
+                {socialLinks.map((link) => (
+                  <Button
+                    key={link.name}
+                    onClick={() => {
+                      if (link.url && link.url.trim() !== "") {
+                        window.open(link.url, "_blank");
+                      }
+                    }}
+                  >
+                    {link.name}
+                  </Button>
+                ))}
+              </div>
+            )}
+            <hr className="border-gray-700" />
+
+            {/* BOOKING DETAILS CAROUSEL */}
+            {bookingCards.length > 0 && (
+              <BookingCarousel bookingCards={bookingCards} />
+            )}
+          </>
+        )}
       </div>
     </Modal>
   );
