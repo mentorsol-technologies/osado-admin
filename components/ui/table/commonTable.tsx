@@ -22,10 +22,10 @@ export interface Column<T> {
 export interface FilterConfig {
   key: string;
   label: string;
-  options?: string[];        
-  type?: "date";             
-  sortBy?: boolean;          
-  mapTo?: string;       
+  options?: string[];
+  type?: "date";
+  sortBy?: boolean;
+  mapTo?: string;
   customSort?: (a: any, b: any, value: string) => number;
 }
 
@@ -74,7 +74,6 @@ export function CommonTable<T extends { [key: string]: any }>({
     setPage(1);
   };
 
-
   const filteredData = useMemo(() => {
     let result = [...(data || [])];
 
@@ -102,9 +101,15 @@ export function CommonTable<T extends { [key: string]: any }>({
           result.sort((a, b) => {
             switch (value) {
               case "Newest":
-                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                return (
+                  new Date(b.createdAt).getTime() -
+                  new Date(a.createdAt).getTime()
+                );
               case "Oldest":
-                return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+                return (
+                  new Date(a.createdAt).getTime() -
+                  new Date(b.createdAt).getTime()
+                );
               case "A–Z":
                 return a.name.localeCompare(b.name);
               case "Z–A":
@@ -118,17 +123,15 @@ export function CommonTable<T extends { [key: string]: any }>({
       }
 
       // Otherwise, apply value filter
-      result = result.filter(
-        (row) =>
-          String(row[mappedKey] ?? "")
-            .toLowerCase()
-            .includes(value.toLowerCase())
+      result = result.filter((row) =>
+        String(row[mappedKey] ?? "")
+          .toLowerCase()
+          .includes(value.toLowerCase())
       );
     });
 
     return result;
   }, [data, search, selectedFilters, filters]);
-
 
   const totalPages = Math.ceil(filteredData?.length / rowsPerPage);
 
@@ -272,7 +275,7 @@ export function CommonTable<T extends { [key: string]: any }>({
         </div>
 
         {/* Fixed Pagination */}
-        <div className="absolute bottom-[-30px] left-0 w-full bg-black-500 py-3 border-t border-black-400">
+        <div className="absolute bottom-[-20px] left-0 w-full bg-black-500 py-3 border-t border-black-400">
           <Pagination
             totalPages={totalPages || 1}
             currentPage={page}
