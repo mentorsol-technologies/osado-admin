@@ -124,33 +124,20 @@ export default function EditEventModal({
   // ------------------ Handle image upload ------------------
   const handleMultipleFileUpload = async (files: File[]) => {
     try {
-      const uploadedIds: string[] = [];
+      const uploaded: { id: string; url: string }[] = [];
+
       for (const file of files) {
         const { url, fields, uploadId } = await UploadEventLink(file.type);
         await uploadToS3(file, url, fields);
-        uploadedIds.push(uploadId);
 
-        // Construct final image URL from uploadId
-        // Based on the response pattern: https://osado-bucket-vga.s3.me-central-1.amazonaws.com/{uploadId}.{ext}
-        const getFileExtension = (
-          mimeType: string,
-          fileName: string
-        ): string => {
-          if (mimeType.includes("jpeg") || mimeType.includes("jpg"))
-            return "jpeg";
-          if (mimeType.includes("png")) return "png";
-          if (mimeType.includes("svg")) return "svg";
-          if (mimeType.includes("webp")) return "webp";
-          // Fallback to file extension
-          return fileName.split(".").pop()?.toLowerCase() || "jpeg";
-        };
-
-        const fileExtension = getFileExtension(file.type, file.name);
-        const finalUrl = `https://osado-bucket-vga.s3.me-central-1.amazonaws.com/${uploadId}.${fileExtension}`;
-
-        setExistingFiles((prev) => [...prev, { id: uploadId, url: finalUrl }]);
+        uploaded.push({
+          id: uploadId,
+          url: URL.createObjectURL(file), // instant preview
+        });
       }
-      setUploadIds((prev) => [...prev, ...uploadedIds]);
+
+      setUploadIds(uploaded.map((u) => u.id));
+      setExistingFiles(uploaded);
       setValue("image", files);
     } catch (error) {
       console.error("File upload failed:", error);
