@@ -19,10 +19,14 @@ import { Badge } from "@/components/ui/badge";
 import Upload from "@/components/ui/upload";
 
 import { uploadToS3 } from "@/lib/s3Upload";
-import { useCategoriesQuery, useUpdateEventMutation } from "@/hooks/useEventManagementMutations";
+import {
+  useCategoriesQuery,
+  useUpdateEventMutation,
+} from "@/hooks/useEventManagementMutations";
 import { UploadEventLink } from "@/services/event-management/EventManagementServices";
 import TimeRangePicker from "@/components/ui/commonComponent/TimeRangePicker";
 import { Textarea } from "@/components/ui/textarea";
+import GooglePlacesAutocomplete from "@/components/ui/GooglePlacesAutocomplete";
 
 // ------------------ Schema ------------------
 const schema = z.object({
@@ -38,6 +42,8 @@ const schema = z.object({
   status: z.string().min(1, "Select a status"),
   categoryId: z.string().array().optional(),
   bio: z.string().min(1, "Bio is required"),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -70,7 +76,9 @@ export default function EditEventModal({
 
   const [uploadIds, setUploadIds] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [existingFiles, setExistingFiles] = useState<{ id: string; url: string }[]>([]);
+  const [existingFiles, setExistingFiles] = useState<
+    { id: string; url: string }[]
+  >([]);
 
   // ------------------ Prefill form ------------------
   useEffect(() => {
@@ -94,9 +102,10 @@ export default function EditEventModal({
 
       setSelectedCategories(categoryIds);
       setUploadIds(photoIds);
-      setExistingFiles(
-        eventData.photos?.map((p: any) => ({ id: p.id, url: p.url })) || []
-      );
+
+      const photos =
+        eventData.photos?.map((p: any) => ({ id: p.id, url: p.url })) || [];
+      setExistingFiles(photos);
     }
   }, [eventData, categories, reset]);
 
@@ -120,12 +129,32 @@ export default function EditEventModal({
         const { url, fields, uploadId } = await UploadEventLink(file.type);
         await uploadToS3(file, url, fields);
         uploadedIds.push(uploadId);
-        setExistingFiles((prev) => [...prev, { id: uploadId, url }]);
+
+        // Construct final image URL from uploadId
+        // Based on the response pattern: https://osado-bucket-vga.s3.me-central-1.amazonaws.com/{uploadId}.{ext}
+        const getFileExtension = (
+          mimeType: string,
+          fileName: string
+        ): string => {
+          if (mimeType.includes("jpeg") || mimeType.includes("jpg"))
+            return "jpeg";
+          if (mimeType.includes("png")) return "png";
+          if (mimeType.includes("svg")) return "svg";
+          if (mimeType.includes("webp")) return "webp";
+          // Fallback to file extension
+          return fileName.split(".").pop()?.toLowerCase() || "jpeg";
+        };
+
+        const fileExtension = getFileExtension(file.type, file.name);
+        const finalUrl = `https://osado-bucket-vga.s3.me-central-1.amazonaws.com/${uploadId}.${fileExtension}`;
+
+        setExistingFiles((prev) => [...prev, { id: uploadId, url: finalUrl }]);
       }
       setUploadIds((prev) => [...prev, ...uploadedIds]);
       setValue("image", files);
     } catch (error) {
       console.error("File upload failed:", error);
+      toast.error("Failed to upload image(s)");
     }
   };
 
@@ -149,6 +178,8 @@ export default function EditEventModal({
       bio: data.bio,
       price: Number(data.price),
       priceType: data.priceType,
+      latitude: String(data.latitude),
+      longitude: String(data.longitude),
     };
 
     console.log("Updating Event:", payload);
@@ -169,7 +200,6 @@ export default function EditEventModal({
     );
   };
 
-
   return (
     <Modal
       open={open}
@@ -179,6 +209,7 @@ export default function EditEventModal({
           reset();
           setSelectedCategories([]);
           setExistingFiles([]);
+          setUploadIds([]);
         }
       }}
       title="Edit Event"
@@ -214,12 +245,33 @@ export default function EditEventModal({
             }}
           />
         </div>
+        {existingFiles.length > 0 && (
+          <div className="mt-2">
+            <div className="flex flex-wrap gap-2">
+              {existingFiles.map((file) => (
+                <div key={file.id} className="relative">
+                  <img
+                    src={file.url}
+                    alt="Event Preview"
+                    className="w-20 h-20 rounded-md border object-cover"
+                    onError={(e) => {
+                      console.error("Failed to load image:", file.url);
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Title */}
         <div className="mb-4">
           <label className="block text-sm mb-1">Title</label>
           <CommonInput placeholder="Enter title" {...register("title")} />
-          {errors.title && <p className="text-xs text-red-500">{errors.title.message}</p>}
+          {errors.title && (
+            <p className="text-xs text-red-500">{errors.title.message}</p>
+          )}
         </div>
 
         {/* Price & Price type */}
@@ -230,12 +282,19 @@ export default function EditEventModal({
               placeholder="Enter Price"
               {...register("price", { valueAsNumber: true })}
             />
-            {errors.price && <p className="text-xs text-red-500">{errors.price.message}</p>}
+            {errors.price && (
+              <p className="text-xs text-red-500">{errors.price.message}</p>
+            )}
           </div>
           <div>
             <label className="block text-sm mb-1">Price Type</label>
-            <CommonInput placeholder="Enter Price Type" {...register("priceType")} />
-            {errors.priceType && <p className="text-xs text-red-500">{errors.priceType.message}</p>}
+            <CommonInput
+              placeholder="Enter Price Type"
+              {...register("priceType")}
+            />
+            {errors.priceType && (
+              <p className="text-xs text-red-500">{errors.priceType.message}</p>
+            )}
           </div>
         </div>
 
@@ -244,7 +303,9 @@ export default function EditEventModal({
           <div>
             <label className="block text-sm mb-1">Date</label>
             <CommonInput type="date" {...register("date")} />
-            {errors.date && <p className="text-xs text-red-500">{errors.date.message}</p>}
+            {errors.date && (
+              <p className="text-xs text-red-500">{errors.date.message}</p>
+            )}
           </div>
           <div>
             <TimeRangePicker
@@ -259,35 +320,35 @@ export default function EditEventModal({
         {/* Country & City */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="block text-sm mb-1">Country</label>
-            <Select
-              onValueChange={(val) => setValue("country", val)}
-              defaultValue={eventData?.country}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select country" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Kuwait">Kuwait</SelectItem>
-                <SelectItem value="USA">USA</SelectItem>
-                <SelectItem value="UAE">UAE</SelectItem>
-              </SelectContent>
-            </Select>
-            {errors.country && <p className="text-xs text-red-500">{errors.country.message}</p>}
+            <label className="block text-sm mb-1">Location</label>
+            <GooglePlacesAutocomplete
+              value={watch("location")}
+              onChange={(v) => setValue("location", v)}
+              onPlaceSelect={(place) => {
+                if (place.city) setValue("city", place.city);
+                if (place.country) setValue("country", place.country);
+                if (place.lat) setValue("latitude", place.lat);
+                if (place.lng) setValue("longitude", place.lng);
+              }}
+            />
           </div>
           <div>
-            <label className="block text-sm mb-1">City</label>
-            <CommonInput placeholder="Enter city" {...register("city")} />
-            {errors.city && <p className="text-xs text-red-500">{errors.city.message}</p>}
+            <label className="block text-sm mb-1">Country</label>
+            <CommonInput {...register("country")} />
+            {errors.country && (
+              <p className="text-xs text-red-500">{errors.country.message}</p>
+            )}
           </div>
         </div>
 
         {/* Location & Status */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="block text-sm mb-1">Location</label>
-            <CommonInput placeholder="Enter location" {...register("location")} />
-            {errors.location && <p className="text-xs text-red-500">{errors.location.message}</p>}
+            <label className="block text-sm mb-1">City</label>
+            <CommonInput {...register("city")} />
+            {errors.city && (
+              <p className="text-xs text-red-500">{errors.city.message}</p>
+            )}
           </div>
           <div>
             <label className="block text-sm mb-1">Status</label>
@@ -303,7 +364,9 @@ export default function EditEventModal({
                 <SelectItem value="INACTIVE">Inactive</SelectItem>
               </SelectContent>
             </Select>
-            {errors.status && <p className="text-xs text-red-500">{errors.status.message}</p>}
+            {errors.status && (
+              <p className="text-xs text-red-500">{errors.status.message}</p>
+            )}
           </div>
         </div>
 
@@ -315,10 +378,11 @@ export default function EditEventModal({
               <Badge
                 key={cat.id}
                 onClick={() => toggleCategory(cat.id)}
-                className={`flex items-center gap-2 cursor-pointer px-3 py-2 border transition-all ${selectedCategories.includes(cat.id)
-                  ? "bg-red-600 text-white border-red-700"
-                  : "bg-gray-800 text-gray-300 border-gray-700 hover:bg-gray-700"
-                  }`}
+                className={`flex items-center gap-2 cursor-pointer px-3 py-2 border transition-all ${
+                  selectedCategories.includes(cat.id)
+                    ? "bg-red-600 text-white border-red-700"
+                    : "bg-gray-800 text-gray-300 border-gray-700 hover:bg-gray-700"
+                }`}
               >
                 {cat.iconUrl && (
                   <img
@@ -332,7 +396,9 @@ export default function EditEventModal({
             ))}
           </div>
           {errors.categoryId && (
-            <p className="text-xs text-red-500 mt-1">{errors.categoryId.message}</p>
+            <p className="text-xs text-red-500 mt-1">
+              {errors.categoryId.message}
+            </p>
           )}
         </div>
 
@@ -340,7 +406,9 @@ export default function EditEventModal({
         <div className="mb-4">
           <label className="block text-sm mb-1">Bio</label>
           <Textarea placeholder="Enter bio..." {...register("bio")} />
-          {errors.bio && <p className="text-xs text-red-500">{errors.bio.message}</p>}
+          {errors.bio && (
+            <p className="text-xs text-red-500">{errors.bio.message}</p>
+          )}
         </div>
       </div>
     </Modal>

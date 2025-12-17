@@ -25,6 +25,7 @@ import {
   useCreateEventMutation,
 } from "@/hooks/useEventManagementMutations";
 import TimeRangePicker from "@/components/ui/commonComponent/TimeRangePicker";
+import GooglePlacesAutocomplete from "@/components/ui/GooglePlacesAutocomplete";
 
 // ✅ 1. Update schema: categoryId is now an array
 const schema = z.object({
@@ -43,6 +44,8 @@ const schema = z.object({
   status: z.string().min(1, "Select a status"),
   categoryId: z.string().array().optional(),
   bio: z.string().min(1, "Bio is required"),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -134,6 +137,8 @@ export default function AddEventModal({ open, setOpen }: AddEventModalProps) {
       bio: data.bio,
       price: Number(data.price),
       priceType: data.priceType,
+      latitude: String(data.latitude),
+      longitude: String(data.longitude),
     };
 
     console.log("Submitting payload:", payload);
@@ -253,26 +258,23 @@ export default function AddEventModal({ open, setOpen }: AddEventModalProps) {
         {/* Country & City */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="block text-sm mb-1">Country</label>
-            <Select onValueChange={(val) => setValue("country", val)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select country" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Kuwait">Kuwait</SelectItem>
-                <SelectItem value="USA">USA</SelectItem>
-                <SelectItem value="UAE">UAE</SelectItem>
-              </SelectContent>
-            </Select>
-            {errors.country && (
-              <p className="text-xs text-red-500">{errors.country.message}</p>
-            )}
+            <label className="block text-sm mb-1">Location</label>
+            <GooglePlacesAutocomplete
+              value={watch("location")}
+              onChange={(v) => setValue("location", v)}
+              onPlaceSelect={(place) => {
+                if (place.city) setValue("city", place.city);
+                if (place.country) setValue("country", place.country);
+                if (place.lat) setValue("latitude", place.lat);
+                if (place.lng) setValue("longitude", place.lng);
+              }}
+            />
           </div>
           <div>
-            <label className="block text-sm mb-1">City</label>
-            <CommonInput placeholder="Enter city" {...register("city")} />
-            {errors.city && (
-              <p className="text-xs text-red-500">{errors.city.message}</p>
+            <label className="block text-sm mb-1">Country</label>
+            <CommonInput {...register("country")} />
+            {errors.country && (
+              <p className="text-xs text-red-500">{errors.country.message}</p>
             )}
           </div>
         </div>
@@ -280,13 +282,10 @@ export default function AddEventModal({ open, setOpen }: AddEventModalProps) {
         {/* Location & Status */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="block text-sm mb-1">Location</label>
-            <CommonInput
-              placeholder="Enter location"
-              {...register("location")}
-            />
-            {errors.location && (
-              <p className="text-xs text-red-500">{errors.location.message}</p>
+            <label className="block text-sm mb-1">City</label>
+            <CommonInput {...register("city")} />
+            {errors.city && (
+              <p className="text-xs text-red-500">{errors.city.message}</p>
             )}
           </div>
           <div>
