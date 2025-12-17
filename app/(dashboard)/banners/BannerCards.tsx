@@ -73,7 +73,14 @@ export default function BannerCard({
 
           <div className="flex justify-between flex-wrap">
             <span className="text-white">Target Audience</span>
-            <span>{displayCategories}</span>
+            <span className=" flex flex-wrap gap-2">
+              {(Array.isArray(displayCategories)
+                ? displayCategories
+                : displayCategories?.split(",")
+              )?.map((category: string, index: number) => (
+                <span key={index}>{category.trim()}</span>
+              ))}
+            </span>
           </div>
 
           <div className="flex justify-between flex-wrap">
