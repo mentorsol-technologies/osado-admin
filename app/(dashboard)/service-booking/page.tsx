@@ -102,7 +102,7 @@ export default function ServiceBookingPage() {
       key: "status",
       label: "Status",
       mapTo: "status",
-      options: ["All", "Confirmed", "Pending", "Canceled"],
+      options: ["All", "Accepted", "Pending", "Cancelled"],
     },
 
     {

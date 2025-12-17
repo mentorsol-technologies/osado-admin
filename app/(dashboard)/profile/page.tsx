@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Pencil, Loader2 } from "lucide-react";
@@ -13,6 +16,38 @@ import { uploadToS3 } from "@/lib/s3Upload";
 import { getUserUploadLink } from "@/services/users/userServices";
 import { toast } from "react-toastify";
 
+// Zod schema for profile form validation
+const profileSchema = z.object({
+  name: z
+    .string()
+    .min(1, "Full name is required")
+    .min(2, "Full name must be at least 2 characters")
+    .regex(/^[a-zA-Z\s]+$/, "Full name can only contain letters and spaces"),
+  surName: z
+    .string()
+    .min(1, "Surname is required")
+    .min(2, "Surname must be at least 2 characters")
+    .regex(/^[a-zA-Z\s]+$/, "Surname can only contain letters and spaces"),
+  email: z
+    .string()
+    .min(1, "Email is required")
+    .email("Please enter a valid email address"),
+  phoneNumber: z
+    .string()
+    .refine(
+      (val) => !val || val.trim() === "" || /^\d{8}$/.test(val),
+      "Phone number must be exactly 8 digits (Kuwait format)"
+    )
+    .optional(),
+  city: z.string().optional(),
+  callingCode: z.string().optional(),
+  countryCode: z.string().optional(),
+  roleId: z.string().optional(),
+  authProvider: z.string().optional(),
+});
+
+type ProfileFormData = z.infer<typeof profileSchema>;
+
 export default function ProfilePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -22,17 +57,28 @@ export default function ProfilePage() {
   const [profileImage, setProfileImage] = useState<string>("");
   const [photoId, setPhotoId] = useState<string>("");
 
-  const [formData, setFormData] = useState({
-    name: "",
-    surName: "",
-    email: "",
-    phoneNumber: "",
-    city: "",
-    callingCode: "",
-    countryCode: "",
-    roleId: "",
-    authProvider: "",
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    watch,
+  } = useForm<ProfileFormData>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      name: "",
+      surName: "",
+      email: "",
+      phoneNumber: "",
+      city: "",
+      callingCode: "",
+      countryCode: "",
+      roleId: "",
+      authProvider: "",
+    },
   });
+
+  const name = watch("name");
 
   /* Populate data */
   useEffect(() => {
@@ -40,7 +86,7 @@ export default function ProfilePage() {
 
     const user = adminData?.data || adminData;
 
-    setFormData({
+    reset({
       name: user.name || "",
       surName: user.surName || "",
       email: user.email || "",
@@ -55,14 +101,7 @@ export default function ProfilePage() {
     if (user.photoURL) {
       setProfileImage(user.photoURL || user.photo?.url);
     }
-  }, [adminData]);
-
-  const handleInputChange = (key: keyof typeof formData, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
+  }, [adminData, reset]);
 
   const handlePencilClick = () => {
     fileInputRef.current?.click();
@@ -85,11 +124,9 @@ export default function ProfilePage() {
   };
 
   /* Submit */
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const onSubmit = (data: ProfileFormData) => {
     const payload: Record<string, any> = {
-      ...formData,
+      ...data,
       ...(photoId && { photoId }),
     };
 
@@ -114,7 +151,7 @@ export default function ProfilePage() {
             <Avatar className="h-28 w-28">
               <AvatarImage src={profileImage} />
               <AvatarFallback>
-                {formData.name ? formData.name[0].toUpperCase() : "A"}
+                {name ? name[0].toUpperCase() : "A"}
               </AvatarFallback>
             </Avatar>
 
@@ -137,43 +174,49 @@ export default function ProfilePage() {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <CommonInput
               label="Full Name"
-              value={formData.name}
-              onChange={(e) => handleInputChange("name", e.target.value)}
+              {...register("name")}
+              error={!!errors.name}
+              errorMessage={errors.name?.message}
             />
 
             <CommonInput
               label="Surname"
-              value={formData.surName}
-              onChange={(e) => handleInputChange("surName", e.target.value)}
+              {...register("surName")}
+              error={!!errors.surName}
+              errorMessage={errors.surName?.message}
             />
 
             <CommonInput
               label="Email"
               type="email"
-              value={formData.email}
-              onChange={(e) => handleInputChange("email", e.target.value)}
+              {...register("email")}
+              error={!!errors.email}
+              errorMessage={errors.email?.message}
             />
 
             <CommonInput
               label="Phone Number"
-              value={formData.phoneNumber}
-              onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
+              {...register("phoneNumber")}
+              error={!!errors.phoneNumber}
+              errorMessage={errors.phoneNumber?.message}
             />
 
             <CommonInput
               label="City"
-              value={formData.city}
-              onChange={(e) => handleInputChange("city", e.target.value)}
+              {...register("city")}
+              error={!!errors.city}
+              errorMessage={errors.city?.message}
             />
 
             <CommonInput
               label="Calling Code"
-              value={formData.callingCode}
-              onChange={(e) => handleInputChange("callingCode", e.target.value)}
+              {...register("callingCode")}
+              error={!!errors.callingCode}
+              errorMessage={errors.callingCode?.message}
             />
           </div>
 

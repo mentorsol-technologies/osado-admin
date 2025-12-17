@@ -86,7 +86,7 @@ const ServiceProviders = () => {
             Service Providers
           </h2>
           <Button
-            onClick={handleAnalyticsClick}
+            // onClick={handleAnalyticsClick}
             leftIcon={
               <Image
                 src="/images/Vector (1).svg"
@@ -112,52 +112,50 @@ const ServiceProviders = () => {
 
         {/* Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-          {isLoading ? (
-            Array.from({ length: 8 }).map((_, index) => (
-              <div
-                key={index}
-                className="bg-black-400 rounded-2xl shadow-md p-5 space-y-4"
-              >
-                <div className="flex flex-col items-center space-y-4">
-                  <Skeleton className="w-24 h-24 rounded-full bg-black-300" />
-                  <Skeleton className="h-4 w-1/2 bg-black-300" />
-                  <div className="w-full space-y-2">
-                    <div className="flex justify-between">
-                      <Skeleton className="h-3 w-1/3 bg-black-300" />
-                      <Skeleton className="h-3 w-1/4 bg-black-300" />
-                    </div>
-                    <div className="flex justify-between">
-                      <Skeleton className="h-3 w-1/3 bg-black-300" />
-                      <Skeleton className="h-3 w-1/4 bg-black-300" />
-                    </div>
-                    <div className="flex justify-between">
-                      <Skeleton className="h-3 w-1/3 bg-black-300" />
-                      <Skeleton className="h-3 w-1/4 bg-black-300" />
+          {isLoading
+            ? Array.from({ length: 8 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="bg-black-400 rounded-2xl shadow-md p-5 space-y-4"
+                >
+                  <div className="flex flex-col items-center space-y-4">
+                    <Skeleton className="w-24 h-24 rounded-full bg-black-300" />
+                    <Skeleton className="h-4 w-1/2 bg-black-300" />
+                    <div className="w-full space-y-2">
+                      <div className="flex justify-between">
+                        <Skeleton className="h-3 w-1/3 bg-black-300" />
+                        <Skeleton className="h-3 w-1/4 bg-black-300" />
+                      </div>
+                      <div className="flex justify-between">
+                        <Skeleton className="h-3 w-1/3 bg-black-300" />
+                        <Skeleton className="h-3 w-1/4 bg-black-300" />
+                      </div>
+                      <div className="flex justify-between">
+                        <Skeleton className="h-3 w-1/3 bg-black-300" />
+                        <Skeleton className="h-3 w-1/4 bg-black-300" />
+                      </div>
                     </div>
                   </div>
+                  <div className="flex gap-3 w-full pt-2">
+                    <Skeleton className="h-9 w-full bg-black-300" />
+                    <Skeleton className="h-9 w-full bg-black-300" />
+                  </div>
                 </div>
-                <div className="flex gap-3 w-full pt-2">
-                  <Skeleton className="h-9 w-full bg-black-300" />
-                  <Skeleton className="h-9 w-full bg-black-300" />
-                </div>
-              </div>
-            ))
-          ) : (
-            filteredServiceProviders?.map((provider: any) => (
-              <ProvidersCard
-                key={provider.id}
-                {...provider}
-                onEdit={() => {
-                  setSelectedProviders(provider);
-                  setEditOpen(true);
-                }}
-                onDelete={() => {
-                  setSelectedProviders(provider);
-                  setDeleteOpen(true);
-                }}
-              />
-            ))
-          )}
+              ))
+            : filteredServiceProviders?.map((provider: any) => (
+                <ProvidersCard
+                  key={provider.id}
+                  {...provider}
+                  onEdit={() => {
+                    setSelectedProviders(provider);
+                    setEditOpen(true);
+                  }}
+                  onDelete={() => {
+                    setSelectedProviders(provider);
+                    setDeleteOpen(true);
+                  }}
+                />
+              ))}
         </div>
       </div>
 

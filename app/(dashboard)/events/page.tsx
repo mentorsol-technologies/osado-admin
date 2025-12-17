@@ -1,6 +1,6 @@
 "use client";
 import FiltersBar, { Filter } from "@/components/ui/commonComponent/FiltersBar";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import EventCard from "./EventCard";
 import EventInfoModal from "./EventInfoModalForm";
 import SuspendedEventModal from "./SuspendEventModal";
@@ -14,6 +14,7 @@ import { Plus } from "lucide-react";
 import AddEventModal from "./CreateEventForm";
 import { applyFilters } from "@/lib/filterHelper";
 import { Skeleton } from "@/components/ui/skeleton";
+import Pagination from "@/components/ui/pagination";
 
 const EventsManagement = () => {
   const { data: eventlist, isLoading } = useGetAllEventsQuery();
@@ -24,6 +25,7 @@ const EventsManagement = () => {
   }>({});
   const [search, setSearch] = useState("");
   const [openModal, setOpenModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
@@ -74,6 +76,20 @@ const EventsManagement = () => {
     });
   }, [eventlist?.data, search, selectedFilters]);
 
+  /* -------------------- PAGINATION -------------------- */
+  const pageSize = 8;
+  const totalPages = Math.ceil(filteredEvents.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedEvents = filteredEvents.slice(
+    startIndex,
+    startIndex + pageSize
+  );
+
+  // Reset to page 1 when filters or search change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, selectedFilters]);
+
   const handleFilterChange = (key: string, value: string) => {
     setSelectedFilters((prev) => {
       if (prev[key] === value || value === "All" || value === "") {
@@ -86,7 +102,7 @@ const EventsManagement = () => {
   };
 
   return (
-    <div className="p-6 bg-black-500 !min-h-[calc(100vh-120px)]  rounded-lg">
+    <div className="p-6 bg-black-500 !min-h-[calc(100vh-120px)] rounded-lg flex flex-col">
       <div className="flex justify-between items-center mb-6">
         <h2 className="lg:text-3xl text-xl  font-medium text-white">
           Events Management
@@ -108,54 +124,63 @@ const EventsManagement = () => {
           search={search}
           onSearchChange={(val) => {
             setSearch(val);
-            // reset page if pagination
           }}
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {isLoading ? (
-          Array.from({ length: 8 }).map((_, index) => (
-            <div
-              key={index}
-              className="bg-black-400 rounded-xl shadow-md p-4 space-y-4"
-            >
-              <Skeleton className="h-40 w-full rounded-lg bg-black-300" />
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-3/4 bg-black-300" />
-                <Skeleton className="h-3 w-1/2 bg-black-300" />
+      <div className="flex-1">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {isLoading ? (
+            Array.from({ length: 8 }).map((_, index) => (
+              <div
+                key={index}
+                className="bg-black-400 rounded-xl shadow-md p-4 space-y-4"
+              >
+                <Skeleton className="h-40 w-full rounded-lg bg-black-300" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-3/4 bg-black-300" />
+                  <Skeleton className="h-3 w-1/2 bg-black-300" />
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-3 w-full bg-black-300" />
+                  <Skeleton className="h-3 w-5/6 bg-black-300" />
+                </div>
+                <div className="flex gap-3 pt-2">
+                  <Skeleton className="h-9 w-full bg-black-300" />
+                  <Skeleton className="h-9 w-full bg-black-300" />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Skeleton className="h-3 w-full bg-black-300" />
-                <Skeleton className="h-3 w-5/6 bg-black-300" />
-              </div>
-              <div className="flex gap-3 pt-2">
-                <Skeleton className="h-9 w-full bg-black-300" />
-                <Skeleton className="h-9 w-full bg-black-300" />
-              </div>
-            </div>
-          ))
-        ) : filteredEvents?.length ? (
-          filteredEvents.map((event: any, idx: any) => (
-            <EventCard
-              key={event.id || idx}
-              {...event}
-              onClick={() => handleCardClick(event)}
-              onEdit={() => {
-                setSelectedEvent(event);
-                setIsEditModalOpen(true);
-              }}
-              onSuspend={() => {
-                setSelectedEvent(event);
-                setSuspendOpen(true);
-              }}
-            />
-          ))
-        ) : (
-          <p className="text-white text-center col-span-full">
-            No events found.
-          </p>
-        )}
+            ))
+          ) : paginatedEvents?.length ? (
+            paginatedEvents.map((event: any, idx: any) => (
+              <EventCard
+                key={event.id || idx}
+                {...event}
+                onClick={() => handleCardClick(event)}
+                onEdit={() => {
+                  setSelectedEvent(event);
+                  setIsEditModalOpen(true);
+                }}
+                onSuspend={() => {
+                  setSelectedEvent(event);
+                  setSuspendOpen(true);
+                }}
+              />
+            ))
+          ) : (
+            <p className="text-white text-center col-span-full">
+              No events found.
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-auto pt-8">
+        <Pagination
+          totalPages={totalPages}
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+        />
       </div>
       {/* Event Info Modal */}
       {selectedEvent && (

@@ -16,11 +16,13 @@ import {
 import Modal from "@/components/ui/Modal";
 import CommonInput from "@/components/ui/input";
 import Upload from "@/components/ui/upload";
-import { useCreateInfluencerRankMutation, useUploadInfluencerRankFileMutation } from "@/hooks/useInfluencersRankMutations";
-import { toast } from 'react-toastify';
+import {
+  useCreateInfluencerRankMutation,
+  useUploadInfluencerRankFileMutation,
+} from "@/hooks/useInfluencersRankMutations";
+import { toast } from "react-toastify";
 import { getInfluencersRankUploadLink } from "@/services/influencers-rank-table/InfluencersRankServices";
 import { uploadToS3 } from "@/lib/s3Upload";
-
 
 const schema = z.object({
   title: z.string().min(2, "Title is required"),
@@ -51,11 +53,12 @@ export default function AddRankModal({
   selectedInfluencers,
   onSave,
 }: AddRankModalProps) {
-  const { mutate: createInfluencersRank, isPending } = useCreateInfluencerRankMutation();
-  const { mutateAsync: uploadInfluencersRankFile, isPending: isUploading } = useUploadInfluencerRankFileMutation();
+  const { mutate: createInfluencersRank, isPending } =
+    useCreateInfluencerRankMutation();
+  const { mutateAsync: uploadInfluencersRankFile, isPending: isUploading } =
+    useUploadInfluencerRankFileMutation();
   const [uploadIds, setUploadIds] = useState<string[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
 
   const {
     register,
@@ -68,7 +71,8 @@ export default function AddRankModal({
     defaultValues: {
       title: selectedInfluencers?.title || "",
       status: selectedInfluencers?.status || "Active",
-      noOfEventsVisited: selectedInfluencers?.noOfEventsVisited?.toString() || "",
+      noOfEventsVisited:
+        selectedInfluencers?.noOfEventsVisited?.toString() || "",
       noOfReviews: selectedInfluencers?.noOfReviews?.toString() || "",
     },
   });
@@ -106,7 +110,7 @@ export default function AddRankModal({
       noOfReviews: "",
     });
     setPreviewUrl(null);
-    setUploadIds([])
+    setUploadIds([]);
   };
 
   const onSubmit = async (data: FormData) => {
@@ -117,9 +121,6 @@ export default function AddRankModal({
         noOfEventsVisited: Number(data.noOfEventsVisited),
         noOfReviews: Number(data.noOfReviews),
         iconId: uploadIds.length ? uploadIds[0] : undefined,
-
-
-
       };
 
       createInfluencersRank(payload, {
@@ -150,7 +151,11 @@ export default function AddRankModal({
       title="Create Rank"
       footer={
         <div className="flex flex-col sm:flex-row gap-3 w-full">
-          <Button onClick={handleSubmit(onSubmit)} className="flex-1" disabled={isPending || isUploading}>
+          <Button
+            onClick={handleSubmit(onSubmit)}
+            className="flex-1"
+            disabled={isPending || isUploading}
+          >
             {isPending ? "Submitting..." : "Submit"}
           </Button>
           <Button
@@ -169,14 +174,18 @@ export default function AddRankModal({
         <div className="flex-1">
           <label className="block text-sm mb-1">Title</label>
           <CommonInput placeholder="Write title" {...register("title")} />
-          {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title.message}</p>}
+          {errors.title && (
+            <p className="text-xs text-red-500 mt-1">{errors.title.message}</p>
+          )}
         </div>
 
         <div className="flex-1">
           <label className="block text-sm mb-1">Status</label>
           <Select
             defaultValue={selectedInfluencers?.status || "Active"}
-            onValueChange={(val) => setValue("status", val as "Active" | "Inactive")}
+            onValueChange={(val) =>
+              setValue("status", val as "Active" | "Inactive")
+            }
           >
             <SelectTrigger>
               <SelectValue placeholder="Select Status" />
@@ -186,7 +195,9 @@ export default function AddRankModal({
               <SelectItem value="Inactive">Inactive</SelectItem>
             </SelectContent>
           </Select>
-          {errors.status && <p className="text-xs text-red-500 mt-1">{errors.status.message}</p>}
+          {errors.status && (
+            <p className="text-xs text-red-500 mt-1">{errors.status.message}</p>
+          )}
         </div>
       </div>
 
@@ -213,17 +224,24 @@ export default function AddRankModal({
               ))}
             </SelectContent>
           </Select>
-          {errors.noOfEventsVisited && <p className="text-xs text-red-500 mt-1">{errors.noOfEventsVisited.message}</p>}
+          {errors.noOfEventsVisited && (
+            <p className="text-xs text-red-500 mt-1">
+              {errors.noOfEventsVisited.message}
+            </p>
+          )}
         </div>
 
         <div className="flex-1">
-          <label className="block text-sm mb-1">Number of positive reviews</label>
+          <label className="block text-sm mb-1">
+            Number of positive reviews
+          </label>
           <Select
             defaultValue={
               selectedInfluencers?.noOfReviews
                 ? selectedInfluencers.noOfReviews.toString()
                 : ""
-            } onValueChange={(val) => setValue("noOfReviews", val)}
+            }
+            onValueChange={(val) => setValue("noOfReviews", val)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select Number of positive reviews" />
@@ -236,7 +254,11 @@ export default function AddRankModal({
               ))}
             </SelectContent>
           </Select>
-          {errors.noOfReviews && <p className="text-xs text-red-500 mt-1">{errors.noOfReviews.message}</p>}
+          {errors.noOfReviews && (
+            <p className="text-xs text-red-500 mt-1">
+              {errors.noOfReviews.message}
+            </p>
+          )}
         </div>
       </div>
 
@@ -252,11 +274,11 @@ export default function AddRankModal({
         />
 
         {/* Preview */}
-        {previewUrl && (
+        {/* {previewUrl && (
           <div className="mt-2">
             <img src={previewUrl} className="w-16 h-16 rounded-md border" alt="preview" />
           </div>
-        )}
+        )} */}
       </div>
     </Modal>
   );

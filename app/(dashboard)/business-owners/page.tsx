@@ -131,7 +131,7 @@ export default function ServiceBookingPage() {
           mobileView="card"
           data={tableData}
           columns={columns}
-          rowsPerPage={5}
+          rowsPerPage={10}
           filters={filters}
           searchable
           renderCardActions={(row) => (

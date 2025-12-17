@@ -140,7 +140,7 @@ export default function SubAdminPage() {
           mobileView="card"
           data={data}
           columns={columns}
-          rowsPerPage={5}
+          rowsPerPage={10}
           filters={filters}
           searchable
           renderCardActions={(row) => (
