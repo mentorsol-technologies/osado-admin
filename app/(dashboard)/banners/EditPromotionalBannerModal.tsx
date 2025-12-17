@@ -107,7 +107,7 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
       });
 
       setPreviewUrl(bannerData.photoURL || "");
-      setUploadIds(bannerData.photoId ? [bannerData.photoId] : []);
+      setUploadIds([]);
       setSelectedCategories(bannerData.displayCategories || ["All"]);
     }
   }, [bannerData, reset]);
@@ -132,9 +132,12 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
         const { url, fields, uploadId } = await getBannerUploadLink(file.type);
         await uploadToS3(file, url, fields);
         uploadedIds.push(uploadId);
+
+        const filePreview = URL.createObjectURL(file);
+        setPreviewUrl(filePreview);
       }
 
-      setUploadIds((prev) => [...prev, ...uploadedIds]);
+      setUploadIds(uploadedIds);
       setValue("image", files);
     } catch (err) {
       console.error("Upload failed", err);
@@ -145,15 +148,19 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
       console.error("Banner ID missing for update");
       return;
     }
+    const finalPhotoId =
+      uploadIds.length > 0 ? uploadIds[0] : bannerData?.photoId;
 
-    // If no new upload happened, fall back to the existing banner photoId
-    const finalPhotoId = uploadIds || bannerData?.photoId;
+    if (!finalPhotoId) {
+      console.error("Photo ID is required");
+      return;
+    }
 
     const payload = {
       bannerTitle: data.bannerTitle,
       startDate: new Date(data.startDate).toISOString(),
       endDate: new Date(data.endDate).toISOString(),
-      photoId: finalPhotoId[0],
+      photoId: finalPhotoId,
       displayCategories: selectedCategories,
       status: data.status.toLowerCase(),
       linkType: data.linkType,
@@ -163,7 +170,11 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
     updateBanner(
       { id: bannerData.id, data: payload },
       {
-        onSuccess: () => setOpen(false),
+        onSuccess: () => {
+          setOpen(false);
+          setUploadIds([]);
+          setPreviewUrl(null);
+        },
       }
     );
   };
