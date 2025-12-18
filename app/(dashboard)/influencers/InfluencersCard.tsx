@@ -12,7 +12,7 @@ interface InfluencerCardProps {
   title: string;
   photoURL?: string;
   name: string;
-  rating: number;
+  totalReviews: number;
   createdAt: string;
   location: string;
   status: string;
@@ -24,7 +24,7 @@ export default function InfluencerCard({
   title,
   photoURL,
   name,
-  rating,
+  totalReviews,
   createdAt,
   location,
   status,
@@ -57,17 +57,16 @@ export default function InfluencerCard({
                 <span className="p-1 bg-red-700 rounded-lg">
                   <Icon className="text-white h-4 w-4" />
                 </span>
-                <span className="font-semibold">{title}</span>
+                <span className="font-semibold">{title || "Platinum"}</span>
               </span>
               <span className="flex items-center flex-wrap">
-                <span>{rating?.toFixed(1)}/5</span>
+                <span>{totalReviews?.toFixed(1)}/5</span>
                 <Star className="w-4 h-4 text-red-500 ml-1 fill-red-500" />
               </span>
             </p>
             <p className="flex justify-between flex-wrap">
               <span className="font-semibold">Member Since</span>
               <span>{new Date(createdAt).toLocaleDateString()}</span>
-
             </p>
             <p className="flex justify-between flex-wrap">
               <span className="font-semibold">Location</span>
@@ -98,6 +97,5 @@ export default function InfluencerCard({
         </div>
       </CardContent>
     </Card>
-
   );
 }
