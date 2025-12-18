@@ -83,7 +83,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
       </div>
 
       {/* Search */}
-      <div className="hidden lg:flex items-center gap-4 flex-1 w-full">
+      {/* <div className="hidden lg:flex items-center gap-4 flex-1 w-full">
         <div className="relative w-full hidden lg:block">
           <CommonInput
             placeholder="Search"
@@ -91,7 +91,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
             icon={<Search />}
           />
         </div>
-      </div>
+      </div> */}
 
       {/* Right Side */}
       <div className="flex items-center">
@@ -123,6 +123,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
             // variant="ghost"
             size="icon"
             className="text-white-100 bg-transparent hover:bg-transparent lg:hidden"
+            onClick={handleLogout}
           >
             <LogOut className="h-5 w-5" />
           </Button>

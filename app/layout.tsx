@@ -10,6 +10,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Osado",
   description: "Admin Panel for handling user's data",
+  icons: {
+    icon: "/Logo.png",
+  },
 };
 
 export default function RootLayout({
@@ -24,7 +27,7 @@ export default function RootLayout({
         <ReactQueryProvider>
           {children}
           {/* <AppToaster /> */}
-           <ToastContainer
+          <ToastContainer
             position="top-right"
             autoClose={3000}
             hideProgressBar={false}
