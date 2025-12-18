@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: "Osado",
   description: "Admin Panel for handling user's data",
   icons: {
-    icon: "/Logo.png",
+    icon: "/appLogo.png",
   },
 };
 
