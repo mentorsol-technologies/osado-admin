@@ -113,7 +113,7 @@ const Photographers = () => {
           }}
         />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {influencers.map((influencer) => (
           <InfluencerCard
             key={influencer.id}
@@ -129,7 +129,7 @@ const Photographers = () => {
             }}
           />
         ))}
-      </div>
+      </div> */}
 
       {/* Delete Modal */}
       <DeleteConfirmModal
