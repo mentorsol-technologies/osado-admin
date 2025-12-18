@@ -275,7 +275,11 @@ export function CommonTable<T extends { [key: string]: any }>({
         </div>
 
         {/* Fixed Pagination */}
-        <div className="absolute bottom-[-20px] left-0 w-full bg-black-500 py-3 border-t border-black-400">
+        <div
+          className={`absolute left-0 w-full bg-black-500 py-3 border-t border-black-400
+    ${mobileView === "card" ? "bottom-[-50px]" : "bottom-[-8px]"}
+  `}
+        >
           <Pagination
             totalPages={totalPages || 1}
             currentPage={page}
