@@ -22,6 +22,11 @@ const schema = z.object({
   surName: z.string().min(1, "Surname is required"),
   email: z.string().email("Valid email required"),
   password: z.string().min(6, "Password must be at least 6 characters"),
+  phoneNumber: z
+    .string()
+    .min(7, "Phone number is required")
+    .max(15, "Phone number is too long")
+    .regex(/^\d+$/, "Phone number must contain only digits"),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -49,11 +54,12 @@ export default function AddBusinessOwnerModal({
       surName: "",
       email: "",
       password: "",
+      phoneNumber: "",
     },
   });
 
   const { mutate: createOwner, isPending } = useCreateBussinessOwnerMutation();
-  const [phoneNumber, setPhoneNumber] = useState("");
+  // const [phoneNumber, setPhoneNumber] = useState("");
   const countries = useCountries();
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(
     countries.find((c) => c.iso3 === "KWT") || null
@@ -64,7 +70,7 @@ export default function AddBusinessOwnerModal({
       name: data.name,
       surName: data.surName,
       email: data.email,
-      phoneNumber,
+      phoneNumber: data.phoneNumber,
       callingCode: selectedCountry?.code || "+965",
       countryCode: selectedCountry?.iso3 || "KWT",
       password: data.password,
@@ -141,17 +147,27 @@ export default function AddBusinessOwnerModal({
             <p className="text-xs text-red-500">{errors.email.message}</p>
           )}
         </div>
-        <CommonInput
-          label="Phone Number"
-          type="tel"
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
-          maxLength={15}
-          countries={countries}
-          selectedCountry={selectedCountry || undefined}
-          onCountryChange={setSelectedCountry}
-          showCountryDropdown
-        />
+        <div>
+          <CommonInput
+            label="Phone Number"
+            type="tel"
+            inputMode="numeric"
+            maxLength={15}
+            {...register("phoneNumber", {
+              onChange: (e) => {
+                // allow digits only
+                e.target.value = e.target.value.replace(/\D/g, "");
+              },
+            })}
+            countries={countries}
+            selectedCountry={selectedCountry || undefined}
+            onCountryChange={setSelectedCountry}
+            showCountryDropdown
+          />
+          {errors.phoneNumber && (
+            <p className="text-xs text-red-500">{errors.phoneNumber.message}</p>
+          )}
+        </div>
       </div>
       {/* Password */}
       <div>

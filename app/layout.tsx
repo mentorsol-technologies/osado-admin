@@ -8,7 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Osado",
+  title: "Osado Admin",
   description: "Admin Panel for handling user's data",
   icons: {
     icon: "/appLogo.png",
