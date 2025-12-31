@@ -63,24 +63,67 @@ export function CommonTable<T extends { [key: string]: any }>({
   >({});
 
   // ------------------ Helper functions ------------------
+  const getNestedValue = (obj: any, path: string) => {
+    return path.split(".").reduce((acc, part) => acc && acc[part], obj);
+  };
 
   const getValue = (row: any, key: string) =>
-    String(row?.[key] ?? "").toLowerCase();
+    String(getNestedValue(row, key) ?? "").toLowerCase();
 
-  const sortByValue = (a: any, b: any, key: string, order: "asc" | "desc") => {
-    const valA = a?.[key];
-    const valB = b?.[key];
+  const findRelevantKey = (row: any, type: "date" | "text") => {
+    const dateKeys = [
+      "createdAt",
+      "updatedAt",
+      "created_at",
+      "updated_at",
+      "date",
+      "bookingDate",
+      "joinedAt",
+    ];
+    const textKeys = [
+      "name",
+      "fullName",
+      "title",
+      "email",
+      "username",
+      "serviceName",
+    ];
 
-    if (valA == null || valB == null) return 0;
+    const candidates = type === "date" ? dateKeys : textKeys;
+    return candidates.find((k) => row[k] !== undefined && row[k] !== null);
+  };
 
-    // If date
-    if (!isNaN(Date.parse(valA)) && !isNaN(Date.parse(valB))) {
-      return order === "asc"
-        ? new Date(valA).getTime() - new Date(valB).getTime()
-        : new Date(valB).getTime() - new Date(valA).getTime();
+  const sortByValue = (
+    a: any,
+    b: any,
+    key: string | undefined,
+    order: "asc" | "desc"
+  ) => {
+    let valA = key ? getNestedValue(a, key) : undefined;
+    let valB = key ? getNestedValue(b, key) : undefined;
+
+    if (valA == null && valB == null) {
     }
 
-    // Treat as string
+    if (valA === valB) return 0;
+    if (valA === null || valA === undefined) return 1;
+    if (valB === null || valB === undefined) return -1;
+
+    if (typeof valA === "number" && typeof valB === "number") {
+      return order === "asc" ? valA - valB : valB - valA;
+    }
+    const dateA = Date.parse(valA);
+    const dateB = Date.parse(valB);
+
+    if (
+      !isNaN(dateA) &&
+      !isNaN(dateB) &&
+      typeof valA !== "number" &&
+      typeof valB !== "number"
+    ) {
+      return order === "asc" ? dateA - dateB : dateB - dateA;
+    }
+
     return order === "asc"
       ? String(valA).localeCompare(String(valB))
       : String(valB).localeCompare(String(valA));
@@ -114,7 +157,9 @@ export function CommonTable<T extends { [key: string]: any }>({
     if (search) {
       result = result.filter((row) =>
         Object.values(row).some((val) =>
-          val?.toString().toLowerCase().includes(search.toLowerCase())
+          String(val ?? "")
+            .toLowerCase()
+            .includes(search.toLowerCase())
         )
       );
     }
@@ -123,13 +168,24 @@ export function CommonTable<T extends { [key: string]: any }>({
     Object.entries(selectedFilters).forEach(([key, value]) => {
       if (!value) return;
       const filterConfig = filters.find((f) => f.key === key);
-      const mappedKey = filterConfig?.mapTo || key;
+      let mappedKey = filterConfig?.mapTo || key;
 
       // Sorting
       if (filterConfig?.sortBy) {
         if (filterConfig.customSort) {
           result.sort((a, b) => filterConfig.customSort!(a, b, value));
         } else {
+          const sampleRow = result[0];
+          if (sampleRow && getNestedValue(sampleRow, mappedKey) === undefined) {
+            if (["Newest", "Oldest"].includes(value)) {
+              const fallback = findRelevantKey(sampleRow, "date");
+              if (fallback) mappedKey = fallback;
+            } else if (["A–Z", "Z–A"].includes(value)) {
+              const fallback = findRelevantKey(sampleRow, "text");
+              if (fallback) mappedKey = fallback;
+            }
+          }
+
           result.sort((a, b) => {
             switch (value) {
               case "Newest":
@@ -150,11 +206,37 @@ export function CommonTable<T extends { [key: string]: any }>({
 
       // Filtering
       const handler = filterHandlers[key];
-      result = result.filter((row) =>
-        handler
-          ? handler(row, value)
-          : getValue(row, mappedKey).includes(value.toLowerCase())
-      );
+      result = result.filter((row) => {
+        if (handler) return handler(row, value);
+
+        if (filterConfig?.type === "date") {
+          let targetKey = mappedKey;
+          const val = getNestedValue(row, targetKey);
+          if (val === undefined) {
+            const fallback = findRelevantKey(row, "date");
+            if (fallback) targetKey = fallback;
+          }
+
+          const rowVal = getNestedValue(row, targetKey);
+          if (!rowVal) return false;
+          try {
+            const d1 = new Date(rowVal);
+            const d2 = new Date(value);
+
+            if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return false;
+
+            return (
+              d1.getFullYear() === d2.getFullYear() &&
+              d1.getMonth() === d2.getMonth() &&
+              d1.getDate() === d2.getDate()
+            );
+          } catch (e) {
+            return false;
+          }
+        }
+
+        return getValue(row, mappedKey).includes(value.toLowerCase());
+      });
     });
 
     return result;
@@ -167,7 +249,6 @@ export function CommonTable<T extends { [key: string]: any }>({
     return filteredData?.slice(start, start + rowsPerPage);
   }, [page, filteredData, rowsPerPage]);
 
-  // Reset page on filter/search change
   useEffect(() => {
     setPage(1);
   }, [search, selectedFilters]);
