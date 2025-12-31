@@ -47,7 +47,7 @@ export default function DashboardPage() {
   const columns = [
     { key: "id", label: "ID" },
     { key: "name", label: "Influencer" },
-    { key: "event", label: "Event" },
+    // { key: "event", label: "Event" },
     {
       key: "createdAt",
       label: "Date",

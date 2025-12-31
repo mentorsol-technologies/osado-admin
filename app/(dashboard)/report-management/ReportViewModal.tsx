@@ -104,12 +104,12 @@ const ReportViewModal: React.FC<ReportViewModalProps> = ({
                 size="lg"
                 footer={
                     <div className="flex items-center gap-4 mt-4 w-full">
-                      <Button
-              variant="default"
-              className="flex-1"
-              onClick={() => setSuspendOpen(true)} 
-            >
-              Suspend Account
+                        <Button
+                            variant="default"
+                            className="flex-1"
+                            onClick={() => setSuspendOpen(true)}
+                        >
+                            Suspend Account
                         </Button>
                         <Button variant="outline" className="flex-1" onClick={handleDismiss}>
                             Dismiss Report
@@ -241,15 +241,16 @@ const ReportViewModal: React.FC<ReportViewModalProps> = ({
                 />
 
             </Modal >
-           <SuspendUserModal
-        open={suspendOpen}
-        onOpenChange={setSuspendOpen}
-        onConfirm={(data) => {
-          console.log("Suspension Payload:", data);
-          toast.success("User suspended successfully");
-          setSuspendOpen(false);
-        }}
-      />
+            <SuspendUserModal
+                open={suspendOpen}
+                onOpenChange={setSuspendOpen}
+                onConfirm={(data) => {
+                    console.log("Suspension Payload:", data);
+                    // Toast is now handled inside SuspendUserModal
+                    setSuspendOpen(false);
+                }}
+                reportId={report?.id || ""}
+            />
         </>
     );
 };

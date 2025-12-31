@@ -6,24 +6,45 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { CustomSelect } from "@/components/ui/customeSelect";
 import { toast } from "react-toastify";
+import { useSuspendAccountMutation } from "@/hooks/useReportManagementMutations";
 
 interface SuspendUserModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onConfirm: (data: { duration: string; reason: string }) => void;
+    reportId: string;
 }
 
 export default function SuspendUserModal({
     open,
     onOpenChange,
     onConfirm,
+    reportId,
 }: SuspendUserModalProps) {
     const [duration, setDuration] = useState("");
     const [reason, setReason] = useState("");
 
 
+    const { mutate: suspendAccount, isPending } = useSuspendAccountMutation();
+
     const handleConfirm = () => {
-        onConfirm({ duration, reason });
+        if (!duration || !reason) {
+            toast.error("Please select a duration and provide a reason.");
+            return;
+        }
+        suspendAccount(
+            { id: reportId, payload: { duration, suspendedReason: reason } },
+            {
+                onSuccess: () => {
+                    toast.success("User suspended successfully");
+                    onConfirm({ duration, reason });
+                    onOpenChange(false);
+                },
+                onError: (error: any) => {
+                    toast.error(error?.response?.data?.message || "Failed to suspend user");
+                },
+            }
+        );
     };
 
     return (
@@ -39,8 +60,9 @@ export default function SuspendUserModal({
                         <Button
                             className="flex-1"
                             onClick={handleConfirm}
+                            disabled={isPending}
                         >
-                            Confirm Suspension
+                            {isPending ? "Suspending..." : "Confirm Suspension"}
                         </Button>
 
                         <Button
