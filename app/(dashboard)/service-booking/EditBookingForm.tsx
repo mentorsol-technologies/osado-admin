@@ -27,6 +27,7 @@ import {
   useGetServiceUsersListQuery,
   useUpdateServiceBookingMutation,
 } from "@/hooks/useServiceBookingMutations";
+import GooglePlacesAutocomplete from "@/components/ui/GooglePlacesAutocomplete";
 
 const schema = z.object({
   service: z.string().min(1, "Service is required"),
@@ -38,6 +39,8 @@ const schema = z.object({
   country: z.string().min(1, "Country is required"),
   providerId: z.string().min(1, "Provider is required"),
   userId: z.string().min(1, "User Id is required"),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -482,51 +485,49 @@ export default function EditBookingModal({
 
               <div>
                 <label className="block mb-1 text-sm">Location</label>
-                <CommonInput placeholder="Location" {...register("location")} />
-                {errors.location && (
-                  <p className="text-xs text-red-500">
-                    {errors.location.message}
-                  </p>
-                )}
+                <GooglePlacesAutocomplete
+                  value={watch("location")}
+                  onChange={(v) => setValue("location", v)}
+                  onPlaceSelect={(place) => {
+                    if (place.city) setValue("city", place.city);
+                    if (place.country) setValue("country", place.country);
+                    if (place.lat) setValue("latitude", place.lat);
+                    if (place.lng) setValue("longitude", place.lng);
+                  }}
+                />
               </div>
-
               <div>
-                <label className="block mb-1 text-sm">Status</label>
-                <Select
-                  value={watch("status")}
-                  onValueChange={(val) =>
-                    setValue(
-                      "status",
-                      val as "Confirmed" | "Pending" | "Suspended"
-                    )
-                  }
-                >
-                  <SelectTrigger className=" border-[#333] text-white">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Confirmed">Confirmed</SelectItem>
-                    <SelectItem value="Pending">Pending</SelectItem>
-                    <SelectItem value="Suspended">Suspended</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                {errors.status && (
-                  <p className="text-xs text-red-500">
-                    {errors.status.message}
-                  </p>
-                )}
+                <label className="block mb-1 text-sm">Country</label>
+                <CommonInput
+                  placeholder="Country"
+                  value={watch("country")}
+                  onChange={(e) => setValue("country", e.target.value)}
+                />
               </div>
             </div>
           </div>
 
           <div>
-            <label className="block mb-1 text-sm">Country</label>
-            <CommonInput
-              placeholder="Country"
-              value={watch("country")}
-              onChange={(e) => setValue("country", e.target.value)}
-            />
+            <label className="block mb-1 text-sm">Status</label>
+            <Select
+              value={watch("status")}
+              onValueChange={(val) =>
+                setValue("status", val as "Confirmed" | "Pending" | "Suspended")
+              }
+            >
+              <SelectTrigger className=" border-[#333] text-white">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Confirmed">Confirmed</SelectItem>
+                <SelectItem value="Pending">Pending</SelectItem>
+                <SelectItem value="Suspended">Suspended</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {errors.status && (
+              <p className="text-xs text-red-500">{errors.status.message}</p>
+            )}
           </div>
         </form>
       </Modal>

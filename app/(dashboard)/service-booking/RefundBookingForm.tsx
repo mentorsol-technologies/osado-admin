@@ -53,6 +53,7 @@ export default function RefundBookingModal({
     register,
     handleSubmit,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -68,7 +69,16 @@ export default function RefundBookingModal({
     },
   });
 
+  const handleResetForm = () => {
+    reset({
+      amount: "",
+      reason: "Service Not Provided",
+      comment: "",
+    });
+  };
+
   const onSubmit = (data: FormData) => {
+    handleResetForm();
     onSave(data);
     setOpen(false);
   };
@@ -76,7 +86,12 @@ export default function RefundBookingModal({
   return (
     <Modal
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          handleResetForm();
+        }
+        setOpen(isOpen);
+      }}
       title="Give Refund"
       description="Are you sure you want to cancel this booking and issue a refund?"
       footer={
@@ -84,7 +99,15 @@ export default function RefundBookingModal({
           <Button onClick={handleSubmit(onSubmit)} className="flex-1">
             Submit
           </Button>
-          <Button variant="outline" className="flex-1" onClick={onCancelClick}>
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={() => {
+              handleResetForm();
+              onCancelClick();
+              setOpen(false);
+            }}
+          >
             Cancel
           </Button>
         </div>

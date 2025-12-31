@@ -2,108 +2,114 @@
 import PaymentsChart from "@/components/charts/PaymentsChart";
 import RevenueChart from "@/components/charts/RevenueChart";
 import { StatsCards } from "@/components/dashboard/stats-cards";
-import { CommonTable } from "@/components/ui/table/commonTable";
+import { CommonTable, FilterConfig } from "@/components/ui/table/commonTable";
+import { useCategoriesQuery } from "@/hooks/useCategoryMutations";
+import { useGetUsersListQuery } from "@/hooks/useUsersMutations";
 import { Edit, Eye, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 import { MdOutlineEdit } from "react-icons/md";
 
-
-const columns = [
-  { key: "influencer", label: "Influencer" },
-  { key: "event", label: "Event" },
-  { key: "date", label: "Date" },
-  { key: "id", label: "ID" },
-  { key: "price", label: "Price" },
-  {
-    key: "category",
-    label: "Category",
-    render: (row: any) => (
-      <span className="rounded bg-gray-700/40 px-2 py-1 text-xs">
-        {row.category}
-      </span>
-    ),
-  },
-  {
-    key: "status",
-    label: "Status",
-    render: (row: any) => (
-      <span
-        className={`rounded px-2 py-1 text-xs ${
-          row.status === "Confirmed"
-            ? "text-green-400 border border-green-500/30"
-            : row.status === "Canceled"
-            ? " text-red-400 border border-red-500/30"
-            : " text-blue-400 border border-blue-500/30"
-        }`}
-      >
-        {row.status}
-      </span>
-    ),
-  },
-  {
-    key: "actions",
-    label: "Actions",
-    render: (row: any) => (
-      <div className="flex justify-center gap-3">
-        <button className="p-1 border border-black-600">
-          <Eye size={16} />
-        </button>
-        <button className="p-1 border border-black-600">
-          <MdOutlineEdit size={16} />
-        </button>
-        <button className="p-1 rounded-md  bg-red-600">
-          <Trash2 size={16}  />
-        </button>
-      </div>
-    ),
-  },
-];
-
-const data = [
-  {
-    influencer: "John Doe",
-    event: "Launch Party",
-    date: "2025-09-15",
-    id: "EV123",
-    price: "$250",
-    category: "Music",
-    status: "Confirmed",
-  },
-  {
-    influencer: "Jane Smith",
-    event: "Tech Demo",
-    date: "2025-09-20",
-    id: "EV456",
-    price: "$500",
-    category: "Tech",
-    status: "Pending",
-  },
-  {
-    influencer: "Waheed",
-    event: "Tech Demo",
-    date: "2025-09-20",
-    id: "EV451",
-    price: "$500",
-    category: "Technology",
-    status: "Canceled",
-  },
-];
-const filters = [
-   { key: "month", label: "Month", options: ["January", "February", "March"] },
-  {
-    key: "status",
-    label: "Status",
-    options: ["Confirmed", "Pending", "Canceled"],
-  },
-   {
-        key: "date",
-        label: "Date",
-        options: ["2025-09-15", "2025-09-20"],
-      },
-  { key: "category", label: "Category", options: ["Music", "Tech", "Sports"] },
- 
-];
-
 export default function DashboardPage() {
+  const { data, isLoading } = useGetUsersListQuery();
+  const { data: CategoriesList } = useCategoriesQuery();
+  const router = useRouter();
+
+  const influencerList = useMemo(() => {
+    const users = data || [];
+    return users.filter((user: any) => user.role?.role === "influencer");
+  }, [data]);
+
+  const categoryOptions = useMemo(() => {
+    if (!CategoriesList?.length) return ["All"];
+
+    return ["All", ...CategoriesList.map((cat: any) => cat.name)];
+  }, [CategoriesList]);
+
+  const filters: FilterConfig[] = [
+    {
+      key: "status",
+      label: "Status",
+      mapTo: "status",
+      options: ["All", "Active", "Inactive"],
+    },
+    {
+      key: "date",
+      label: "Date",
+      type: "date",
+    },
+    {
+      key: "category",
+      label: "Category",
+      options: categoryOptions,
+    },
+  ];
+  const columns = [
+    { key: "id", label: "ID" },
+    { key: "name", label: "Influencer" },
+    // { key: "event", label: "Event" },
+    {
+      key: "createdAt",
+      label: "Date",
+      render: (row: any) => new Date(row.createdAt).toLocaleDateString(),
+    },
+    {
+      key: "categories",
+      label: "Category",
+      render: (row: any) => (
+        <div className="flex flex-wrap gap-2">
+          {row.categories?.length ? (
+            row.categories.map((cat: any) => (
+              <span
+                key={cat.id}
+                className="rounded bg-gray-700/40 px-2 py-1 text-xs"
+              >
+                {cat.name}
+              </span>
+            ))
+          ) : (
+            <span className="text-xs text-gray-400">—</span>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: "status",
+      label: "Status",
+      render: (row: any) => (
+        <span
+          className={`rounded px-2 py-1 text-xs border
+        ${
+          row.status === "active"
+            ? "text-green-400 border-green-500/30"
+            : "text-blue-400 border-blue-500/30"
+        }`}
+        >
+          {row.status}
+        </span>
+      ),
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      render: (row: any) => (
+        <div className="flex justify-center gap-3">
+          <button
+            className="p-1 border border-black-600"
+            onClick={() => router.push("/influencers")}
+          >
+            <Eye size={16} />
+          </button>
+          {/* <button className="p-1 border border-black-600">
+            <MdOutlineEdit size={16} />
+          </button>
+          <button className="p-1 rounded-md  bg-red-600">
+            <Trash2 size={16} />
+          </button> */}
+        </div>
+      ),
+    },
+  ];
   return (
     <div className="space-y-6">
       <StatsCards />
@@ -118,7 +124,7 @@ export default function DashboardPage() {
       <div>
         <CommonTable
           title="Influencer Applications"
-          data={data}
+          data={influencerList}
           columns={columns}
           rowsPerPage={5}
           filters={filters}

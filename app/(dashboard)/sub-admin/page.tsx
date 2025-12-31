@@ -78,7 +78,7 @@ export default function SubAdminPage() {
           >
             <MdOutlineEdit size={16} />
           </button>
-          <button
+          {/* <button
             className="p-1 border border-black-600"
             // onClick={() => {
             //   setSelectedAdmin(row);
@@ -86,7 +86,7 @@ export default function SubAdminPage() {
             // }}
           >
             <BiStop size={16} />
-          </button>
+          </button> */}
           <button
             className="p-1 rounded-md bg-red-600 text-white"
             onClick={() => {

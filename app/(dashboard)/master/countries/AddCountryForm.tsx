@@ -125,8 +125,8 @@ export default function AddCountryModal({
             variant="outline"
             className="flex-1"
             onClick={() => {
-              reset();
               setOpen(false);
+              handleResetForm();
             }}
           >
             Cancel

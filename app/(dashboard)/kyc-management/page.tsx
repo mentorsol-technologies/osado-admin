@@ -72,7 +72,7 @@ export default function ServiceBookingPage() {
     {
       key: "sort_by",
       label: "Sort by",
-      options: ["Newest", "Oldest", "A–Z", "Z–A"],
+      options: ["All", "Newest", "Oldest", "A–Z", "Z–A"],
       sortBy: true,
     },
     {

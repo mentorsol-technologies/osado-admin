@@ -192,20 +192,20 @@ const CommonInput = React.forwardRef<HTMLInputElement, CommonInputProps>(
                 </button>
               </PopoverTrigger>
 
-          <PopoverContent className="p-0 bg-black-500 border border-gray-700 rounded-md shadow-xl">
-          <div className="bg-black-500 p-2 rounded-md">
-            <Calendar
-              mode="single"
-              selected={value ? new Date(value) : undefined}
-              onSelect={(date) => {
-                if (date) {
-                  const iso = date.toISOString().split("T")[0];
-                  onChange?.({ target: { value: iso } } as any);
-                }
-              }}
-            />
-          </div>
-        </PopoverContent>
+              <PopoverContent className="p-0 bg-black-500 border border-gray-700 rounded-md shadow-xl">
+                <div className="bg-black-500 p-2 rounded-md">
+                  <Calendar
+                    mode="single"
+                    selected={value ? new Date(value) : undefined}
+                    onSelect={(date) => {
+                      if (date) {
+                        const formattedDate = format(date, "yyyy-MM-dd");
+                        onChange?.({ target: { value: formattedDate } } as any);
+                      }
+                    }}
+                  />
+                </div>
+              </PopoverContent>
             </Popover>
           ) : (
             // NORMAL INPUT

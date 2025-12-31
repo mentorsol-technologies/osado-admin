@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, ReactNode } from "react";
+import React, { useState, useMemo, ReactNode, useEffect } from "react";
 import {
   Table,
   TableHeader,
@@ -62,6 +62,82 @@ export function CommonTable<T extends { [key: string]: any }>({
     Record<string, string>
   >({});
 
+  // ------------------ Helper functions ------------------
+  const getNestedValue = (obj: any, path: string) => {
+    return path.split(".").reduce((acc, part) => acc && acc[part], obj);
+  };
+
+  const getValue = (row: any, key: string) =>
+    String(getNestedValue(row, key) ?? "").toLowerCase();
+
+  const findRelevantKey = (row: any, type: "date" | "text") => {
+    const dateKeys = [
+      "createdAt",
+      "updatedAt",
+      "created_at",
+      "updated_at",
+      "date",
+      "bookingDate",
+      "joinedAt",
+    ];
+    const textKeys = [
+      "name",
+      "fullName",
+      "title",
+      "email",
+      "username",
+      "serviceName",
+    ];
+
+    const candidates = type === "date" ? dateKeys : textKeys;
+    return candidates.find((k) => row[k] !== undefined && row[k] !== null);
+  };
+
+  const sortByValue = (
+    a: any,
+    b: any,
+    key: string | undefined,
+    order: "asc" | "desc"
+  ) => {
+    let valA = key ? getNestedValue(a, key) : undefined;
+    let valB = key ? getNestedValue(b, key) : undefined;
+
+    if (valA == null && valB == null) {
+    }
+
+    if (valA === valB) return 0;
+    if (valA === null || valA === undefined) return 1;
+    if (valB === null || valB === undefined) return -1;
+
+    if (typeof valA === "number" && typeof valB === "number") {
+      return order === "asc" ? valA - valB : valB - valA;
+    }
+    const dateA = Date.parse(valA);
+    const dateB = Date.parse(valB);
+
+    if (
+      !isNaN(dateA) &&
+      !isNaN(dateB) &&
+      typeof valA !== "number" &&
+      typeof valB !== "number"
+    ) {
+      return order === "asc" ? dateA - dateB : dateB - dateA;
+    }
+
+    return order === "asc"
+      ? String(valA).localeCompare(String(valB))
+      : String(valB).localeCompare(String(valA));
+  };
+
+  const filterHandlers: Record<string, Function> = {
+    category: (row: any, value: string) =>
+      row.categories?.some(
+        (cat: any) => cat.name.toLowerCase() === value.toLowerCase()
+      ),
+  };
+
+  // ------------------ Filter & Sort ------------------
+
   const handleFilterChange = (key: string, value: string) => {
     setSelectedFilters((prev) => {
       if (value === "All" || !value) {
@@ -81,53 +157,86 @@ export function CommonTable<T extends { [key: string]: any }>({
     if (search) {
       result = result.filter((row) =>
         Object.values(row).some((val) =>
-          val?.toString().toLowerCase().includes(search.toLowerCase())
+          String(val ?? "")
+            .toLowerCase()
+            .includes(search.toLowerCase())
         )
       );
     }
 
-    // 🎛 Apply filters
+    // 🎛 Filters
     Object.entries(selectedFilters).forEach(([key, value]) => {
       if (!value) return;
-
       const filterConfig = filters.find((f) => f.key === key);
-      const mappedKey = filterConfig?.mapTo || key;
+      let mappedKey = filterConfig?.mapTo || key;
 
-      // If filter is for sorting
+      // Sorting
       if (filterConfig?.sortBy) {
         if (filterConfig.customSort) {
           result.sort((a, b) => filterConfig.customSort!(a, b, value));
         } else {
+          const sampleRow = result[0];
+          if (sampleRow && getNestedValue(sampleRow, mappedKey) === undefined) {
+            if (["Newest", "Oldest"].includes(value)) {
+              const fallback = findRelevantKey(sampleRow, "date");
+              if (fallback) mappedKey = fallback;
+            } else if (["A–Z", "Z–A"].includes(value)) {
+              const fallback = findRelevantKey(sampleRow, "text");
+              if (fallback) mappedKey = fallback;
+            }
+          }
+
           result.sort((a, b) => {
             switch (value) {
               case "Newest":
-                return (
-                  new Date(b.createdAt).getTime() -
-                  new Date(a.createdAt).getTime()
-                );
+                return sortByValue(a, b, mappedKey, "desc");
               case "Oldest":
-                return (
-                  new Date(a.createdAt).getTime() -
-                  new Date(b.createdAt).getTime()
-                );
+                return sortByValue(a, b, mappedKey, "asc");
               case "A–Z":
-                return a.name.localeCompare(b.name);
+                return sortByValue(a, b, mappedKey, "asc");
               case "Z–A":
-                return b.name.localeCompare(a.name);
+                return sortByValue(a, b, mappedKey, "desc");
               default:
                 return 0;
             }
           });
         }
-        return; // skip further filtering
+        return;
       }
 
-      // Otherwise, apply value filter
-      result = result.filter((row) =>
-        String(row[mappedKey] ?? "")
-          .toLowerCase()
-          .includes(value.toLowerCase())
-      );
+      // Filtering
+      const handler = filterHandlers[key];
+      result = result.filter((row) => {
+        if (handler) return handler(row, value);
+
+        if (filterConfig?.type === "date") {
+          let targetKey = mappedKey;
+          const val = getNestedValue(row, targetKey);
+          if (val === undefined) {
+            const fallback = findRelevantKey(row, "date");
+            if (fallback) targetKey = fallback;
+          }
+
+          const rowVal = getNestedValue(row, targetKey);
+          if (!rowVal) return false;
+          try {
+            const d1 = new Date(rowVal);
+            const d2 = new Date(value);
+
+            if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return false;
+
+            return (
+              d1.getFullYear() === d2.getFullYear() &&
+              d1.getMonth() === d2.getMonth() &&
+              d1.getDate() === d2.getDate()
+            );
+          } catch (e) {
+            return false;
+          }
+        }
+
+        return getValue(row, mappedKey).includes(value.toLowerCase());
+      });
     });
 
     return result;
@@ -140,9 +249,14 @@ export function CommonTable<T extends { [key: string]: any }>({
     return filteredData?.slice(start, start + rowsPerPage);
   }, [page, filteredData, rowsPerPage]);
 
+  useEffect(() => {
+    setPage(1);
+  }, [search, selectedFilters]);
+
+  // ------------------ Render ------------------
+
   return (
     <div className="w-[100vw] md:w-auto rounded-md bg-black-500 p-2 text-white">
-      {/* Title & Action */}
       {(title || action) && (
         <div className="mb-4 flex items-center justify-between">
           {title && <h3 className="text-2xl font-semibold">{title}</h3>}
@@ -150,7 +264,6 @@ export function CommonTable<T extends { [key: string]: any }>({
         </div>
       )}
 
-      {/* FiltersBar */}
       {(filters?.length > 0 || searchable) && (
         <FiltersBar
           filters={filters}
@@ -158,14 +271,11 @@ export function CommonTable<T extends { [key: string]: any }>({
           onFilterChange={handleFilterChange}
           searchable={searchable}
           search={search}
-          onSearchChange={(val) => {
-            setSearch(val);
-            setPage(1);
-          }}
+          onSearchChange={(val) => setSearch(val)}
         />
       )}
 
-      {/* Mobile Card Layout */}
+      {/* Mobile card layout */}
       {mobileView === "card" && (
         <div className="grid gap-4 sm:hidden">
           {paginated?.length > 0 ? (
@@ -189,25 +299,7 @@ export function CommonTable<T extends { [key: string]: any }>({
                   );
                 })}
                 <div className="flex justify-between gap-3 w-full">
-                  {renderCardActions ? (
-                    renderCardActions(row)
-                  ) : (
-                    <>
-                      {/* <Button
-                        className="flex-1"
-                        onClick={() => onEditClick?.(row)}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="flex-1"
-                        onClick={() => onSuspendClick?.(row)}
-                      >
-                        Suspend
-                      </Button> */}
-                    </>
-                  )}
+                  {renderCardActions ? renderCardActions(row) : null}
                 </div>
               </div>
             ))
@@ -217,35 +309,24 @@ export function CommonTable<T extends { [key: string]: any }>({
         </div>
       )}
 
-      {/* Desktop Table Layout */}
+      {/* Desktop table layout */}
       <div
         className={`${mobileView === "card" ? "hidden sm:block" : "block"} relative h-[610px]`}
       >
-        {/* Scrollable table body */}
         <div className="overflow-y-auto h-full">
           <Table className="w-full border-collapse text-sm">
             <TableHeader>
               <TableRow className="text-left border-b border-black-500">
-                {columns.map((col) => {
-                  if (col.key === "actions")
-                    return (
-                      <TableHead
-                        key={col.key as string}
-                        className="py-3 px-4 whitespace-nowrap"
-                      />
-                    );
-                  return (
-                    <TableHead
-                      key={col.key as string}
-                      className="py-3 px-4 font-normal whitespace-nowrap"
-                    >
-                      {col.label}
-                    </TableHead>
-                  );
-                })}
+                {columns.map((col) => (
+                  <TableHead
+                    key={col.key as string}
+                    className={`py-3 px-4 ${col.key === "actions" ? "whitespace-nowrap" : "font-normal whitespace-nowrap"}`}
+                  >
+                    {col.key !== "actions" && col.label}
+                  </TableHead>
+                ))}
               </TableRow>
             </TableHeader>
-
             <TableBody>
               {paginated?.length > 0 ? (
                 paginated.map((row, idx) => (
@@ -274,11 +355,8 @@ export function CommonTable<T extends { [key: string]: any }>({
           </Table>
         </div>
 
-        {/* Fixed Pagination */}
         <div
-          className={`absolute left-0 w-full bg-black-500 py-3 border-t border-black-400
-    ${mobileView === "card" ? "bottom-[-50px]" : "bottom-[-8px]"}
-  `}
+          className={`absolute left-0 w-full bg-black-500 py-3 border-t border-black-400 ${mobileView === "card" ? "bottom-[-50px]" : "bottom-[-8px]"}`}
         >
           <Pagination
             totalPages={totalPages || 1}

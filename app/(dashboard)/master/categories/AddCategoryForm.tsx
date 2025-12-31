@@ -84,12 +84,13 @@ export default function AddCategoryModal({
       const uploadedIds: string[] = [];
 
       for (const file of files) {
-        const { url, fields, uploadId } = await getCategoryUploadLink(file.type);
+        const { url, fields, uploadId } = await getCategoryUploadLink(
+          file.type
+        );
         await uploadToS3(file, url, fields);
         uploadedIds.push(uploadId);
 
         setPreviewUrl(URL.createObjectURL(file));
-
       }
 
       setUploadIds((prev) => [...prev, ...uploadedIds]);
@@ -126,7 +127,7 @@ export default function AddCategoryModal({
       }}
       title="Add Category"
       footer={
-        < div className="flex flex-col sm:flex-row gap-3 w-full" >
+        <div className="flex flex-col sm:flex-row gap-3 w-full">
           <Button
             onClick={handleSubmit(onSubmit)}
             className="flex-1"
@@ -137,15 +138,18 @@ export default function AddCategoryModal({
           <Button
             variant="outline"
             className="flex-1"
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              setOpen(false);
+              handleResetForm();
+            }}
           >
             Cancel
           </Button>
-        </div >
+        </div>
       }
     >
       {/* Category Name + Status */}
-      < div className="flex flex-col sm:flex-row gap-3 w-full" >
+      <div className="flex flex-col sm:flex-row gap-3 w-full">
         <div className="flex-1">
           <label className="block text-sm mb-1">Category Name</label>
           <CommonInput placeholder="Category Name" {...register("name")} />
@@ -158,7 +162,9 @@ export default function AddCategoryModal({
           <label className="block text-sm mb-1">Status</label>
           <Select
             defaultValue={watch("status")}
-            onValueChange={(val) => setValue("status", val as "Active" | "Inactive")}
+            onValueChange={(val) =>
+              setValue("status", val as "Active" | "Inactive")
+            }
           >
             <SelectTrigger>
               <SelectValue placeholder="Select status" />
@@ -169,20 +175,20 @@ export default function AddCategoryModal({
             </SelectContent>
           </Select>
         </div>
-      </div >
+      </div>
 
       {/* Description */}
-      < div className="mt-4" >
+      <div className="mt-4">
         <label className="block text-sm mb-1">Description</label>
         <Textarea
           rows={4}
           placeholder="Enter category description"
           {...register("description")}
         />
-      </div >
+      </div>
 
       {/* File Upload */}
-      < div className="mt-4" >
+      <div className="mt-4">
         <Upload
           label="Upload Images"
           multiple
@@ -191,13 +197,10 @@ export default function AddCategoryModal({
             await handleMultipleFileUpload(files);
           }}
         />
-        {
-          isUploading && (
-            <p className="text-sm text-blue-500 mt-1">Uploading...</p>
-          )
-        }
-
-      </div >
-    </Modal >
+        {isUploading && (
+          <p className="text-sm text-blue-500 mt-1">Uploading...</p>
+        )}
+      </div>
+    </Modal>
   );
 }
