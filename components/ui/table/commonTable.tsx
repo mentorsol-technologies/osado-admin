@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, ReactNode } from "react";
+import React, { useState, useMemo, ReactNode, useEffect } from "react";
 import {
   Table,
   TableHeader,
@@ -62,6 +62,39 @@ export function CommonTable<T extends { [key: string]: any }>({
     Record<string, string>
   >({});
 
+  // ------------------ Helper functions ------------------
+
+  const getValue = (row: any, key: string) =>
+    String(row?.[key] ?? "").toLowerCase();
+
+  const sortByValue = (a: any, b: any, key: string, order: "asc" | "desc") => {
+    const valA = a?.[key];
+    const valB = b?.[key];
+
+    if (valA == null || valB == null) return 0;
+
+    // If date
+    if (!isNaN(Date.parse(valA)) && !isNaN(Date.parse(valB))) {
+      return order === "asc"
+        ? new Date(valA).getTime() - new Date(valB).getTime()
+        : new Date(valB).getTime() - new Date(valA).getTime();
+    }
+
+    // Treat as string
+    return order === "asc"
+      ? String(valA).localeCompare(String(valB))
+      : String(valB).localeCompare(String(valA));
+  };
+
+  const filterHandlers: Record<string, Function> = {
+    category: (row: any, value: string) =>
+      row.categories?.some(
+        (cat: any) => cat.name.toLowerCase() === value.toLowerCase()
+      ),
+  };
+
+  // ------------------ Filter & Sort ------------------
+
   const handleFilterChange = (key: string, value: string) => {
     setSelectedFilters((prev) => {
       if (value === "All" || !value) {
@@ -86,14 +119,13 @@ export function CommonTable<T extends { [key: string]: any }>({
       );
     }
 
-    // 🎛 Apply filters
+    // 🎛 Filters
     Object.entries(selectedFilters).forEach(([key, value]) => {
       if (!value) return;
-
       const filterConfig = filters.find((f) => f.key === key);
       const mappedKey = filterConfig?.mapTo || key;
 
-      // If filter is for sorting
+      // Sorting
       if (filterConfig?.sortBy) {
         if (filterConfig.customSort) {
           result.sort((a, b) => filterConfig.customSort!(a, b, value));
@@ -101,32 +133,27 @@ export function CommonTable<T extends { [key: string]: any }>({
           result.sort((a, b) => {
             switch (value) {
               case "Newest":
-                return (
-                  new Date(b.createdAt).getTime() -
-                  new Date(a.createdAt).getTime()
-                );
+                return sortByValue(a, b, mappedKey, "desc");
               case "Oldest":
-                return (
-                  new Date(a.createdAt).getTime() -
-                  new Date(b.createdAt).getTime()
-                );
+                return sortByValue(a, b, mappedKey, "asc");
               case "A–Z":
-                return a.name.localeCompare(b.name);
+                return sortByValue(a, b, mappedKey, "asc");
               case "Z–A":
-                return b.name.localeCompare(a.name);
+                return sortByValue(a, b, mappedKey, "desc");
               default:
                 return 0;
             }
           });
         }
-        return; // skip further filtering
+        return;
       }
 
-      // Otherwise, apply value filter
+      // Filtering
+      const handler = filterHandlers[key];
       result = result.filter((row) =>
-        String(row[mappedKey] ?? "")
-          .toLowerCase()
-          .includes(value.toLowerCase())
+        handler
+          ? handler(row, value)
+          : getValue(row, mappedKey).includes(value.toLowerCase())
       );
     });
 
@@ -140,9 +167,15 @@ export function CommonTable<T extends { [key: string]: any }>({
     return filteredData?.slice(start, start + rowsPerPage);
   }, [page, filteredData, rowsPerPage]);
 
+  // Reset page on filter/search change
+  useEffect(() => {
+    setPage(1);
+  }, [search, selectedFilters]);
+
+  // ------------------ Render ------------------
+
   return (
     <div className="w-[100vw] md:w-auto rounded-md bg-black-500 p-2 text-white">
-      {/* Title & Action */}
       {(title || action) && (
         <div className="mb-4 flex items-center justify-between">
           {title && <h3 className="text-2xl font-semibold">{title}</h3>}
@@ -150,7 +183,6 @@ export function CommonTable<T extends { [key: string]: any }>({
         </div>
       )}
 
-      {/* FiltersBar */}
       {(filters?.length > 0 || searchable) && (
         <FiltersBar
           filters={filters}
@@ -158,14 +190,11 @@ export function CommonTable<T extends { [key: string]: any }>({
           onFilterChange={handleFilterChange}
           searchable={searchable}
           search={search}
-          onSearchChange={(val) => {
-            setSearch(val);
-            setPage(1);
-          }}
+          onSearchChange={(val) => setSearch(val)}
         />
       )}
 
-      {/* Mobile Card Layout */}
+      {/* Mobile card layout */}
       {mobileView === "card" && (
         <div className="grid gap-4 sm:hidden">
           {paginated?.length > 0 ? (
@@ -189,25 +218,7 @@ export function CommonTable<T extends { [key: string]: any }>({
                   );
                 })}
                 <div className="flex justify-between gap-3 w-full">
-                  {renderCardActions ? (
-                    renderCardActions(row)
-                  ) : (
-                    <>
-                      {/* <Button
-                        className="flex-1"
-                        onClick={() => onEditClick?.(row)}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="flex-1"
-                        onClick={() => onSuspendClick?.(row)}
-                      >
-                        Suspend
-                      </Button> */}
-                    </>
-                  )}
+                  {renderCardActions ? renderCardActions(row) : null}
                 </div>
               </div>
             ))
@@ -217,35 +228,24 @@ export function CommonTable<T extends { [key: string]: any }>({
         </div>
       )}
 
-      {/* Desktop Table Layout */}
+      {/* Desktop table layout */}
       <div
         className={`${mobileView === "card" ? "hidden sm:block" : "block"} relative h-[610px]`}
       >
-        {/* Scrollable table body */}
         <div className="overflow-y-auto h-full">
           <Table className="w-full border-collapse text-sm">
             <TableHeader>
               <TableRow className="text-left border-b border-black-500">
-                {columns.map((col) => {
-                  if (col.key === "actions")
-                    return (
-                      <TableHead
-                        key={col.key as string}
-                        className="py-3 px-4 whitespace-nowrap"
-                      />
-                    );
-                  return (
-                    <TableHead
-                      key={col.key as string}
-                      className="py-3 px-4 font-normal whitespace-nowrap"
-                    >
-                      {col.label}
-                    </TableHead>
-                  );
-                })}
+                {columns.map((col) => (
+                  <TableHead
+                    key={col.key as string}
+                    className={`py-3 px-4 ${col.key === "actions" ? "whitespace-nowrap" : "font-normal whitespace-nowrap"}`}
+                  >
+                    {col.key !== "actions" && col.label}
+                  </TableHead>
+                ))}
               </TableRow>
             </TableHeader>
-
             <TableBody>
               {paginated?.length > 0 ? (
                 paginated.map((row, idx) => (
@@ -274,11 +274,8 @@ export function CommonTable<T extends { [key: string]: any }>({
           </Table>
         </div>
 
-        {/* Fixed Pagination */}
         <div
-          className={`absolute left-0 w-full bg-black-500 py-3 border-t border-black-400
-    ${mobileView === "card" ? "bottom-[-50px]" : "bottom-[-8px]"}
-  `}
+          className={`absolute left-0 w-full bg-black-500 py-3 border-t border-black-400 ${mobileView === "card" ? "bottom-[-50px]" : "bottom-[-8px]"}`}
         >
           <Pagination
             totalPages={totalPages || 1}

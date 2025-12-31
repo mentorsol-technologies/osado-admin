@@ -126,17 +126,15 @@ export default function EditInfluencerModal({
   };
 
   // Combine static categories with influencer's categories
-  const staticCategories = [
-    "Business & Networking",
-    "Sports & Fitness",
-    "Food & Drink",
-  ];
+  // const staticCategories = [
+  //   "Business & Networking",
+  //   "Sports & Fitness",
+  //   "Food & Drink",
+  // ];
 
   const influencerCategoryNames =
     influencerData?.categories?.map((cat: any) => cat.name) || [];
-  const categories = Array.from(
-    new Set([...influencerCategoryNames, ...staticCategories])
-  );
+  const categories = Array.from(new Set([...influencerCategoryNames]));
 
   return (
     <Modal
@@ -280,7 +278,7 @@ export default function EditInfluencerModal({
                 {cat}
               </Badge>
             ))}
-            <Badge className="bg-[#2B2B2B] text-gray-400">+15</Badge>
+            {/* <Badge className="bg-[#2B2B2B] text-gray-400">+15</Badge> */}
           </div>
         </div>
 

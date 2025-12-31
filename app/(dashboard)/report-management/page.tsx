@@ -77,7 +77,7 @@ export default function ReportManagementPage() {
       key: "status",
       mapTo: "status",
       label: "Status",
-      options: ["All", "Resolved", "In Review", "Dismissed"],
+      options: ["All", "Warning", "Pending", "Dismissed", "Resolved"],
     },
   ];
 

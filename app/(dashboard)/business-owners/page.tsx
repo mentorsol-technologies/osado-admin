@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CommonTable } from "@/components/ui/table/commonTable";
+import { CommonTable, FilterConfig } from "@/components/ui/table/commonTable";
 import { Plus, Eye, Edit, Trash2 } from "lucide-react";
 import { BiStop } from "react-icons/bi";
 import SuspendedBusinessOwnerModal from "./SuspendedBussinessOwnerForm";
@@ -92,16 +92,18 @@ export default function ServiceBookingPage() {
     },
   ];
 
-  const filters = [
+  const filters: FilterConfig[] = [
     {
       key: "sort_by",
       label: "Sort by",
+      sortBy: true,
       options: ["Newest", "Oldest", "A–Z", "Z–A"],
     },
     {
       key: "status",
       label: "Status",
-      options: ["Confirmed", "Pending", "Canceled"],
+      mapTo: "status",
+      options: ["All", "Active", "Inactive"],
     },
     {
       key: "total_events",
