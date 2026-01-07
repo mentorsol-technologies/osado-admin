@@ -35,7 +35,7 @@ type DialogContentProps = React.ComponentPropsWithoutRef<
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   DialogContentProps
->(({ className, size = "md", children, ...props }, ref) => {
+>(({ className, size = "md", children, onPointerDownOutside, ...props }, ref) => {
   const sizeClasses = {
     sm: "max-w-sm",
     md: "max-w-md",
@@ -53,6 +53,12 @@ const DialogContent = React.forwardRef<
           sizeClasses[size],
           className
         )}
+        onPointerDownOutside={(e) => {
+          if ((e.target as HTMLElement)?.closest?.(".pac-container")) {
+            e.preventDefault();
+          }
+          onPointerDownOutside?.(e);
+        }}
         {...props}
       >
         {children}
@@ -66,33 +72,38 @@ const DialogHeader = ({
   className,
   children,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("text-left mb-4", className)} {...props}>
-    <div className="flex items-center justify-between">
-      {/* Title */}
+}: React.HTMLAttributes<HTMLDivElement>) => {
+  // Helper to check if a child is a specific component type
+  const isComponent = (child: React.ReactNode, component: any, displayName: string): boolean => {
+    if (!React.isValidElement(child)) return false;
+    // Check by reference or by display name
+    return child.type === component || (child.type as any)?.displayName === displayName;
+  };
+
+  return (
+    <div className={cn("text-left mb-4", className)} {...props}>
+      <div className="flex items-center justify-between">
+        {/* Title */}
+        {children &&
+          React.Children.map(children, (child) =>
+            isComponent(child, DialogTitle, "DialogTitle") ? child : null
+          )}
+
+        {/* Close button */}
+        <DialogPrimitive.Close className="ml-4 rounded-sm text-white opacity-70 hover:opacity-100 focus:outline-none">
+          <X className="h-5 w-5" />
+          <span className="sr-only">Close</span>
+        </DialogPrimitive.Close>
+      </div>
+
+      {/* Description */}
       {children &&
         React.Children.map(children, (child) =>
-          React.isValidElement(child) && child.type === DialogTitle
-            ? child
-            : null
+          isComponent(child, DialogDescription, "DialogDescription") ? child : null
         )}
-
-      {/* Close button */}
-      <DialogPrimitive.Close className="ml-4 rounded-sm text-white opacity-70 hover:opacity-100 focus:outline-none">
-        <X className="h-5 w-5" />
-        <span className="sr-only">Close</span>
-      </DialogPrimitive.Close>
     </div>
-
-    {/* Description */}
-    {children &&
-      React.Children.map(children, (child) =>
-        React.isValidElement(child) && child.type === DialogDescription
-          ? child
-          : null
-      )}
-  </div>
-);
+  );
+};
 DialogHeader.displayName = "DialogHeader";
 
 const DialogFooter = ({

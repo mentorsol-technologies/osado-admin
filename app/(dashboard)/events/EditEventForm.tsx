@@ -289,7 +289,17 @@ export default function EditEventModal({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div>
             <label className="block text-sm mb-1">Date</label>
-            <CommonInput type="date" {...register("date")} />
+            <CommonInput
+              placeholder="Enter Date"
+              type="calendar"
+              value={watch("date")}
+              onChange={(e) => setValue("date", e.target.value)}
+              minDate={(() => {
+                const d = new Date();
+                d.setHours(0, 0, 0, 0);
+                return d;
+              })()}
+            />
             {errors.date && (
               <p className="text-xs text-red-500">{errors.date.message}</p>
             )}
@@ -365,11 +375,10 @@ export default function EditEventModal({
               <Badge
                 key={cat.id}
                 onClick={() => toggleCategory(cat.id)}
-                className={`flex items-center gap-2 cursor-pointer px-3 py-2 border transition-all ${
-                  selectedCategories.includes(cat.id)
-                    ? "bg-red-600 text-white border-red-700"
-                    : "bg-gray-800 text-gray-300 border-gray-700 hover:bg-gray-700"
-                }`}
+                className={`flex items-center gap-2 cursor-pointer px-3 py-2 border transition-all ${selectedCategories.includes(cat.id)
+                  ? "bg-red-600 text-white border-red-700"
+                  : "bg-gray-800 text-gray-300 border-gray-700 hover:bg-gray-700"
+                  }`}
               >
                 {cat.iconUrl && (
                   <img

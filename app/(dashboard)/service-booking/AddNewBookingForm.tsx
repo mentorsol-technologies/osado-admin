@@ -156,7 +156,6 @@ export default function AddBookingModal({
     setUserDropdownOpen(false);
   };
 
-  // Handle closing the modal
   const handleClose = () => {
     resetForm();
     setOpen(false);
@@ -443,6 +442,11 @@ export default function AddBookingModal({
                   type="calendar"
                   value={watch("bookingDate")}
                   onChange={(e) => setValue("bookingDate", e.target.value)}
+                  minDate={(() => {
+                    const d = new Date();
+                    d.setHours(0, 0, 0, 0);
+                    return d;
+                  })()}
                 />
               </div>
 
