@@ -26,6 +26,7 @@ import {
   useGetServiceUsersListQuery,
 } from "@/hooks/useServiceBookingMutations";
 import GooglePlacesAutocomplete from "@/components/ui/GooglePlacesAutocomplete";
+import TimeRangePicker from "@/components/ui/commonComponent/TimeRangePicker";
 
 const schema = z.object({
   service: z.string().min(1, "Service is required"),
@@ -417,12 +418,17 @@ export default function AddBookingModal({
               </div>
               <div>
                 <label className="block mb-1 text-sm">Booking Time</label>
-                <CommonInput
-                  placeholder="Booking time"
-                  type="time"
-                  value={watch("bookingTime")}
-                  onChange={(e) => setValue("bookingTime", e.target.value)}
+                <TimeRangePicker
+                  value={watch("bookingTime") || ""}
+                  onChange={(val) => setValue("bookingTime", val)}
+                  mode="single"
+                  placeholder="Select Booking Time"
                 />
+                {errors.bookingTime && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.bookingTime.message}
+                  </p>
+                )}
               </div>
 
               <div>
