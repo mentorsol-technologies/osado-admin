@@ -43,12 +43,12 @@ type CommonInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   selectedCountry?: Country;
   onCountryChange?: (country: Country) => void;
   showCountryDropdown?: boolean;
+  minDate?: Date;
 };
 
-// ✅ Correctly forward ref so RHF can register it
 const CommonInput = React.forwardRef<HTMLInputElement, CommonInputProps>(
-  (
-    {
+  (props, ref) => {
+    const {
       label,
       placeholder = "",
       value,
@@ -67,10 +67,10 @@ const CommonInput = React.forwardRef<HTMLInputElement, CommonInputProps>(
       selectedCountry,
       onCountryChange,
       showCountryDropdown = false,
+      minDate,
       ...rest
-    },
-    ref
-  ) => {
+    } = props;
+
     const inputId =
       name || `input-${label?.toLowerCase().replace(/\s+/g, "-")}`;
     const [showPassword, setShowPassword] = useState(false);
@@ -197,6 +197,7 @@ const CommonInput = React.forwardRef<HTMLInputElement, CommonInputProps>(
                   <Calendar
                     mode="single"
                     selected={value ? new Date(value) : undefined}
+                    disabled={minDate ? { before: minDate } : undefined}
                     onSelect={(date) => {
                       if (date) {
                         const formattedDate = format(date, "yyyy-MM-dd");

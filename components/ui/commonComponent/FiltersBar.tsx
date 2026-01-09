@@ -10,15 +10,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import CommonInput from "../input";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
+import TimeRangePicker from "./TimeRangePicker";
 
 export interface Filter {
   key: string;
   label: string;
   options?: string[];
-  type?: "select" | "date" | "time";   // ✅ ADDED "time"
+  type?: "select" | "date" | "time"; // ✅ ADDED "time"
 }
 
 interface FiltersBarProps {
@@ -62,9 +67,7 @@ const FiltersBar = ({
 
       {/* 🎛️ Filters */}
       <div className="grid grid-cols-2 gap-3 md:order-1 md:flex md:flex-wrap">
-
         {filters?.map((filter) => {
-          
           /* 📅 DATE FILTER */
           if (filter.type === "date") {
             const selectedDate = selectedFilters[filter.key]
@@ -75,7 +78,9 @@ const FiltersBar = ({
               <Popover
                 key={filter.key}
                 open={openCalendar === filter.key}
-                onOpenChange={(open) => setOpenCalendar(open ? filter.key : null)}
+                onOpenChange={(open) =>
+                  setOpenCalendar(open ? filter.key : null)
+                }
               >
                 <PopoverTrigger asChild>
                   <button
@@ -109,64 +114,19 @@ const FiltersBar = ({
             );
           }
 
-          /* ⏱️ SIMPLE TIME PICKER */
-         /* ⏱️ SIMPLE TIME PICKER WITH CUSTOM PLACEHOLDER + AM/PM FORMAT */
-if (filter.type === "time") {
-  // Convert 24-hour input to AM/PM
-  const formatToAMPM = (time: string) => {
-    if (!time) return "";
-    const [h, m] = time.split(":");
-    const hour = parseInt(h);
-    const suffix = hour >= 12 ? "PM" : "AM";
-    const formattedHour = hour % 12 || 12; // convert 0 → 12
-    return `${String(formattedHour).padStart(2, "0")}:${m} ${suffix}`;
-  };
-
-  const selectedTime = selectedFilters[filter.key]
-    ? formatToAMPM(selectedFilters[filter.key])
-    : null;
-
-  return (
-    <div key={filter.key} className="relative w-full md:w-[160px]">
-
-      {/* Hidden input (actual time picker) */}
-      <input
-        type="time"
-        ref={(el) => {
-          (window as any)[`timeInput_${filter.key}`] = el;
-        }}
-        className="absolute inset-0 opacity-0 cursor-pointer"
-        value={selectedFilters[filter.key] || ""}
-        onChange={(e) => onFilterChange(filter.key, e.target.value)}
-      />
-
-      {/* Visible styled button */}
-      <button
-        type="button"
-        onClick={() =>
-          (window as any)[`timeInput_${filter.key}`]?.showPicker()
-        }
-        className="flex h-[51px] w-full items-center justify-between rounded-[14px] 
-                   border border-black-300 bg-black-500 px-4 text-sm text-gray-200"
-      >
-        {/* Show formatted AM/PM time OR placeholder */}
-        {selectedTime || filter.label}
-
-        <Clock
-          className="h-4 w-4 opacity-70 cursor-pointer"
-          onClick={(e) => {
-            e.stopPropagation();
-            (window as any)[`timeInput_${filter.key}`]?.showPicker();
-          }}
-        />
-      </button>
-    </div>
-  );
-}
-
-
-
-
+          /* ⏱️ TIME PICKER (RANGE MODE) WITH CUSTOM PLACEHOLDER + AM/PM FORMAT */
+          if (filter.type === "time") {
+            return (
+              <div key={filter.key}>
+                <TimeRangePicker
+                  label={undefined}
+                  value={selectedFilters[filter.key] || ""}
+                  onChange={(val) => onFilterChange(filter.key, val)}
+                  mode="single"
+                />
+              </div>
+            );
+          }
           /* 🔽 SELECT FILTER */
           return (
             <Select

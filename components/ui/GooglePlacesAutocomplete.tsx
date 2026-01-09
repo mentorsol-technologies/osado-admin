@@ -117,6 +117,21 @@ const GooglePlacesAutocomplete = React.forwardRef<
       setIsInitialized(true);
     }, [isLoaded, isInitialized]);
 
+    // Force high z-index for Google Places Autocomplete dropdown to ensure it's selectable in modals
+    useEffect(() => {
+      const style = document.createElement("style");
+      style.innerHTML = `
+        .pac-container {
+          z-index: 10000 !important;
+          pointer-events: auto !important;
+        }
+      `;
+      document.body.appendChild(style);
+      return () => {
+        document.body.removeChild(style);
+      };
+    }, []);
+
     const setRefs = (element: HTMLInputElement | null) => {
       inputRef.current = element;
       if (typeof ref === "function") ref(element);

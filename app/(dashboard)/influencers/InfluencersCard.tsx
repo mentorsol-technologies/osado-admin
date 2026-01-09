@@ -9,19 +9,24 @@ import { LucideIcon } from "lucide-react";
 
 interface InfluencerCardProps {
   icon?: LucideIcon;
-  title: string;
   photoURL?: string;
   name: string;
   totalReviews: number;
   createdAt: string;
   location: string;
   status: string;
+  influencerRank?: {
+    rank?: {
+      title?: string;
+      iconURL?: string;
+    };
+  };
   onEdit?: () => void;
   onDelete?: () => void;
 }
 export default function InfluencerCard({
   icon: IconProp,
-  title,
+  influencerRank,
   photoURL,
   name,
   totalReviews,
@@ -40,10 +45,12 @@ export default function InfluencerCard({
         <div className="flex flex-col items-center space-y-4 flex-1">
           {/* Avatar */}
           <div className="flex justify-center mt-4">
-            <img
+            <Image
               src={photoURL || "/images/Ellipse 5.png"}
-              alt={name}
-              className="w-24 h-24 rounded-full object-cover"
+              alt={name || "Profile Image"}
+              width={96}
+              height={96}
+              className="rounded-full object-cover"
             />
           </div>
 
@@ -57,7 +64,9 @@ export default function InfluencerCard({
                 <span className="p-1 bg-red-700 rounded-lg">
                   <Icon className="text-white h-4 w-4" />
                 </span>
-                <span className="font-semibold">{title || "Platinum"}</span>
+                <span className="font-semibold">
+                  {influencerRank?.rank?.title || "Not Ranked"}
+                </span>
               </span>
               <span className="flex items-center flex-wrap">
                 <span>{totalReviews?.toFixed(1)}/5</span>
