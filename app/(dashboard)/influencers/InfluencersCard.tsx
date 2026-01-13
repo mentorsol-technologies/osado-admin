@@ -45,12 +45,10 @@ export default function InfluencerCard({
         <div className="flex flex-col items-center space-y-4 flex-1">
           {/* Avatar */}
           <div className="flex justify-center mt-4">
-            <Image
+            <img
               src={photoURL || "/images/Ellipse 5.png"}
-              alt={name || "Profile Image"}
-              width={96}
-              height={96}
-              className="rounded-full object-cover"
+              alt={name}
+              className="w-24 h-24 rounded-full object-cover"
             />
           </div>
 

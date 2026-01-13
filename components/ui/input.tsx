@@ -5,7 +5,11 @@ import { Eye, ChevronDown, CalendarIcon } from "lucide-react";
 import { Label } from "./label";
 import Image from "next/image";
 import { Country } from "@/components/ui/CountryPicker";
-import { Popover, PopoverContent, PopoverTrigger } from "@radix-ui/react-popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@radix-ui/react-popover";
 import { format } from "date-fns";
 import { Calendar } from "./calendar";
 
@@ -15,20 +19,20 @@ type CommonInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   type?:
-  | "number"
-  | "search"
-  | "time"
-  | "text"
-  | "hidden"
-  | "date"
-  | "datetime-local"
-  | "email"
-  | "month"
-  | "password"
-  | "tel"
-  | "url"
-  | "week"
-  | "calendar";
+    | "number"
+    | "search"
+    | "time"
+    | "text"
+    | "hidden"
+    | "date"
+    | "datetime-local"
+    | "email"
+    | "month"
+    | "password"
+    | "tel"
+    | "url"
+    | "week"
+    | "calendar";
 
   name?: string;
   autoComplete?: string;
@@ -115,8 +119,9 @@ const CommonInput = React.forwardRef<HTMLInputElement, CommonInputProps>(
                 />
                 <ChevronDown
                   size={18}
-                  className={`text-white-100 flex-shrink-0 transition-transform ${isDropdownOpen ? "rotate-180" : "rotate-0"
-                    }`}
+                  className={`text-white-100 flex-shrink-0 transition-transform ${
+                    isDropdownOpen ? "rotate-180" : "rotate-0"
+                  }`}
                 />
                 <span className="text-white-100 font-normal">
                   {selectedCountry.code}
@@ -192,7 +197,7 @@ const CommonInput = React.forwardRef<HTMLInputElement, CommonInputProps>(
                 </button>
               </PopoverTrigger>
 
-              <PopoverContent className="p-0 bg-black-500 border border-gray-700 rounded-md shadow-xl">
+              <PopoverContent className="p-0 bg-black-500 border border-gray-700 rounded-md shadow-xl z-[999999]">
                 <div className="bg-black-500 p-2 rounded-md">
                   <Calendar
                     mode="single"
@@ -227,7 +232,6 @@ const CommonInput = React.forwardRef<HTMLInputElement, CommonInputProps>(
               {...rest}
             />
           )}
-
 
           {isPasswordType && (
             <button
