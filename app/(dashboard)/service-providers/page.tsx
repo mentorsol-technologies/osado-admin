@@ -2,21 +2,20 @@
 
 import DeleteConfirmModal from "@/components/ui/commonComponent/DeleteConfirmModal";
 import FiltersBar from "@/components/ui/commonComponent/FiltersBar";
-import { useMemo, useState } from "react";
-import { Award, Crown, Star } from "lucide-react";
-import Pagination from "@/components/ui/pagination";
-import ProvidersCard from "./ProvidersCard";
+import { useMemo, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { providers } from "@/lib/constant";
-import { useRouter } from "next/navigation";
+import Pagination from "@/components/ui/pagination";
+import ProvidersCard from "./ProvidersCard";
 import EditServiceProviderModal from "./EditServiceProvidersModal";
 import { useGetUsersListQuery } from "@/hooks/useUsersMutations";
 import { applyFilters } from "@/lib/filterHelper";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useRouter } from "next/navigation";
 
 const ServiceProviders = () => {
   const router = useRouter();
+
   const [selectedFilters, setSelectedFilters] = useState<{
     [key: string]: string;
   }>({});
@@ -25,10 +24,8 @@ const ServiceProviders = () => {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+
   const pageSize = 8;
-  const totalPages = Math.ceil(providers.length / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const paginatedProvider = providers.slice(startIndex, startIndex + pageSize);
 
   const filters = [
     {
@@ -44,20 +41,32 @@ const ServiceProviders = () => {
   ];
 
   const { data, isLoading } = useGetUsersListQuery();
-  console.log("provider data", data);
+
   const serviceProviderList = useMemo(() => {
     const users = data || [];
     return users.filter((user: any) => user.role?.role === "service_provider");
   }, [data]);
 
-  console.log("serviceProviderList", serviceProviderList);
-
+  // Apply filters & search
   const filteredServiceProviders = useMemo(() => {
     return applyFilters(serviceProviderList, search, selectedFilters, {
       searchKeys: ["name", "location", "status"],
       dateKey: "createdAt",
     });
   }, [serviceProviderList, search, selectedFilters]);
+
+  // Reset page to 1 whenever filters or search change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, selectedFilters]);
+
+  // Paginate filtered results
+  const totalPages = Math.ceil(filteredServiceProviders.length / pageSize);
+
+  const paginatedServiceProviders = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredServiceProviders.slice(startIndex, startIndex + pageSize);
+  }, [filteredServiceProviders, currentPage]);
 
   const handleFilterChange = (key: string, value: string) => {
     setSelectedFilters((prev) => {
@@ -71,8 +80,9 @@ const ServiceProviders = () => {
   };
 
   const handleDelete = () => {
-    console.log("Influencer deleted:", selectedProviders);
+    console.log("Service Provider deleted:", selectedProviders);
   };
+
   const handleAnalyticsClick = () => {
     router.push("/service-analytics");
   };
@@ -142,7 +152,7 @@ const ServiceProviders = () => {
                   </div>
                 </div>
               ))
-            : filteredServiceProviders?.map((provider: any) => (
+            : paginatedServiceProviders?.map((provider: any) => (
                 <ProvidersCard
                   key={provider.id}
                   {...provider}
@@ -159,23 +169,26 @@ const ServiceProviders = () => {
         </div>
       </div>
 
-      {/* Pagination at bottom */}
-      <div className="mt-8">
-        <Pagination
-          totalPages={totalPages}
-          currentPage={currentPage}
-          onPageChange={setCurrentPage}
-        />
-      </div>
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="mt-8">
+          <Pagination
+            totalPages={totalPages}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      )}
 
       {/* Delete Modal */}
       <DeleteConfirmModal
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         onConfirm={handleDelete}
-        title="Delete Influencer"
+        title="Delete Service Provider"
         description={`Are you sure you want to delete "${selectedProviders?.title}"? This action cannot be undone.`}
       />
+
       {/* Edit Provider Modal */}
       <EditServiceProviderModal
         open={editOpen}

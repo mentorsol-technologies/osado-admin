@@ -14,8 +14,8 @@ interface TimeRangePickerProps {
   value?: string;
   onChange: (value: string) => void;
   error?: string;
-  mode?: "single" | "range"; 
-  placeholder?: string; 
+  mode?: "single" | "range";
+  placeholder?: string;
 }
 
 export default function TimeRangePicker({
@@ -190,7 +190,7 @@ function TimePickerInput({
         </button>
       </PopoverTrigger>
       <PopoverContent
-        className="p-0 bg-black-500 border border-black-300 rounded-md shadow-xl w-[240px]"
+        className="p-0 bg-black-500 border border-black-300 rounded-md shadow-xl w-[240px] z-[999999]"
         align="start"
       >
         <div className="flex h-[300px] text-white">
