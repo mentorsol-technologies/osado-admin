@@ -36,7 +36,7 @@ const profileSchema = z.object({
     .string()
     .refine(
       (val) => !val || val.trim() === "" || /^\d{8}$/.test(val),
-      "Phone number must be exactly 8 digits (Kuwait format)"
+      "Phone number must be exactly 8 digits (Kuwait format)",
     )
     .optional(),
   city: z.string().optional(),
@@ -56,6 +56,7 @@ export default function ProfilePage() {
 
   const [profileImage, setProfileImage] = useState<string>("");
   const [photoId, setPhotoId] = useState<string>("");
+  const [existingPhotoId, setExistingPhotoId] = useState<string>("");
 
   const {
     register,
@@ -101,6 +102,10 @@ export default function ProfilePage() {
     if (user.photoURL) {
       setProfileImage(user.photoURL || user.photo?.url);
     }
+
+    if (user.photoId) {
+      setExistingPhotoId(user.photoId);
+    }
   }, [adminData, reset]);
 
   const handlePencilClick = () => {
@@ -127,7 +132,9 @@ export default function ProfilePage() {
   const onSubmit = (data: ProfileFormData) => {
     const payload: Record<string, any> = {
       ...data,
-      ...(photoId && { photoId }),
+      ...(photoId
+        ? { photoId }
+        : existingPhotoId && { photoId: existingPhotoId }),
     };
 
     updateProfileMutation.mutate(payload);

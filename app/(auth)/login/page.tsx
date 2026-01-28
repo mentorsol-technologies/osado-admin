@@ -35,13 +35,6 @@ export default function LoginPage() {
     onSuccess: (res: any) => {
       const userId = res?.userId;
       const accessToken = res?.accessToken;
-      const role = res?.role?.role;
-
-      // Check if user has admin role
-      if (role !== "admin") {
-        toast.error("Not authorized to login");
-        return;
-      }
 
       if (accessToken) {
         Cookies.set("token", accessToken, { expires: 7 });
