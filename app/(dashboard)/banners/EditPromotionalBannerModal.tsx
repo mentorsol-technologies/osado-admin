@@ -175,7 +175,7 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
           setUploadIds([]);
           setPreviewUrl(null);
         },
-      }
+      },
     );
   };
 
@@ -307,24 +307,38 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
         {/* Start / End Date */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="block text-sm mb-1">Start Date</label>
-            <CommonInput type="date" {...register("startDate")} />
-            {errors.startDate && (
-              <p className="text-xs text-red-500">{errors.startDate.message}</p>
-            )}
+            <label className="block mb-1 text-sm">Start Date</label>
+            <CommonInput
+              placeholder="Start Date"
+              type="calendar"
+              value={watch("startDate")}
+              onChange={(e) => setValue("startDate", e.target.value)}
+              minDate={(() => {
+                const d = new Date();
+                d.setHours(0, 0, 0, 0);
+                return d;
+              })()}
+            />
           </div>
           <div>
-            <label className="block text-sm mb-1">End Date</label>
-            <CommonInput type="date" {...register("endDate")} />
-            {errors.endDate && (
-              <p className="text-xs text-red-500">{errors.endDate.message}</p>
-            )}
+            <label className="block mb-1 text-sm">End Date</label>
+            <CommonInput
+              placeholder="End Date"
+              type="calendar"
+              value={watch("endDate")}
+              onChange={(e) => setValue("endDate", e.target.value)}
+              minDate={(() => {
+                const d = new Date();
+                d.setHours(0, 0, 0, 0);
+                return d;
+              })()}
+            />
           </div>
         </div>
 
-        {/* Category */}
+        {/* Target Audience */}
         <div className="mb-4">
-          <label className="block text-sm mb-2">Category</label>
+          <label className="block text-sm mb-2">Target Audience</label>
           <div className="flex flex-wrap gap-2">
             {[
               "All",
