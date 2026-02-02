@@ -29,22 +29,22 @@ export const useAuthStore = create<AuthState>()(
       setAccessToken: (token) => set({ accessToken: token }),
       setToken: (token) => {
         if (typeof window !== "undefined") {
-          localStorage.setItem("osado_admin_token", token);
-          Cookies.set("osado_admin_token", token, { expires: 7 });
+          localStorage.setItem("token", token);
+          Cookies.set("token", token, { expires: 7 }); // ✅ store cookie for middleware
         }
         set({ token });
       },
 
       logout: () => {
         if (typeof window !== "undefined") {
-          localStorage.removeItem("osado_admin_token");
-          Cookies.remove("osado_admin_token");
+          localStorage.removeItem("token");
+          Cookies.remove("token"); // ✅ remove cookie to break session
         }
         set({ user: null, token: null });
       },
     }),
     {
-      name: "osado-admin-auth-storage",
+      name: "auth-storage", // key for localStorage
     },
   ),
 );
