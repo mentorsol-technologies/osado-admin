@@ -9,7 +9,7 @@ interface AuthState {
   token: string | null;
   setUser: (user: any) => void;
   setUserId: (id: string) => void;
-   setAccessToken: (token: string) => void;
+  setAccessToken: (token: string) => void;
   setToken: (token: string) => void;
 
   logout: () => void;
@@ -29,22 +29,22 @@ export const useAuthStore = create<AuthState>()(
       setAccessToken: (token) => set({ accessToken: token }),
       setToken: (token) => {
         if (typeof window !== "undefined") {
-          localStorage.setItem("token", token);
-          Cookies.set("token", token, { expires: 7 }); // ✅ store cookie for middleware
+          localStorage.setItem("osado_admin_token", token);
+          Cookies.set("osado_admin_token", token, { expires: 7 });
         }
         set({ token });
       },
 
       logout: () => {
         if (typeof window !== "undefined") {
-          localStorage.removeItem("token");
-          Cookies.remove("token"); // ✅ remove cookie to break session
+          localStorage.removeItem("osado_admin_token");
+          Cookies.remove("osado_admin_token");
         }
         set({ user: null, token: null });
       },
     }),
     {
-      name: "auth-storage", // key for localStorage
-    }
-  )
+      name: "osado-admin-auth-storage",
+    },
+  ),
 );
