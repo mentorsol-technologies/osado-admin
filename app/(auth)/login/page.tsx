@@ -13,8 +13,7 @@ import CommonInput from "@/components/ui/input";
 import { useCountries } from "@/components/ui/CountryPicker";
 import { Country } from "@/components/ui/CountryPicker";
 import Cookies from "js-cookie";
-import { toast } from 'react-toastify';
-
+import { toast } from "react-toastify";
 
 export default function LoginPage() {
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -23,9 +22,8 @@ export default function LoginPage() {
 
   const countries = useCountries();
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(
-    countries.find((c) => c.iso3 === "KWT") || null
+    countries.find((c) => c.iso3 === "KWT") || null,
   );
-
 
   const { setUser, setToken } = useAuthStore();
 
@@ -35,6 +33,14 @@ export default function LoginPage() {
     onSuccess: (res: any) => {
       const userId = res?.userId;
       const accessToken = res?.accessToken;
+
+      const userRole = res?.role?.role;
+
+      // Check if role is admin
+      if (userRole !== "admin") {
+        toast.error("You are not authorized to Login");
+        return;
+      }
 
       if (accessToken) {
         Cookies.set("token", accessToken, { expires: 7 });
@@ -46,17 +52,16 @@ export default function LoginPage() {
     },
     onError: (error: any) => {
       console.error("Login Error:", error);
-      toast.error("Failed Login")
+      toast.error("Failed Login");
     },
   });
-
 
   // ✅ Handle form submit
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!selectedCountry) {
-      toast.error("Please select your country before logging in.")
+      toast.error("Please select your country before logging in.");
       return;
     }
 
@@ -71,7 +76,6 @@ export default function LoginPage() {
 
     login(payload);
   };
-
 
   return (
     <Card className="w-full bg-transparent md:bg-black-600 rounded-[18px] border-0 max-w-[450px]">
