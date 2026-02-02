@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Modal from "@/components/ui/Modal";
 import clsx from "clsx";
-import { Shield, ArrowRight } from "lucide-react";
+import { Shield, ArrowRight, User } from "lucide-react";
 
 // Match your CommonTable row keys
 export interface BusinessOwnerRow {
@@ -21,6 +21,9 @@ export interface BusinessOwnerRow {
   total_events?: number;
   completed_events?: number;
   cancelled_events?: number;
+  user: {
+    photoURL?: string;
+  };
 }
 
 interface OwnerViewModalProps {
@@ -58,13 +61,13 @@ export default function OwnerViewModal({
       owner.disputes === 0
         ? "No disputes raised against this owner"
         : (owner.disputes?.toString() ?? "No disputes data available"),
-    avatarUrl: owner.avatar_url,
+    avatarUrl: owner.user?.photoURL,
   };
 
   const statusClasses = clsx(
     "px-3 py-1 rounded-md border text-sm font-medium w-fit",
     data.status === "Active" && "text-green-400 border-green-500/30",
-    data.status === "Suspended" && "text-red-400 border-red-500/30"
+    data.status === "Suspended" && "text-red-400 border-red-500/30",
   );
 
   return (
@@ -77,14 +80,18 @@ export default function OwnerViewModal({
       <div className="space-y-6 text-white max-h-[80vh] overflow-y-auto ">
         {/* Header */}
         <div className="flex flex-col items-center text-center">
-          <div className="w-24 h-24 rounded-full overflow-hidden">
-            <Image
-              src={data.avatarUrl || "https://i.pravatar.cc/150?u=defaultUser"}
-              alt={data.name}
-              width={120}
-              height={120}
-              className="object-cover"
-            />
+          <div className="w-24 h-24 rounded-full overflow-hidden flex items-center justify-center bg-gray-400">
+            {data.avatarUrl ? (
+              <Image
+                src={data.avatarUrl}
+                alt={data.name}
+                width={120}
+                height={120}
+                className="object-cover w-24 h-24"
+              />
+            ) : (
+              <User className="w-10 h-10 text-gray-800" />
+            )}
           </div>
           <h2 className="mt-4 text-xl font-semibold">{data.name}</h2>
         </div>
