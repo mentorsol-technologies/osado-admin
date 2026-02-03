@@ -2,10 +2,17 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // Define which routes are public
-const publicRoutes = ["/login", "/signup", "/reset-password", "/verify-otp", "/create-password", "/forgot-password"];
+const publicRoutes = [
+  "/login",
+  "/signup",
+  "/reset-password",
+  "/verify-otp",
+  "/create-password",
+  "/forgot-password",
+];
 
 export function middleware(req: NextRequest) {
-  const token = req.cookies.get("token")?.value;
+  const token = req.cookies.get("osado-admin-token")?.value;
 
   const { pathname } = req.nextUrl;
 
