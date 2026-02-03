@@ -15,7 +15,9 @@ api.interceptors.request.use(
   (config) => {
     // Add token if available
     const token =
-      typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      typeof window !== "undefined"
+        ? localStorage.getItem("osado-admin-token")
+        : null;
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -23,7 +25,7 @@ api.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 //  Response interceptor
@@ -35,8 +37,8 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && typeof window !== "undefined") {
       // Automatically log out on unauthorized
       try {
-        localStorage.removeItem("token");
-        Cookies.remove("token");
+        localStorage.removeItem("osado-admin-token");
+        Cookies.remove("osado-admin-token");
       } catch (e) {
         console.error("Error clearing auth data on 401:", e);
       }
@@ -46,7 +48,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

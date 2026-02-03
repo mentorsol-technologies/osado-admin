@@ -14,9 +14,9 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 
   // Redirect to dashboard if already authenticated
   useEffect(() => {
-    const token = Cookies.get('token');
+    const token = Cookies.get("osado-admin-token");
     if (token) {
-      router.push('/dashboard');
+      router.push("/dashboard");
     }
   }, [router]);
 

@@ -17,9 +17,9 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   // Redirect to login if not authenticated
   useEffect(() => {
-    const token = Cookies.get('token');
+    const token = Cookies.get("osado-admin-token");
     if (!token) {
-      router.push('/login');
+      router.push("/login");
     } else {
       setIsAuthenticated(true);
     }

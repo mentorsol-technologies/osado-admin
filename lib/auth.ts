@@ -1,22 +1,22 @@
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export async function requireAuth() {
-  const cookieStore = await cookies()
-  const token = cookieStore.get('token')
-  
+  const cookieStore = await cookies();
+  const token = cookieStore.get("osado-admin-token");
+
   if (!token) {
-    redirect('/login')
+    redirect("/login");
   }
-  
-  return token
+
+  return token;
 }
 
 export async function redirectIfAuthenticated() {
-  const cookieStore = await cookies()
-  const token = cookieStore.get('token')
-  
+  const cookieStore = await cookies();
+  const token = cookieStore.get("osado-admin-token");
+
   if (token) {
-    redirect('/dashboard')
+    redirect("/dashboard");
   }
 }
