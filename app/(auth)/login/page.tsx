@@ -43,7 +43,7 @@ export default function LoginPage() {
       }
 
       if (accessToken) {
-        Cookies.set("token", accessToken, { expires: 7 });
+        Cookies.set("osado-admin-token", accessToken, { expires: 7 });
         setToken(accessToken);
         setUser(userId);
         toast.success("Login successful!");
