@@ -24,27 +24,23 @@ export const useAuthStore = create<AuthState>()(
       token: null,
 
       setUser: (user) => set({ user }),
-
       setUserId: (id) => set({ userId: id }),
       setAccessToken: (token) => set({ accessToken: token }),
+
       setToken: (token) => {
-        if (typeof window !== "undefined") {
-          localStorage.setItem("token", token);
-          Cookies.set("token", token, { expires: 7 }); // ✅ store cookie for middleware
-        }
+        localStorage.setItem("osado-admin-token", token);
+        Cookies.set("osado-admin-token", token, { expires: 7 });
         set({ token });
       },
 
       logout: () => {
-        if (typeof window !== "undefined") {
-          localStorage.removeItem("token");
-          Cookies.remove("token"); // ✅ remove cookie to break session
-        }
+        localStorage.removeItem("osado-admin-token");
+        Cookies.remove("osado-admin-token");
         set({ user: null, token: null });
       },
     }),
     {
-      name: "auth-storage", // key for localStorage
+      name: "osado-admin-auth",
     },
   ),
 );
