@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 import { Crown, LucideIcon } from "lucide-react";
 import Image from "next/image";
 
-
 interface InfluencersRankCardProps {
   iconURL?: string | null;
   title: string;
@@ -34,14 +33,14 @@ export default function InfluencersRankCard({
         {/* Header */}
         <div className="flex items-center gap-3">
           {iconURL ? (
-          <div className="p-3 bg-red-700 rounded-lg">
-            <Image
-              src={iconURL}
-              alt={title}
-              width={28}
-              height={28}
-              className="object-contain rounded"
-            />
+            <div className="p-2 bg-red-700 rounded-lg flex items-center justify-center w-12 h-11">
+              <Image
+                src={iconURL}
+                alt={title}
+                width={30}
+                height={30}
+                className="object-cover rounded w-10 h-7"
+              />
             </div>
           ) : (
             <div className="p-3 bg-red-700 rounded-lg">
@@ -50,7 +49,9 @@ export default function InfluencersRankCard({
           )}
           <div>
             <h3 className="text-lg font-semibold">{title}</h3>
-            <p className="text-xs text-gray-400">Min.{noOfEventsVisited} events</p>
+            <p className="text-xs text-gray-400">
+              Min.{noOfEventsVisited} events
+            </p>
           </div>
         </div>
 
@@ -65,8 +66,7 @@ export default function InfluencersRankCard({
             <span> {influencerTaggedCount}</span>
           </p>
           <p className="flex justify-between">
-            <span className="font-semibold">Status</span>{" "}
-            <span >{status}</span>
+            <span className="font-semibold">Status</span> <span>{status}</span>
           </p>
         </div>
 

@@ -142,7 +142,7 @@ const CommonInput = React.forwardRef<HTMLInputElement, CommonInputProps>(
                     .filter((country) =>
                       country.name
                         .toLowerCase()
-                        .includes(searchTerm.toLowerCase())
+                        .includes(searchTerm.toLowerCase()),
                     )
                     .map((country, idx) => (
                       <button
@@ -260,7 +260,7 @@ const CommonInput = React.forwardRef<HTMLInputElement, CommonInputProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
 CommonInput.displayName = "CommonInput";

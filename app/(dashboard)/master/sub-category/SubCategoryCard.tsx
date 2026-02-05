@@ -31,14 +31,14 @@ export default function SubCategoryCard({
       <CardContent className="p-4 flex flex-col justify-between h-full">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-red-700 rounded-lg flex items-center justify-center w-12 h-12">
+          <div className="p-2 bg-red-700 rounded-lg flex items-center justify-center w-12 h-12">
             {iconUrl ? (
               <Image
                 src={iconUrl}
                 alt={name}
                 width={30}
                 height={30}
-                className="object-contain rounded"
+                className="object-cover rounded w-10 h-7"
               />
             ) : (
               <Folder className="text-white h-6 w-6" />

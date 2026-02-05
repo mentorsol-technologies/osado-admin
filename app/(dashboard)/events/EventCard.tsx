@@ -100,7 +100,7 @@ export default function EventCard({
             alt={organizerName}
             width={40}
             height={40}
-            className="rounded-full object-cover"
+            className="rounded-full object-cover w-9 h-9"
           />
 
           <div className="flex flex-col">
