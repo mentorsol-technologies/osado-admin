@@ -32,16 +32,15 @@ export default function CountryCard({
       <CardContent className="p-4 space-y-3">
         {/* Header */}
         <div className="flex items-center gap-3">
-          
           {iconURL ? (
-            <div className="p-3 bg-red-700 rounded-lg">
-            <Image
-              src={iconURL}
-              alt={name}
-              width={28}
-              height={28}
-              className="object-contain rounded "
-            />
+            <div className="p-1 bg-red-700 rounded-lg flex items-center justify-center w-12 h-12">
+              <Image
+                src={iconURL}
+                alt={name}
+                width={30}
+                height={30}
+                className="object-cover rounded w-10 h-7"
+              />
             </div>
           ) : (
             <div className="p-3 bg-red-700 rounded-lg">
@@ -51,7 +50,7 @@ export default function CountryCard({
           <div>
             <h3 className="text-lg font-semibold">{name}</h3>
             <p className="text-xs ">
-              Last Updated at :  {new Date(updatedAt).toLocaleDateString()}
+              Last Updated at : {new Date(updatedAt).toLocaleDateString()}
             </p>
           </div>
         </div>
