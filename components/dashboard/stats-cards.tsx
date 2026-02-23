@@ -1,30 +1,30 @@
-'use client';
+"use client";
 
-import { PartyPopper } from 'lucide-react';
+import { PartyPopper } from "lucide-react";
 
 const stats = [
   {
-    title: 'Total Events',
-    value: '4,539',
-    change: '+12.5%',
+    title: "Total Events",
+    value: "4,539",
+    change: "+12.5%",
     positive: true,
   },
   {
-    title: 'Active Events',
-    value: '1,290',
-    change: '+5.4%',
+    title: "Active Events",
+    value: "1,290",
+    change: "+5.4%",
     positive: true,
   },
   {
-    title: 'Upcoming Events',
-    value: '3,339',
-    change: '+8.2%',
+    title: "Upcoming Events",
+    value: "3,339",
+    change: "+8.2%",
     positive: true,
   },
   {
-    title: 'Total Bookings',
-    value: '539',
-    change: '+15.3%',
+    title: "Total Bookings",
+    value: "539",
+    change: "+15.3%",
     positive: true,
   },
 ];
@@ -39,18 +39,19 @@ export function StatsCards() {
               <PartyPopper className="w-3 h-3 lg:w-4 lg:h-4 text-white" />
             </div>
             <h3 className="text-xs lg:text-sm font-normal">{stat.title}</h3>
-            
           </div>
-          
+
           <div className="flex items-end justify-between">
             <div className="flex gap-4">
-              <p className="text-lg lg:text-2xl font-bold text-white">{stat.value}</p>
+              <p className="text-lg lg:text-2xl font-bold text-white">
+                {stat.value}
+              </p>
               <div className="flex items-center gap-2 mt-1">
-                <span 
+                <span
                   className={`text-xs px-1.5 lg:px-2 py-0.5 lg:py-1 rounded-full ${
-                    stat.positive 
-                      ? 'bg-green-500/20 text-green-400' 
-                      : 'bg-red-500/20 text-red-400'
+                    stat.positive
+                      ? "bg-green-500/20 text-green-400"
+                      : "bg-red-500/20 text-red-400"
                   }`}
                 >
                   {stat.change}

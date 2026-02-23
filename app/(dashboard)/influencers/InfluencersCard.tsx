@@ -15,6 +15,7 @@ interface InfluencerCardProps {
   createdAt: string;
   location: string;
   status: string;
+  city: string;
   influencerRank?: {
     rank?: {
       title?: string;
@@ -32,6 +33,7 @@ export default function InfluencerCard({
   totalReviews,
   createdAt,
   location,
+  city,
   status,
   onEdit,
   onDelete,
@@ -75,9 +77,11 @@ export default function InfluencerCard({
               <span className="font-semibold">Member Since</span>
               <span>{new Date(createdAt).toLocaleDateString()}</span>
             </p>
-            <p className="flex justify-between flex-wrap">
-              <span className="font-semibold">Location</span>
-              <span>{location}</span>
+            <p className="flex justify-between gap-2">
+              <span className="flex-shrink-0">Location</span>
+              <span className="font-semibold text-right break-words">
+                {city || "N/A"}
+              </span>
             </p>
             <p className="flex justify-between flex-wrap">
               <span className="font-semibold">Status</span>

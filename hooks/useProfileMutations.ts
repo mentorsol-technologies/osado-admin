@@ -1,5 +1,6 @@
 import {
   getCurrentAdminService,
+  getDashboardEventsDataService,
   updateProfileService,
   type UpdateProfilePayload,
 } from "@/services/auth-services/authService";
@@ -11,6 +12,14 @@ export const useCurrentAdminQuery = () => {
   return useQuery({
     queryKey: ["currentAdmin"],
     queryFn: getCurrentAdminService,
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useGetDashboardStatsQuery = () => {
+  return useQuery({
+    queryKey: ["dashboardStats"],
+    queryFn: getDashboardEventsDataService,
     staleTime: 1000 * 60 * 5,
   });
 };
@@ -34,7 +43,7 @@ export const useUpdateProfileMutation = () => {
     },
     onError: (error: any) => {
       toast.error(
-        error?.response?.data?.message || "Failed to update profile!"
+        error?.response?.data?.message || "Failed to update profile!",
       );
     },
   });

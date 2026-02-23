@@ -48,6 +48,7 @@ type CommonInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   onCountryChange?: (country: Country) => void;
   showCountryDropdown?: boolean;
   minDate?: Date;
+  maxDate?: Date;
 };
 
 const CommonInput = React.forwardRef<HTMLInputElement, CommonInputProps>(
@@ -72,6 +73,7 @@ const CommonInput = React.forwardRef<HTMLInputElement, CommonInputProps>(
       onCountryChange,
       showCountryDropdown = false,
       minDate,
+      maxDate,
       ...rest
     } = props;
 
@@ -202,7 +204,10 @@ const CommonInput = React.forwardRef<HTMLInputElement, CommonInputProps>(
                   <Calendar
                     mode="single"
                     selected={value ? new Date(value) : undefined}
-                    disabled={minDate ? { before: minDate } : undefined}
+                    disabled={[
+                      ...(minDate ? [{ before: minDate }] : []),
+                      ...(maxDate ? [{ after: maxDate }] : []),
+                    ]}
                     onSelect={(date) => {
                       if (date) {
                         const formattedDate = format(date, "yyyy-MM-dd");

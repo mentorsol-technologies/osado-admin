@@ -20,11 +20,13 @@ import { getBannerUploadLink } from "@/services/banners/bannersService";
 import { uploadToS3 } from "@/lib/s3Upload";
 import { Camera } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import GooglePlacesAutocomplete from "@/components/ui/GooglePlacesAutocomplete";
+import { useUpdateInfluencerServiceProviderMutation } from "@/hooks/useUsersMutations";
+import countryList from "react-select-country-list";
+import { useCategoriesQuery } from "@/hooks/useCategoryMutations";
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
-  surName: z.string().min(1, "Surname is required"),
-  country: z.string().min(1, "Country is required"),
   city: z.string().min(1, "City is required"),
   email: z.string().email("Valid email is required"),
   phone: z.string().min(1, "Phone number is required"),
@@ -66,16 +68,33 @@ export default function EditInfluencerModal({
   const [preview, setPreview] = useState<string | null>(null);
   const [uploadId, setUploadId] = useState<string>("");
 
+  const { mutate: updateInfluencer, isPending } =
+    useUpdateInfluencerServiceProviderMutation();
+
+  const { data: allCategories } = useCategoriesQuery();
+
   useEffect(() => {
-    if (influencerData) {
-      // Extract category names from the categories array
-      const categoryNames =
-        influencerData.categories?.map((cat: any) => cat.name) || [];
+    if (influencerData && allCategories) {
+      // Extract category IDs from the categories array
+      const categoryIds = influencerData.categories
+        ?.map((cat: any) => {
+          if (typeof cat === "string") {
+            // Try to find the category in the master list by name OR id
+            const found = allCategories.find(
+              (c: any) =>
+                c.name.toLowerCase() === cat.toLowerCase() || c.id === cat,
+            );
+            return found ? found.id : null;
+          }
+          return cat?.id || null;
+        })
+        .filter(Boolean) as string[];
+
+      // Deduplicate IDs
+      const uniqueIds = Array.from(new Set(categoryIds)) as string[];
 
       reset({
         name: influencerData.name || "",
-        surName: influencerData.surName?.trim() || "",
-        country: influencerData.country || "",
         city: influencerData.city || "",
         email: influencerData.email || "",
         phone: influencerData.phoneNumber || "",
@@ -84,12 +103,12 @@ export default function EditInfluencerModal({
         youtube: influencerData.facebookUrl || "",
         tiktok: influencerData.tiktokUrl || "",
         snapchat: influencerData.snapchat || "",
-        categories: categoryNames,
+        categories: uniqueIds,
       });
-      setSelectedCategories(categoryNames);
+      setSelectedCategories(uniqueIds);
       setPreview(influencerData.photoURL || null);
     }
-  }, [influencerData, reset]);
+  }, [influencerData, allCategories, reset]);
 
   const handleFileUpload = async (file: File) => {
     try {
@@ -118,11 +137,36 @@ export default function EditInfluencerModal({
   };
 
   const onSubmit = (data: FormData) => {
-    onUpdate({
-      ...data,
+    if (!influencerData?.id) return;
+
+    const payload = {
+      name: data.name,
+      city: data.city,
+      email: data.email,
+      phoneNumber: data.phone,
+      bio: data.description,
+      instagramUrl: data.instagram,
+      // youtubeUrl: data.youtube,
+      tiktokUrl: data.tiktok,
+      // snapchat: data.snapchat,
       categories: selectedCategories,
-    });
-    setOpen(false);
+      photoId: uploadId || influencerData.photoId,
+      // authProvider: "phone",
+      // callingCode: "+965",
+      // countryCode: "KWD",
+    };
+
+    updateInfluencer(
+      {
+        id: influencerData.id,
+        data: payload,
+      },
+      {
+        onSuccess: () => {
+          setOpen(false);
+        },
+      },
+    );
   };
 
   // Combine static categories with influencer's categories
@@ -132,9 +176,7 @@ export default function EditInfluencerModal({
   //   "Food & Drink",
   // ];
 
-  const influencerCategoryNames =
-    influencerData?.categories?.map((cat: any) => cat.name) || [];
-  const categories = Array.from(new Set([...influencerCategoryNames]));
+  const categories = allCategories || [];
 
   return (
     <Modal
@@ -143,8 +185,12 @@ export default function EditInfluencerModal({
       title="Edit Influencer"
       footer={
         <div className="flex flex-col sm:flex-row gap-3 w-full">
-          <Button onClick={handleSubmit(onSubmit)} className="flex-1">
-            Submit
+          <Button
+            onClick={handleSubmit(onSubmit)}
+            className="flex-1"
+            disabled={isPending}
+          >
+            {isPending ? "Updating..." : "Submit"}
           </Button>
           <Button
             variant="outline"
@@ -197,50 +243,44 @@ export default function EditInfluencerModal({
           </p>
         </div>
 
-        {/* Name / Surname */}
-        <div className=" mb-4">
+        {/* Name / Email */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <CommonInput
             label="Name"
             placeholder="Enter name"
             {...register("name")}
           />
-        </div>
-
-        {/* Country / City */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="block text-[16px] font-medium">Country</label>
-            <Controller
-              name="country"
-              control={control}
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select country" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Germany">Germany</SelectItem>
-                    <SelectItem value="France">France</SelectItem>
-                    <SelectItem value="UK">United Kingdom</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </div>
-          <CommonInput
-            label="City"
-            placeholder="Enter city"
-            {...register("city")}
-          />
-        </div>
-
-        {/* Email / Phone */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <CommonInput
             label="Email"
             placeholder="Enter email"
             {...register("email")}
           />
+        </div>
+
+        {/* City / Phone */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block mb-1 text-[16px] font-medium">
+              Location
+            </label>
+            <Controller
+              name="city"
+              control={control}
+              render={({ field }) => (
+                <GooglePlacesAutocomplete
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Search city..."
+                  onPlaceSelect={(place) => {
+                    field.onChange(place.city || place.formatted_address || "");
+                  }}
+                />
+              )}
+            />
+            {errors.city && (
+              <p className="text-xs text-red-500 mt-1">{errors.city.message}</p>
+            )}
+          </div>
           <CommonInput
             label="Phone number"
             placeholder="+965 5584 9201"
@@ -263,19 +303,19 @@ export default function EditInfluencerModal({
 
         {/* Category */}
         <div className="mb-4">
-          <label className="block text-sm mb-2">Category</label>
+          <label className="block text-[16px] font-medium mb-2">Category</label>
           <div className="flex flex-wrap gap-2">
-            {categories.map((cat) => (
+            {categories.map((cat: any) => (
               <Badge
-                key={cat}
-                onClick={() => toggleCategory(cat)}
+                key={cat.id}
+                onClick={() => toggleCategory(cat.id)}
                 className={`cursor-pointer px-4 py-1 rounded-full ${
-                  selectedCategories.includes(cat)
+                  selectedCategories.includes(cat.id)
                     ? "bg-red-600 text-white"
                     : "bg-gray-700 text-gray-300"
                 }`}
               >
-                {cat}
+                {cat.name}
               </Badge>
             ))}
             {/* <Badge className="bg-[#2B2B2B] text-gray-400">+15</Badge> */}

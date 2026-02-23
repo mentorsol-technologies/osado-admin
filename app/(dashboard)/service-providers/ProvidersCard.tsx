@@ -12,6 +12,7 @@ interface ProvidersCardProps {
   title: string;
   photoURL?: string;
   name: string;
+  city: string;
   rating: number;
   createdAt: string;
   location: string;
@@ -28,6 +29,7 @@ export default function ProvidersCard({
   rating,
   createdAt,
   location,
+  city,
   status,
   onEdit,
   onDelete,
@@ -69,9 +71,12 @@ export default function ProvidersCard({
               <span className="font-semibold">Member Since</span>
               <span>{new Date(createdAt).toLocaleDateString()}</span>
             </p>
-            <p className="flex justify-between flex-wrap">
-              <span className="font-semibold">Location</span>
-              <span>{location}</span>
+
+            <p className="flex justify-between gap-2">
+              <span className="flex-shrink-0">Location</span>
+              <span className="font-semibold text-right break-words">
+                {city || "N/A"}
+              </span>
             </p>
             <p className="flex justify-between flex-wrap">
               <span className="font-semibold">Status</span>

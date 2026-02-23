@@ -20,11 +20,12 @@ import { getBannerUploadLink } from "@/services/banners/bannersService";
 import { uploadToS3 } from "@/lib/s3Upload";
 import { Camera } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import GooglePlacesAutocomplete from "@/components/ui/GooglePlacesAutocomplete";
+import { useCategoriesQuery } from "@/hooks/useCategoryMutations";
+import { useUpdateInfluencerServiceProviderMutation } from "@/hooks/useUsersMutations";
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
-  surName: z.string().min(1, "Surname is required"),
-  country: z.string().min(1, "Country is required"),
   city: z.string().min(1, "City is required"),
   email: z.string().email("Valid email is required"),
   phoneNumber: z.string().min(1, "Phone number is required"),
@@ -57,6 +58,7 @@ export default function EditServiceProviderModal({
     handleSubmit,
     reset,
     setValue,
+    control,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -66,14 +68,33 @@ export default function EditServiceProviderModal({
   const [preview, setPreview] = useState<string | null>(null);
   const [uploadId, setUploadId] = useState<string>("");
 
+  const { data: allCategories } = useCategoriesQuery();
+
+  const { mutate: updateServiceProvider, isPending } =
+    useUpdateInfluencerServiceProviderMutation();
+
   useEffect(() => {
-    if (providerData) {
-      const categoryIds =
-        providerData.categories?.map((cat: any) => cat.id) || [];
+    if (providerData && allCategories) {
+      // Extract category IDs from the categories array
+      const categoryIds = providerData.categories
+        ?.map((cat: any) => {
+          if (typeof cat === "string") {
+            // Try to find the category in the master list by name OR id
+            const found = allCategories.find(
+              (c: any) =>
+                c.name.toLowerCase() === cat.toLowerCase() || c.id === cat,
+            );
+            return found ? found.id : null;
+          }
+          return cat?.id || null;
+        })
+        .filter(Boolean) as string[];
+
+      // Deduplicate IDs
+      const uniqueIds = Array.from(new Set(categoryIds));
+
       reset({
         name: providerData.name || "",
-        surName: providerData.surName || "",
-        country: providerData.country || "",
         city: providerData.city || "",
         email: providerData.email || "",
         phoneNumber: providerData.phoneNumber || "",
@@ -82,12 +103,12 @@ export default function EditServiceProviderModal({
         youtube: providerData.youtube || "",
         tiktok: providerData.tiktok || "",
         snapchat: providerData.snapchat || "",
-        categories: providerData.categories || [],
+        categories: uniqueIds,
       });
-      setSelectedCategories(categoryIds);
+      setSelectedCategories(uniqueIds);
       setPreview(providerData.photoURL || null);
     }
-  }, [providerData, reset]);
+  }, [providerData, allCategories, reset]);
 
   const handleFileUpload = async (file: File) => {
     try {
@@ -116,11 +137,34 @@ export default function EditServiceProviderModal({
   };
 
   const onSubmit = (data: FormData) => {
-    onUpdate({
-      ...data,
+    if (!providerData?.id) return;
+
+    const payload = {
+      name: data.name,
+      city: data.city,
+      email: data.email,
+      phoneNumber: data.phoneNumber,
+      bio: data.bio,
+      instagramUrl: data.instagram,
+      // youtubeUrl: data.youtube,
+      tiktokUrl: data.tiktok,
+      // snapchat: data.snapchat,
       categories: selectedCategories,
-    });
-    setOpen(false);
+      photoId: uploadId || (providerData as any).photoId,
+    };
+
+    updateServiceProvider(
+      {
+        id: providerData.id,
+        data: payload,
+      },
+      {
+        onSuccess: () => {
+          setOpen(false);
+          onUpdate(data);
+        },
+      },
+    );
   };
 
   return (
@@ -130,8 +174,12 @@ export default function EditServiceProviderModal({
       title="Edit Service Provider"
       footer={
         <div className="flex flex-col sm:flex-row gap-3 w-full">
-          <Button onClick={handleSubmit(onSubmit)} className="flex-1">
-            Submit
+          <Button
+            onClick={handleSubmit(onSubmit)}
+            className="flex-1"
+            disabled={isPending}
+          >
+            {isPending ? "Updating..." : "Submit"}
           </Button>
           <Button
             variant="outline"
@@ -149,7 +197,9 @@ export default function EditServiceProviderModal({
           <div className="relative">
             <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-700">
               <Image
-                src={providerData?.photoURL || "/images/Ellipse5.png"}
+                src={
+                  preview || providerData?.photoURL || "/images/Ellipse5.png"
+                }
                 alt="Profile"
                 width={96}
                 height={96}
@@ -184,7 +234,7 @@ export default function EditServiceProviderModal({
           </p>
         </div>
 
-        {/* Name / Surname */}
+        {/* Name / Email */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <CommonInput
             label="Name"
@@ -192,35 +242,36 @@ export default function EditServiceProviderModal({
             {...register("name")}
           />
           <CommonInput
-            label="Surname"
-            placeholder="Enter surname"
-            {...register("surName")}
-          />
-        </div>
-
-        {/* Country / City */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          <div>
-            <CommonInput
-              label="Country"
-              placeholder="Enter country"
-              {...register("country")}
-            />
-          </div>
-          <CommonInput
-            label="City"
-            placeholder="Enter city"
-            {...register("city")}
-          />
-        </div>
-
-        {/* Email / Phone */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          <CommonInput
             label="Email"
             placeholder="Enter email"
             {...register("email")}
           />
+        </div>
+
+        {/* City / Phone */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block mb-1 text-[16px] font-medium">
+              Location
+            </label>
+            <Controller
+              name="city"
+              control={control}
+              render={({ field }) => (
+                <GooglePlacesAutocomplete
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Search city..."
+                  onPlaceSelect={(place) => {
+                    field.onChange(place.city || place.formatted_address || "");
+                  }}
+                />
+              )}
+            />
+            {errors.city && (
+              <p className="text-xs text-red-500 mt-1">{errors.city.message}</p>
+            )}
+          </div>
           <CommonInput
             label="Phone number"
             placeholder="+965 5584 9201"
@@ -243,9 +294,9 @@ export default function EditServiceProviderModal({
 
         {/* Category */}
         <div className="mb-4">
-          <label className="block text-sm mb-2">Category</label>
+          <label className="block text-[16px] font-medium mb-2">Category</label>
           <div className="flex flex-wrap gap-2">
-            {providerData?.categories.map((cat: any) => (
+            {(allCategories || []).map((cat: any) => (
               <Badge
                 key={cat.id}
                 onClick={() => toggleCategory(cat.id)}
@@ -258,8 +309,6 @@ export default function EditServiceProviderModal({
                 {cat.name}
               </Badge>
             ))}
-
-            {/* <Badge className="bg-[#2B2B2B] text-gray-400">+15</Badge> */}
           </div>
         </div>
 
