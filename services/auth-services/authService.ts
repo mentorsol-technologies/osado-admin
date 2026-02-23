@@ -54,7 +54,7 @@ export const verifyOtpService = async (data: VerifyOtpPayload) => {
 
 export const CreateNewPasswordService = (
   data: CreateNewPasswordPayload,
-  token?: string
+  token?: string,
 ) =>
   api.patch("/auth/resetPassword", data, {
     headers: {
@@ -75,4 +75,11 @@ export const getCurrentAdminService = async () => {
 export const updateProfileService = async (data: UpdateProfilePayload) => {
   const res = await api.patch("/admin/updateProfile", data);
   return res;
+};
+
+// Dashboard events card data
+
+export const getDashboardEventsDataService = async () => {
+  const res = await api.get("/auth/admin-dashboard");
+  return res.data?.[0];
 };

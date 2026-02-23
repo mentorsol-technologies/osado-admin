@@ -42,3 +42,11 @@ export const getUserUploadLink = async (fileType: string) => {
     throw new Error("Upload link missing URL or fields");
   return data;
 };
+
+export const updateInfluencerServiceProvider = async (
+  id: string | number,
+  data: any,
+) => {
+  const response = await api.patch(`/users/${id}/update`, data);
+  return response;
+};

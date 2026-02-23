@@ -142,9 +142,9 @@ export function Navbar({ onMenuClick }: NavbarProps) {
               <User className="mr-2 h-4 w-4" />
               Profile
             </DropdownMenuItem>
-            <DropdownMenuItem className="text-white ">
+            {/* <DropdownMenuItem className="text-white ">
               Settings
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
             <DropdownMenuSeparator className="bg-gray-700" />
             <DropdownMenuItem className="text-white" onClick={handleLogout}>
               Log out

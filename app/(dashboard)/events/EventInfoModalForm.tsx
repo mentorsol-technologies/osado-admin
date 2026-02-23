@@ -7,7 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Modal from "@/components/ui/Modal";
 import { User, Clock9, Album, Star, Calendar } from "lucide-react";
 import weddingPackage from "/public/images/578ac720e49fcbf44cbc003fd2428e7c56e15eb7.png";
-import { useDeleteEventMutation, useViewEventDetailsQuery } from "@/hooks/useEventManagementMutations";
+import {
+  useDeleteEventMutation,
+  useViewEventDetailsQuery,
+} from "@/hooks/useEventManagementMutations";
 import { useState } from "react";
 import { formatTime, FormatDate } from "@/lib/utils";
 import BusinessOwnerDetailsModal from "./BussinessOwnerDetailsForm";
@@ -29,10 +32,18 @@ export default function EventInfoModal({
   const { mutate: deleteEvent, isPending } = useDeleteEventMutation();
 
   const event = eventData?.event;
-  const photo = event?.photos?.[0]?.url || "/images/event.png"
+  const appliedInfluencers = eventData?.appliedInfluencers || [];
+  const photo = event?.photos?.[0]?.url || "/images/event.png";
   const [ownerModalOpen, setOwnerModalOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
+  const influencerUsers = appliedInfluencers.filter(
+    (user: any) => user?.role?.role === "influencer",
+  );
+
+  const serviceProviders = appliedInfluencers.filter(
+    (user: any) => user?.role?.role === "service_provider",
+  );
 
   const handleSeeProfileClick = () => {
     setOwnerModalOpen(true);
@@ -95,7 +106,8 @@ export default function EventInfoModal({
                 </p>
               </div>
               <div className="flex justify-between">
-                <p className="text-white">Registration Date</p> <p>{FormatDate(event?.createdAt)}</p>
+                <p className="text-white">Registration Date</p>{" "}
+                <p>{FormatDate(event?.createdAt)}</p>
               </div>
               <div className="flex justify-between items-center gap-2">
                 <p className="text-white">Status</p>
@@ -105,7 +117,11 @@ export default function EventInfoModal({
                 <p className="text-white">Category</p>
                 <div className="mt-1 flex flex-col lg:flex-row flex-wrap gap-2">
                   {event?.categories?.map((cat: any) => (
-                    <Badge key={cat.id} variant="secondary" className="w-auto px-3 py-1">
+                    <Badge
+                      key={cat.id}
+                      variant="secondary"
+                      className="w-auto px-3 py-1"
+                    >
                       {cat.name}
                     </Badge>
                   ))}
@@ -118,11 +134,14 @@ export default function EventInfoModal({
           <div className="mt-6 flex flex-col lg:flex-row items-start lg:items-center justify-between rounded-md w-full gap-4">
             <div className="flex items-center gap-3">
               <Image
-                src={event?.creator?.photoURL || "https://randomuser.me/api/portraits/women/65.jpg"}
+                src={
+                  event?.creator?.photoURL ||
+                  "https://randomuser.me/api/portraits/women/65.jpg"
+                }
                 alt="Organizer"
                 width={40}
                 height={40}
-                className="rounded-full"
+                className="rounded-full object-cover w-10 h-10"
               />
               <div>
                 <p className="text-sm font-semibold">{event?.creator?.name}</p>
@@ -135,7 +154,11 @@ export default function EventInfoModal({
 
             <div className="flex flex-col lg:flex-row gap-3 w-full lg:w-auto">
               {/* <Button className="flex-1 lg:flex-none">Edit</Button> */}
-              <Button variant="outline" className="flex-1 lg:flex-none" onClick={handleSeeProfileClick}>
+              <Button
+                variant="outline"
+                className="flex-1 lg:flex-none"
+                onClick={handleSeeProfileClick}
+              >
                 See Profile
               </Button>
             </div>
@@ -143,32 +166,38 @@ export default function EventInfoModal({
 
           {/* Applied Influencers */}
           <Section title="Applied Influencers">
-            <div className="grid lg:grid-cols-2  gap-4">
-              <InfluencerCard
-                name="Liam Johnson"
-                date="19/04/2025"
-                avatar="https://randomuser.me/api/portraits/men/32.jpg"
-              />
-              <InfluencerCard
-                name="Emily Carter"
-                date="19/04/2025"
-                avatar="https://randomuser.me/api/portraits/women/44.jpg"
-              />
+            <div className="grid lg:grid-cols-2 gap-4">
+              {influencerUsers.length > 0 ? (
+                influencerUsers.map((user: any) => (
+                  <InfluencerCard
+                    key={user.id}
+                    name={`${user.name} ${user.surName || ""}`}
+                    date={FormatDate(user?.invite?.createdAt)}
+                    avatar={user.photoURL}
+                  />
+                ))
+              ) : (
+                <p className="text-sm text-gray-400">No influencers applied</p>
+              )}
             </div>
           </Section>
           {/* Applied Booked Service  */}
           <Section title="Booked Service & Providers">
             <div className="grid lg:grid-cols-2 gap-4">
-              <BookedServiceProviderCard
-                name="Liam Johnson"
-                date="19/04/2025"
-                avatar="https://randomuser.me/api/portraits/men/32.jpg"
-              />
-              <BookedServiceProviderCard
-                name="Emily Carter"
-                date="19/04/2025"
-                avatar="https://randomuser.me/api/portraits/women/44.jpg"
-              />
+              {serviceProviders.length > 0 ? (
+                serviceProviders.map((user: any) => (
+                  <BookedServiceProviderCard
+                    key={user.id}
+                    name={`${user.name} ${user.surName || ""}`}
+                    date={FormatDate(user?.proposal?.createdAt)}
+                    avatar={user.photoURL}
+                  />
+                ))
+              ) : (
+                <p className="text-sm text-gray-400">
+                  No service providers booked
+                </p>
+              )}
             </div>
           </Section>
 
@@ -182,9 +211,13 @@ export default function EventInfoModal({
 
           {/* Footer buttons */}
           <div className="mt-6 flex flex-col justify-between gap-3">
-            <Button className="flex-1" variant="outline" onClick={() => {
-              setDeleteOpen(true);
-            }}>
+            <Button
+              className="flex-1"
+              variant="outline"
+              onClick={() => {
+                setDeleteOpen(true);
+              }}
+            >
               Delete
             </Button>
           </div>
@@ -251,7 +284,7 @@ function InfluencerCard({
           alt={name}
           width={50}
           height={50}
-          className="rounded-full"
+          className="rounded-full object-cover w-10 h-10"
         />
         <div>
           <CardTitle className="text-sm font-medium text-white">
@@ -284,7 +317,7 @@ function BookedServiceProviderCard({
           alt={name}
           width={50}
           height={50}
-          className="rounded-full"
+          className="rounded-full w-10 h-10 object-cover"
         />
         <div>
           <CardTitle className="text-sm font-medium text-white">

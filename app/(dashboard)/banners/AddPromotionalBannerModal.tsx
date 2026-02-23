@@ -237,6 +237,11 @@ export default function AddPromotionalBannerModal({
                 d.setHours(0, 0, 0, 0);
                 return d;
               })()}
+              maxDate={
+                watch("endDate")
+                  ? new Date(watch("endDate") + "T00:00:00")
+                  : undefined
+              }
             />
           </div>
           <div>
@@ -246,11 +251,15 @@ export default function AddPromotionalBannerModal({
               type="calendar"
               value={watch("endDate")}
               onChange={(e) => setValue("endDate", e.target.value)}
-              minDate={(() => {
-                const d = new Date();
-                d.setHours(0, 0, 0, 0);
-                return d;
-              })()}
+              minDate={
+                watch("startDate")
+                  ? new Date(watch("startDate") + "T00:00:00")
+                  : (() => {
+                      const d = new Date();
+                      d.setHours(0, 0, 0, 0);
+                      return d;
+                    })()
+              }
             />
           </div>
         </div>
