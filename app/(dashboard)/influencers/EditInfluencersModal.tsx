@@ -31,10 +31,8 @@ const schema = z.object({
   email: z.string().email("Valid email is required"),
   phone: z.string().min(1, "Phone number is required"),
   description: z.string().min(1, "Description is required"),
-  instagram: z.string().optional(),
-  youtube: z.string().optional(),
-  tiktok: z.string().optional(),
-  snapchat: z.string().optional(),
+  instagram: z.string().min(1, "Instagram link is required"),
+  tiktok: z.string().min(1, "TikTok link is required"),
   categories: z.array(z.string()).min(1, "Select at least one category"),
 });
 
@@ -100,9 +98,7 @@ export default function EditInfluencerModal({
         phone: influencerData.phoneNumber || "",
         description: influencerData.bio || "",
         instagram: influencerData.instagramUrl || "",
-        youtube: influencerData.facebookUrl || "",
         tiktok: influencerData.tiktokUrl || "",
-        snapchat: influencerData.snapchat || "",
         categories: uniqueIds,
       });
       setSelectedCategories(uniqueIds);
@@ -133,7 +129,7 @@ export default function EditInfluencerModal({
       updated = [...selectedCategories, cat];
     }
     setSelectedCategories(updated);
-    setValue("categories", updated);
+    setValue("categories", updated, { shouldValidate: true });
   };
 
   const onSubmit = (data: FormData) => {
@@ -146,14 +142,9 @@ export default function EditInfluencerModal({
       phoneNumber: data.phone,
       bio: data.description,
       instagramUrl: data.instagram,
-      // youtubeUrl: data.youtube,
       tiktokUrl: data.tiktok,
-      // snapchat: data.snapchat,
       categories: selectedCategories,
       photoId: uploadId || influencerData.photoId,
-      // authProvider: "phone",
-      // callingCode: "+965",
-      // countryCode: "KWD",
     };
 
     updateInfluencer(
@@ -245,16 +236,29 @@ export default function EditInfluencerModal({
 
         {/* Name / Email */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          <CommonInput
-            label="Name"
-            placeholder="Enter name"
-            {...register("name")}
-          />
-          <CommonInput
-            label="Email"
-            placeholder="Enter email"
-            {...register("email")}
-          />
+          <div>
+            <CommonInput
+              label="Name"
+              placeholder="Enter name"
+              {...register("name")}
+            />
+            {errors.name && (
+              <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>
+            )}
+          </div>
+
+          <div>
+            <CommonInput
+              label="Email"
+              placeholder="Enter email"
+              {...register("email")}
+            />
+            {errors.email && (
+              <p className="text-xs text-red-500 mt-1">
+                {errors.email.message}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* City / Phone */}
@@ -281,11 +285,18 @@ export default function EditInfluencerModal({
               <p className="text-xs text-red-500 mt-1">{errors.city.message}</p>
             )}
           </div>
-          <CommonInput
-            label="Phone number"
-            placeholder="+965 5584 9201"
-            {...register("phone")}
-          />
+          <div>
+            <CommonInput
+              label="Phone number"
+              placeholder="+965 5584 9201"
+              {...register("phone")}
+            />
+            {errors.phone && (
+              <p className="text-xs text-red-500 mt-1">
+                {errors.phone.message}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Description */}
@@ -297,8 +308,14 @@ export default function EditInfluencerModal({
             {...register("description")}
             rows={4}
             placeholder="Enter description"
-            className=" focus:outline-none focus:ring-1 focus:ring-red-600 resize-none"
+            className="focus:outline-none focus:ring-1 focus:ring-red-600 resize-none"
           />
+
+          {errors.description && (
+            <p className="text-xs text-red-500 mt-1">
+              {errors.description.message}
+            </p>
+          )}
         </div>
 
         {/* Category */}
@@ -324,26 +341,30 @@ export default function EditInfluencerModal({
 
         {/* Social Media Links */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          <CommonInput
-            label="Instagram"
-            placeholder="instagramlink"
-            {...register("instagram")}
-          />
-          <CommonInput
-            label="YouTube"
-            placeholder="youtubelink"
-            {...register("youtube")}
-          />
-          <CommonInput
-            label="TikTok"
-            placeholder="tiktoklink"
-            {...register("tiktok")}
-          />
-          <CommonInput
-            label="Snapchat"
-            placeholder="snapchatlink"
-            {...register("snapchat")}
-          />
+          <div>
+            <CommonInput
+              label="Instagram"
+              placeholder="instagramlink"
+              {...register("instagram")}
+            />
+            {errors.instagram && (
+              <p className="text-xs text-red-500 mt-1">
+                {errors.instagram.message}
+              </p>
+            )}
+          </div>
+          <div>
+            <CommonInput
+              label="TikTok"
+              placeholder="tiktoklink"
+              {...register("tiktok")}
+            />
+            {errors.tiktok && (
+              <p className="text-xs text-red-500 mt-1">
+                {errors.tiktok.message}
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </Modal>

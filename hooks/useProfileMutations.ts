@@ -20,7 +20,6 @@ export const useGetDashboardStatsQuery = () => {
   return useQuery({
     queryKey: ["dashboardStats"],
     queryFn: getDashboardEventsDataService,
-    staleTime: 1000 * 60 * 5,
   });
 };
 
