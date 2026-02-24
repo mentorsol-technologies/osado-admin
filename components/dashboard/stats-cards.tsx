@@ -2,37 +2,48 @@
 
 import { PartyPopper } from "lucide-react";
 
-const stats = [
-  {
-    title: "Total Events",
-    value: "4,539",
-    change: "+12.5%",
-    positive: true,
-  },
-  {
-    title: "Active Events",
-    value: "1,290",
-    change: "+5.4%",
-    positive: true,
-  },
-  {
-    title: "Upcoming Events",
-    value: "3,339",
-    change: "+8.2%",
-    positive: true,
-  },
-  {
-    title: "Total Bookings",
-    value: "539",
-    change: "+15.3%",
-    positive: true,
-  },
-];
+export interface DashboardStats {
+  totalEvents: number;
+  activeEvents: number;
+  upcomingEvents: number;
+  totalBookings: number;
+}
+interface StatsCardsProps {
+  stats?: DashboardStats[];
+}
 
-export function StatsCards() {
+export function StatsCards({ stats }: StatsCardsProps) {
+  const statData = stats?.[0];
+
+  const cards = [
+    {
+      title: "Total Events",
+      value: statData?.totalEvents ?? 0,
+      change: "+12.5%",
+      positive: true,
+    },
+    {
+      title: "Active Events",
+      value: statData?.activeEvents ?? 0,
+      change: "+5.4%",
+      positive: true,
+    },
+    {
+      title: "Upcoming Events",
+      value: statData?.upcomingEvents ?? 0,
+      change: "+8.2%",
+      positive: true,
+    },
+    {
+      title: "Total Bookings",
+      value: statData?.totalBookings ?? 0,
+      change: "+15.3%",
+      positive: true,
+    },
+  ];
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6 mb-6 lg:mb-8">
-      {stats.map((stat, index) => (
+      {cards.map((stat, index) => (
         <div key={index} className="stat-card bg-black-500">
           <div className="flex flex-col gap-  mb-2 lg:mb-4">
             <div className="w-6 h-6 lg:w-8 lg:h-8 bg-red-600  rounded-lg flex items-center justify-center">

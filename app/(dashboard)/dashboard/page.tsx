@@ -1,9 +1,10 @@
 "use client";
 import PaymentsChart from "@/components/charts/PaymentsChart";
 import RevenueChart from "@/components/charts/RevenueChart";
-import { StatsCards } from "@/components/dashboard/stats-cards";
+import { DashboardStats, StatsCards } from "@/components/dashboard/stats-cards";
 import { CommonTable, FilterConfig } from "@/components/ui/table/commonTable";
 import { useCategoriesQuery } from "@/hooks/useCategoryMutations";
+import { useGetDashboardStatsQuery } from "@/hooks/useProfileMutations";
 import { useGetUsersListQuery } from "@/hooks/useUsersMutations";
 import { Edit, Eye, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -11,9 +12,10 @@ import { useMemo } from "react";
 import { MdOutlineEdit } from "react-icons/md";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const { data, isLoading } = useGetUsersListQuery();
   const { data: CategoriesList } = useCategoriesQuery();
-  const router = useRouter();
+  const { data: dashboardStats } = useGetDashboardStatsQuery();
 
   const influencerList = useMemo(() => {
     const users = data || [];
@@ -112,7 +114,7 @@ export default function DashboardPage() {
   ];
   return (
     <div className="space-y-6">
-      <StatsCards />
+      <StatsCards stats={dashboardStats as unknown as DashboardStats[]} />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <RevenueChart />

@@ -81,5 +81,5 @@ export const updateProfileService = async (data: UpdateProfilePayload) => {
 
 export const getDashboardEventsDataService = async () => {
   const res = await api.get("/auth/admin-dashboard");
-  return res.data?.[0];
+  return res;
 };
