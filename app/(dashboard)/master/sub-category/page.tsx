@@ -7,8 +7,11 @@ import DeleteConfirmModal from "@/components/ui/commonComponent/DeleteConfirmMod
 import EditSubCategoryModal from "./EditSubcategoryForm";
 import AddSubCategoryModal from "./AddSubcategoryForm";
 import SubCategoryCard from "./SubCategoryCard";
-import { useDeleteSubCategoryMutation, useSubCategoriesQuery } from "@/hooks/useSubCategoriesMutations";
-import { toast } from 'react-toastify';
+import {
+  useDeleteSubCategoryMutation,
+  useSubCategoriesQuery,
+} from "@/hooks/useSubCategoriesMutations";
+import { toast } from "react-toastify";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SubCategories() {
@@ -17,8 +20,8 @@ export default function SubCategories() {
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
   const [addOpen, setAddOpen] = useState(false);
   const { data, isLoading, isError } = useSubCategoriesQuery();
-  const { mutate: deleteSubCategory, isPending } = useDeleteSubCategoryMutation();
-
+  const { mutate: deleteSubCategory, isPending } =
+    useDeleteSubCategoryMutation();
 
   const handleAdd = (data: any) => {
     console.log("New category added:", data);
@@ -30,7 +33,7 @@ export default function SubCategories() {
 
     deleteSubCategory(selectedCategory.id, {
       onSuccess: () => {
-        toast.error("subcategory deleted successfully !")
+        toast.error("subcategory deleted successfully !");
         setDeleteOpen(false);
         setSelectedCategory(null);
       },
@@ -41,7 +44,7 @@ export default function SubCategories() {
     <div className="p-6 bg-black-500 !min-h-[calc(100vh-120px)]  rounded-lg">
       <div className="flex justify-between items-center mb-6">
         <h2 className="lg:text-3xl text-xl  font-medium text-white">
-          Subcategories for Travel & Outdoor
+          Subcategories
         </h2>
         <Button onClick={() => setAddOpen(true)} leftIcon={<Plus size={18} />}>
           <span className="hidden md:inline">Add Subcategory</span>
@@ -81,7 +84,7 @@ export default function SubCategories() {
                 name={cat.name}
                 subCategoryID={cat.subCategoryID}
                 createdDate={cat.createdAt}
-                subCategoriesCount={cat.subCategoriesCount}
+                assignedCategory={cat.category?.name}
                 status={cat.status}
                 onEdit={() => {
                   setSelectedCategory(cat);
