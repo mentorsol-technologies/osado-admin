@@ -10,7 +10,7 @@ interface SubCategoryCardProps {
   name: string;
   subCategoryID: number | string;
   createdDate: string;
-  subCategoriesCount: number;
+  assignedCategory: string;
   status: string;
   onEdit?: () => void;
   onDelete?: () => void;
@@ -21,7 +21,7 @@ export default function SubCategoryCard({
   name,
   subCategoryID,
   createdDate,
-  subCategoriesCount,
+  assignedCategory,
   status,
   onEdit,
   onDelete,
@@ -52,14 +52,15 @@ export default function SubCategoryCard({
 
         {/* Info */}
         <div className="text-sm space-y-1 text-gray-300 mt-4">
-          <p className="flex justify-between">
+          <p className="flex justify-between flex-wrap">
+            <span className="font-semibold">Assigned to</span>
+            <span>{assignedCategory}</span>
+          </p>
+          <p className="flex justify-between flex-wrap">
             <span className="font-semibold">Created Date</span>
             <span>{new Date(createdDate).toLocaleDateString()}</span>
           </p>
-          <p className="flex justify-between">
-            <span className="font-semibold">Subcategories</span>
-            <span>{subCategoriesCount}</span>
-          </p>
+
           <p className="flex justify-between">
             <span className="font-semibold">Status</span>
             <span>{status}</span>
