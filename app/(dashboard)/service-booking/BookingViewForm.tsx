@@ -19,8 +19,9 @@ const BookingViewForm = ({
   onRefundClick,
 }: BookingViewFormProps) => {
   const { data: bookingView, isLoading } = useGetServiceBookingDetailsQuery(
-    bookingId || ""
+    bookingId || "",
   );
+
   const getStatusClasses = (status: string) =>
     clsx("px-3 py-1 rounded-md border text-sm font-medium w-fit", {
       "text-green-400 border border-green-500/30": status === "Confirmed",

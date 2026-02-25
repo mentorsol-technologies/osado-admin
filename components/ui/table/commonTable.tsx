@@ -87,6 +87,8 @@ export function CommonTable<T extends { [key: string]: any }>({
       "email",
       "username",
       "serviceName",
+      "reportedUser",
+      "reporter",
     ];
 
     const candidates = type === "date" ? dateKeys : textKeys;
@@ -97,7 +99,7 @@ export function CommonTable<T extends { [key: string]: any }>({
     a: any,
     b: any,
     key: string | undefined,
-    order: "asc" | "desc"
+    order: "asc" | "desc",
   ) => {
     let valA = key ? getNestedValue(a, key) : undefined;
     let valB = key ? getNestedValue(b, key) : undefined;
@@ -132,7 +134,7 @@ export function CommonTable<T extends { [key: string]: any }>({
   const filterHandlers: Record<string, Function> = {
     category: (row: any, value: string) =>
       row.categories?.some(
-        (cat: any) => cat.name.toLowerCase() === value.toLowerCase()
+        (cat: any) => cat.name.toLowerCase() === value.toLowerCase(),
       ),
   };
 
@@ -155,13 +157,22 @@ export function CommonTable<T extends { [key: string]: any }>({
 
     // 🔍 Search
     if (search) {
-      result = result.filter((row) =>
-        Object.values(row).some((val) =>
-          String(val ?? "")
-            .toLowerCase()
-            .includes(search.toLowerCase())
-        )
-      );
+      result = result.filter((row) => {
+        const searchLower = search.toLowerCase();
+
+        const checkValue = (val: any): boolean => {
+          if (val == null) return false;
+
+          // If object → search inside its values (recursive)
+          if (typeof val === "object") {
+            return Object.values(val).some((nested) => checkValue(nested));
+          }
+
+          return String(val).toLowerCase().includes(searchLower);
+        };
+
+        return Object.values(row).some((val) => checkValue(val));
+      });
     }
 
     // 🎛 Filters

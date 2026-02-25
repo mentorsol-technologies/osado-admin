@@ -34,7 +34,13 @@ const schema = z.object({
   bookingTime: z.string().min(1, "Booking time is required"),
   location: z.string().min(1, "Location is required"),
   city: z.string().min(1, "City is required"),
-  status: z.enum(["Confirmed", "Pending", "Suspended"]),
+  status: z.enum([
+    "Accepted",
+    "Pending",
+    "Suspended",
+    "Cancelled",
+    "Rescheduled",
+  ]),
   country: z.string().min(1, "Country is required"),
   providerId: z.string().min(1, "Provider is required"),
   userId: z.string().min(1, "User Id is required"),
@@ -74,7 +80,7 @@ export default function AddBookingModal({
       bookingTime: "",
       location: "",
       city: "",
-      status: "Confirmed",
+      status: "Accepted",
       country: "",
     },
   });
@@ -99,7 +105,7 @@ export default function AddBookingModal({
       bookingDate: filterDateISO,
       bookingTime: filterTime,
     },
-    false
+    false,
   );
 
   useEffect(() => {
@@ -121,7 +127,7 @@ export default function AddBookingModal({
       page: 1,
       limit: 20,
     },
-    false
+    false,
   );
 
   const { mutate: createServiceBooking } = useCreateServiceBookingMutation();
@@ -143,7 +149,7 @@ export default function AddBookingModal({
       bookingTime: "",
       location: "",
       city: "",
-      status: "Confirmed",
+      status: "Accepted",
       country: "",
       providerId: "",
       userId: "",
@@ -485,16 +491,26 @@ export default function AddBookingModal({
             <Select
               defaultValue="Confirmed"
               onValueChange={(val) =>
-                setValue("status", val as "Confirmed" | "Pending" | "Suspended")
+                setValue(
+                  "status",
+                  val as
+                    | "Accepted"
+                    | "Pending"
+                    | "Suspended"
+                    | "Cancelled"
+                    | "Rescheduled",
+                )
               }
             >
               <SelectTrigger className=" border-[#333] text-white">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Confirmed">Confirmed</SelectItem>
+                <SelectItem value="Accepted">Accepted</SelectItem>
                 <SelectItem value="Pending">Pending</SelectItem>
                 <SelectItem value="Suspended">Suspended</SelectItem>
+                <SelectItem value="Cancelled">Cancelled</SelectItem>
+                <SelectItem value="Rescheduled">Rescheduled</SelectItem>
               </SelectContent>
             </Select>
           </div>

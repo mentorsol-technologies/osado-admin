@@ -48,8 +48,14 @@ export const useUpdateServiceBookingMutation = () => {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) =>
       UpdateServiceBooking(id, data),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["serviceBookings"] });
+      queryClient.invalidateQueries({
+        queryKey: ["serviceBookingDetails", variables.id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["populatedBookingDetails", variables.id],
+      });
     },
     onError: (error) => {
       console.error("Error updating Service Booking:", error);
@@ -120,9 +126,15 @@ export const useSuspendBookingMutation = () => {
   return useMutation({
     mutationFn: ({ id, reason }: { id: string; reason: string }) =>
       SuspendBookingService(id, reason),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       toast.success("Service Booking suspended successfully!");
       queryClient.invalidateQueries({ queryKey: ["serviceBookings"] });
+      queryClient.invalidateQueries({
+        queryKey: ["serviceBookingDetails", variables.id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["populatedBookingDetails", variables.id],
+      });
     },
     onError: (error: any) => {
       toast.error(

@@ -36,7 +36,13 @@ const schema = z.object({
   bookingTime: z.string().min(1, "Booking time is required"),
   location: z.string().min(1, "Location is required"),
   city: z.string().min(1, "City is required"),
-  status: z.enum(["Confirmed", "Pending", "Suspended"]),
+  status: z.enum([
+    "Accepted",
+    "Pending",
+    "Suspended",
+    "Cancelled",
+    "Rescheduled",
+  ]),
   country: z.string().min(1, "Country is required"),
   providerId: z.string().min(1, "Provider is required"),
   userId: z.string().min(1, "User Id is required"),
@@ -74,7 +80,7 @@ export default function EditBookingModal({
       bookingTime: "",
       location: "",
       city: "",
-      status: "Confirmed",
+      status: "Accepted",
       country: "",
       providerId: "",
       userId: "",
@@ -82,7 +88,7 @@ export default function EditBookingModal({
   });
 
   const { data, isLoading, error } = usePopulatedBookingDetailsQuery(
-    selectedBookingId ?? ""
+    selectedBookingId ?? "",
   );
   const populatedData = data;
 
@@ -108,7 +114,7 @@ export default function EditBookingModal({
       bookingDate: filterDateISO,
       bookingTime: filterTime,
     },
-    false
+    false,
   );
 
   useEffect(() => {
@@ -132,7 +138,7 @@ export default function EditBookingModal({
       page: 1,
       limit: 20,
     },
-    false
+    false,
   );
 
   // update mutation
@@ -248,7 +254,7 @@ export default function EditBookingModal({
           setOpen(false);
         },
         onError: (err) => console.error("Update booking error:", err),
-      }
+      },
     );
   };
 
@@ -520,19 +526,28 @@ export default function EditBookingModal({
             <Select
               value={watch("status")}
               onValueChange={(val) =>
-                setValue("status", val as "Confirmed" | "Pending" | "Suspended")
+                setValue(
+                  "status",
+                  val as
+                    | "Accepted"
+                    | "Pending"
+                    | "Suspended"
+                    | "Cancelled"
+                    | "Rescheduled",
+                )
               }
             >
               <SelectTrigger className=" border-[#333] text-white">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Confirmed">Confirmed</SelectItem>
+                <SelectItem value="Accepted">Accepted</SelectItem>
                 <SelectItem value="Pending">Pending</SelectItem>
                 <SelectItem value="Suspended">Suspended</SelectItem>
+                <SelectItem value="Cancelled">Cancelled</SelectItem>
+                <SelectItem value="Rescheduled">Rescheduled</SelectItem>
               </SelectContent>
             </Select>
-
             {errors.status && (
               <p className="text-xs text-red-500">{errors.status.message}</p>
             )}

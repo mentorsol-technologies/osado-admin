@@ -9,7 +9,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import Modal from "@/components/ui/Modal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface SuspendedBusinessOwnerModalProps {
   open: boolean;
@@ -24,31 +24,42 @@ export default function SuspendedBusinessOwnerModal({
   onSave,
   selectedReason,
 }: SuspendedBusinessOwnerModalProps) {
-  const [reason, setReason] = useState(selectedReason || "");
+  const [reason, setReason] = useState("");
+
+  useEffect(() => {
+    if (open) {
+      setReason(selectedReason || "");
+    }
+  }, [open, selectedReason]);
+
+  const handleSubmit = () => {
+    if (reason) {
+      onSave(reason);
+      setReason("");
+      setOpen(false);
+    }
+  };
+
+  const handleClose = () => {
+    setReason("");
+    setOpen(false);
+  };
 
   return (
     <Modal
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={handleClose}
       title="Suspend Business owner"
       description="Are you sure you want to suspend this business owner? This action will restrict their access to the platform."
       footer={
         <div className="flex flex-col sm:flex-row gap-3 w-full">
-          <Button
-            onClick={() => {
-              if (reason) {
-                onSave(reason);
-                setOpen(false);
-              }
-            }}
-            className="flex-1"
-          >
+          <Button onClick={handleSubmit} className="flex-1">
             Submit
           </Button>
           <Button
             variant="outline"
             className="flex-1"
-            onClick={() => setOpen(false)}
+            onClick={handleClose}
           >
             Cancel
           </Button>
@@ -57,7 +68,7 @@ export default function SuspendedBusinessOwnerModal({
     >
       <div className="w-full">
         <label className="block text-sm mb-1">Reason</label>
-        <Select defaultValue={reason} onValueChange={setReason}>
+        <Select value={reason} onValueChange={setReason}>
           <SelectTrigger>
             <SelectValue placeholder="Select reason" />
           </SelectTrigger>
@@ -65,8 +76,12 @@ export default function SuspendedBusinessOwnerModal({
             <SelectItem value="Service Not Provided">
               Service Not Provided
             </SelectItem>
-            <SelectItem value="Provider Canceled">Provider Canceled</SelectItem>
-            <SelectItem value="Customer Request">Customer Request</SelectItem>
+            <SelectItem value="Provider Canceled">
+              Provider Canceled
+            </SelectItem>
+            <SelectItem value="Customer Request">
+              Customer Request
+            </SelectItem>
             <SelectItem value="Other">Other</SelectItem>
           </SelectContent>
         </Select>
