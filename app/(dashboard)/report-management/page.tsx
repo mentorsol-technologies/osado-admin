@@ -35,13 +35,12 @@ export default function ReportManagementPage() {
       label: "Status",
       render: (row: any) => (
         <span
-          className={`rounded px-2 py-1 text-xs ${
-            row.status === "resolved"
+          className={`rounded px-2 py-1 text-xs ${row.status === "resolved"
               ? "text-green-400 border border-green-500/30"
               : row.status === "dismissed"
                 ? "text-red-400 border border-red-500/30"
                 : "text-blue-400 border border-blue-500/30"
-          }`}
+            }`}
         >
           {capitalizeFirstLetter(row.status)}
         </span>

@@ -144,7 +144,7 @@ export default function ServiceBookingPage() {
         onSuccess: () => {
           setSuspendOpen(false);
         },
-      }
+      },
     );
   };
 
@@ -233,7 +233,7 @@ export default function ServiceBookingPage() {
           location: "",
           city: "",
           country: "",
-          status: "Confirmed",
+          status: "Accepted",
           providerId: "",
           userId: "",
         }}

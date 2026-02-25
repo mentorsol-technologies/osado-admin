@@ -35,8 +35,8 @@ export const useSuspendBussinessOwnerMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, reason }: { id: string; reason: string }) =>
-      SuspendBussinessOwnerService(id, reason),
+    mutationFn: ({ id, suspendedReason }: { id: string; suspendedReason: string }) =>
+      SuspendBussinessOwnerService(id, suspendedReason),
     onSuccess: () => {
       toast.success("Bussiness owner suspended successfully!");
       queryClient.invalidateQueries({ queryKey: ["owner"] });

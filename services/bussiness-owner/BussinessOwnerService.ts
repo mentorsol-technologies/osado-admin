@@ -12,10 +12,10 @@ export const CreateBussinessOwnerService = async (data: any) => {
 
 export const SuspendBussinessOwnerService = async (
   id: string,
-  reason: string
+  suspendedReason: string,
 ) => {
-  const response = await api.patch(`/admin/business-owners/${id}`, {
-    reason,
+  const response = await api.patch(`/admin/business-owners/${id}/suspend`, {
+    suspendedReason,
   });
   return response.data;
 };

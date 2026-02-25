@@ -21,17 +21,17 @@ export default function ServiceBookingPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [AddOpen, setAddOpen] = useState(false);
 
-  const handleSuspendSubmit = (data: any) => {
+  const handleSuspendSubmit = (reason: string) => {
     suspendOwner(
       {
         id: selectedBusiness?.user?.id,
-        reason: data.reason,
+        suspendedReason: reason,
       },
       {
         onSuccess: () => {
           setSuspendOpen(false);
         },
-      }
+      },
     );
   };
   const tableData = owners?.map((item: any) => ({
@@ -58,11 +58,10 @@ export default function ServiceBookingPage() {
       label: "Status",
       render: (row: any) => (
         <span
-          className={`rounded px-2 py-1 text-xs ${
-            row.status === "Active"
-              ? "text-green-400 border border-green-500/30"
-              : "text-red-400 border border-red-500/30"
-          }`}
+          className={`rounded px-2 py-1 text-xs ${row.status === "Active"
+            ? "text-green-400 border border-green-500/30"
+            : "text-red-400 border border-red-500/30"
+            }`}
         >
           {row.status}
         </span>
@@ -84,7 +83,13 @@ export default function ServiceBookingPage() {
             <Eye size={16} />
           </button>
 
-          <button className="p-1 rounded-md  bg-red-600">
+          <button
+            className="p-1 rounded-md bg-red-600"
+            onClick={() => {
+              setSelectedBusiness(row);
+              setSuspendOpen(true);
+            }}
+          >
             <BiStop size={16} />
           </button>
         </div>
@@ -168,7 +173,10 @@ export default function ServiceBookingPage() {
         owner={selectedBusiness}
         onApprove={() => console.log("approve", selectedBusiness)}
         onReject={() => console.log("reject", selectedBusiness)}
-        onSuspend={() => console.log("suspend", selectedBusiness)}
+        onSuspend={() => {
+          setOpenViewModal(false);
+          setSuspendOpen(true);
+        }}
       />
 
       {/* Suspended modal */}
