@@ -97,8 +97,8 @@ export default function EditServiceProviderModal({
         email: providerData.email || "",
         phoneNumber: providerData.phoneNumber || "",
         bio: providerData.bio || "",
-        instagram: providerData.instagram || "",
-        tiktok: providerData.tiktok || "",
+        instagram: (providerData as any).instagramUrl || (providerData as any).instagram || "",
+        tiktok: (providerData as any).tiktokUrl || (providerData as any).tiktok || "",
         categories: uniqueIds,
       });
       setSelectedCategories(uniqueIds);
@@ -318,11 +318,10 @@ export default function EditServiceProviderModal({
               <Badge
                 key={cat.id}
                 onClick={() => toggleCategory(cat.id)}
-                className={`cursor-pointer px-4 py-1 rounded-full ${
-                  selectedCategories.includes(cat.id)
+                className={`cursor-pointer px-4 py-1 rounded-full ${selectedCategories.includes(cat.id)
                     ? "bg-red-600 text-white"
                     : "bg-gray-700 text-gray-300"
-                }`}
+                  }`}
               >
                 {cat.name}
               </Badge>
@@ -335,7 +334,7 @@ export default function EditServiceProviderModal({
           <div>
             <CommonInput
               label="Instagram"
-              placeholder="instagramlink"
+              placeholder="instagram link"
               {...register("instagram")}
             />
             {errors.instagram && (
@@ -348,7 +347,7 @@ export default function EditServiceProviderModal({
           <div>
             <CommonInput
               label="TikTok"
-              placeholder="tiktoklink"
+              placeholder="tiktok link"
               {...register("tiktok")}
             />
             {errors.tiktok && (

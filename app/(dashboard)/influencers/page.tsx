@@ -173,7 +173,7 @@ const InfluencersRank = () => {
         setOpen={setEditOpen}
         influencerData={selectedInfluencers}
         onUpdate={(updatedData) => {
-          console.log("Updated Provider:", updatedData);
+          console.log("Updated Influencers:", updatedData);
         }}
       />
     </div>
