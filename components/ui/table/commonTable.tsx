@@ -267,10 +267,10 @@ export function CommonTable<T extends { [key: string]: any }>({
   // ------------------ Render ------------------
 
   return (
-    <div className="w-[100vw] md:w-auto rounded-md bg-black-500 p-2 text-white">
+    <div className="w-[100vw] md:w-auto rounded-2xl bg-black-500 p-2 text-white">
       {(title || action) && (
         <div className="mb-4 flex items-center justify-between">
-          {title && <h3 className="text-2xl font-semibold">{title}</h3>}
+          {title && <h3 className="text-2xl font-semibold px-3">{title}</h3>}
           {action && <div>{action}</div>}
         </div>
       )}
