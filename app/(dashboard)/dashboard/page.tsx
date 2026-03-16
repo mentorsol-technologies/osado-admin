@@ -61,14 +61,22 @@ export default function DashboardPage() {
       render: (row: any) => (
         <div className="flex flex-wrap gap-2">
           {row.categories?.length ? (
-            row.categories.map((cat: any) => (
-              <span
-                key={cat.id}
-                className="rounded bg-gray-700/40 px-2 py-1 text-xs"
-              >
-                {cat.name}
-              </span>
-            ))
+            <>
+              {row.categories.slice(0, 4).map((cat: any) => (
+                <span
+                  key={cat.id}
+                  className="rounded bg-gray-700/40 px-2 py-1 text-xs"
+                >
+                  {cat.name}
+                </span>
+              ))}
+
+              {row.categories.length > 4 && (
+                <span className="rounded bg-gray-700/40 px-2 py-1 text-xs">
+                  +{row.categories.length - 4}
+                </span>
+              )}
+            </>
           ) : (
             <span className="text-xs text-gray-400">—</span>
           )}
