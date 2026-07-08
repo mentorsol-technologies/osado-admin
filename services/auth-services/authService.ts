@@ -44,12 +44,12 @@ export const signupService = (data: any) => api.post("/auth/signup", data);
 
 export const forgotPasswordService = async (data: ForgetPasswordPayload) => {
   const res = await api.post("/auth/forgetPassword", data);
-  return res.data;
+  return res as any;
 };
 
 export const verifyOtpService = async (data: VerifyOtpPayload) => {
   const res = await api.post("/auth/verifyOtp", data);
-  return res.data;
+  return res as any;
 };
 
 export const CreateNewPasswordService = (
