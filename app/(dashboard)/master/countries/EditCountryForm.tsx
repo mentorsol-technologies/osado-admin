@@ -9,15 +9,24 @@ import { Button } from "@/components/ui/button";
 import Modal from "@/components/ui/Modal";
 import CommonInput from "@/components/ui/input";
 import Upload from "@/components/ui/upload";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import { toast } from "react-toastify";
 
 import { useUpdateCountryMutation } from "@/hooks/useCountryMutations";
 import { getCountryUploadLink } from "@/services/country/countryService";
 import { uploadToS3 } from "@/lib/s3Upload";
+import { CURRENCY_OPTIONS } from "@/lib/currencies";
 
 const schema = z.object({
   name: z.string().min(2, "Country name is required"),
   countryCode: z.string().optional(),
+  currency: z.string().min(1, "Currency is required"),
   image: z.any().optional(),
 });
 
@@ -30,6 +39,7 @@ interface EditCountryModalProps {
     id: string;
     name: string;
     countryCode?: string;
+    currency?: string;
     image?: string;
     iconURL?: string;
   };
@@ -59,6 +69,7 @@ export default function EditCountryModal({
     defaultValues: {
       name: "",
       countryCode: "",
+      currency: "",
       image: undefined,
     },
   });
@@ -69,6 +80,7 @@ export default function EditCountryModal({
       reset({
         name: selectedCountry.name || "",
         countryCode: selectedCountry.countryCode || "",
+        currency: selectedCountry.currency || "",
         image: selectedCountry.iconURL || undefined,
       });
       setPreviewUrl(selectedCountry.iconURL || null);
@@ -103,6 +115,7 @@ export default function EditCountryModal({
     const payload = {
       name: data.name,
       countryCode: data.countryCode,
+      currency: data.currency,
       iconId: uploadIds.length ? uploadIds[0] : undefined,
     };
 
@@ -167,6 +180,32 @@ export default function EditCountryModal({
             type="number"
           />
         </div>
+      </div>
+
+      {/* Currency */}
+      <div className="mt-4">
+        <label className="block text-sm mb-1">Currency</label>
+        <Select
+          key={selectedCountry?.id}
+          defaultValue={selectedCountry?.currency}
+          onValueChange={(val) => setValue("currency", val)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select Currency" />
+          </SelectTrigger>
+          <SelectContent>
+            {CURRENCY_OPTIONS.map((currency) => (
+              <SelectItem key={currency.code} value={currency.code}>
+                {currency.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {errors.currency && (
+          <p className="text-xs text-red-500 mt-1">
+            {errors.currency.message}
+          </p>
+        )}
       </div>
 
       {/* File Upload */}

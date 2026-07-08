@@ -9,6 +9,13 @@ import { Button } from "@/components/ui/button";
 import Modal from "@/components/ui/Modal";
 import CommonInput from "@/components/ui/input";
 import Upload from "@/components/ui/upload";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import { toast } from "react-toastify";
 
 import {
@@ -17,11 +24,13 @@ import {
 } from "@/hooks/useCountryMutations";
 import { getCountryUploadLink } from "@/services/country/countryService";
 import { uploadToS3 } from "@/lib/s3Upload";
+import { CURRENCY_OPTIONS } from "@/lib/currencies";
 
 // ✅ Schema validation
 const schema = z.object({
   name: z.string().min(2, "Country name is required"),
   countryCode: z.string().min(1, "Country code is required"),
+  currency: z.string().min(1, "Currency is required"),
   image: z.any().optional(),
 });
 
@@ -60,6 +69,7 @@ export default function AddCountryModal({
     reset({
       name: "",
       countryCode: "",
+      currency: "",
       image: undefined,
     });
     setPreviewUrl(null);
@@ -91,6 +101,7 @@ export default function AddCountryModal({
       name: data.name,
       iconId: uploadIds.length ? uploadIds[0] : undefined,
       countryCode: data.countryCode,
+      currency: data.currency,
     };
 
     createCountry(payload, {
@@ -156,6 +167,27 @@ export default function AddCountryModal({
             </p>
           )}
         </div>
+      </div>
+
+      <div className="mt-4">
+        <label className="block text-sm mb-1">Currency</label>
+        <Select onValueChange={(val) => setValue("currency", val)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select Currency" />
+          </SelectTrigger>
+          <SelectContent>
+            {CURRENCY_OPTIONS.map((currency) => (
+              <SelectItem key={currency.code} value={currency.code}>
+                {currency.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {errors.currency && (
+          <p className="text-xs text-red-500 mt-1">
+            {errors.currency.message}
+          </p>
+        )}
       </div>
 
       {/* File Upload */}

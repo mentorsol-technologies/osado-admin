@@ -12,6 +12,7 @@ interface CountryCardProps {
   updatedAt: string;
   activeEventsCount?: number;
   activeServiceCount?: number;
+  currency?: string;
   status: string;
   onEdit?: () => void;
   onDelete?: () => void;
@@ -23,6 +24,7 @@ export default function CountryCard({
   updatedAt,
   createdAt,
   activeEventsCount,
+  currency,
   status,
   onEdit,
   onDelete,
@@ -64,6 +66,10 @@ export default function CountryCard({
           <p className="flex justify-between">
             <span className="font-semibold">Active Events/Services</span>
             <span>{activeEventsCount || 0}</span>
+          </p>
+          <p className="flex justify-between">
+            <span className="font-semibold">Currency</span>
+            <span>{currency || "—"}</span>
           </p>
           <p className="flex justify-between">
             <span className="font-semibold">Status</span>
