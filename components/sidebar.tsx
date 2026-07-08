@@ -80,6 +80,11 @@ const menuItems: MenuItem[] = [
     label: "Report Management",
     href: "/report-management",
   },
+  {
+    icon: "/images/material-symbols_report-rounded.svg",
+    label: "Account Deletion Requests",
+    href: "/account-deletion-requests",
+  },
 
   {
     label: "Finance Module",
