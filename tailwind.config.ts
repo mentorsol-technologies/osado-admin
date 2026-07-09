@@ -77,6 +77,7 @@ const config: Config = {
           900: "#9999B8",
         },
         black: {
+          DEFAULT: "#000000",
           100: "#3B3C41",
           200: "#2C2C34",
           300: "#1F222B",
