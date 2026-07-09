@@ -117,7 +117,7 @@ export default function BookingDetailsCard({
 
           <div className="flex flex-col">
             <p className="text-sm font-medium">{organizerName}</p>
-            <p className="flex items-center text-xs gap-1 text-red-600">
+            <p className="flex items-center text-xs gap-1 text-purple-600">
               <User size={14} /> Client
             </p>
           </div>

@@ -243,7 +243,7 @@ export default function EditInfluencerModal({
               {...register("name")}
             />
             {errors.name && (
-              <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>
+              <p className="text-xs text-purple-500 mt-1">{errors.name.message}</p>
             )}
           </div>
 
@@ -254,7 +254,7 @@ export default function EditInfluencerModal({
               {...register("email")}
             />
             {errors.email && (
-              <p className="text-xs text-red-500 mt-1">
+              <p className="text-xs text-purple-500 mt-1">
                 {errors.email.message}
               </p>
             )}
@@ -282,7 +282,7 @@ export default function EditInfluencerModal({
               )}
             />
             {errors.city && (
-              <p className="text-xs text-red-500 mt-1">{errors.city.message}</p>
+              <p className="text-xs text-purple-500 mt-1">{errors.city.message}</p>
             )}
           </div>
           <div>
@@ -292,7 +292,7 @@ export default function EditInfluencerModal({
               {...register("phone")}
             />
             {errors.phone && (
-              <p className="text-xs text-red-500 mt-1">
+              <p className="text-xs text-purple-500 mt-1">
                 {errors.phone.message}
               </p>
             )}
@@ -308,11 +308,11 @@ export default function EditInfluencerModal({
             {...register("description")}
             rows={4}
             placeholder="Enter description"
-            className="focus:outline-none focus:ring-1 focus:ring-red-600 resize-none"
+            className="focus:outline-none focus:ring-1 focus:ring-purple-600 resize-none"
           />
 
           {errors.description && (
-            <p className="text-xs text-red-500 mt-1">
+            <p className="text-xs text-purple-500 mt-1">
               {errors.description.message}
             </p>
           )}
@@ -328,7 +328,7 @@ export default function EditInfluencerModal({
                 onClick={() => toggleCategory(cat.id)}
                 className={`cursor-pointer px-4 py-1 rounded-full ${
                   selectedCategories.includes(cat.id)
-                    ? "bg-red-600 text-white"
+                    ? "bg-purple-600 text-white"
                     : "bg-gray-700 text-gray-300"
                 }`}
               >
@@ -348,7 +348,7 @@ export default function EditInfluencerModal({
               {...register("instagram")}
             />
             {errors.instagram && (
-              <p className="text-xs text-red-500 mt-1">
+              <p className="text-xs text-purple-500 mt-1">
                 {errors.instagram.message}
               </p>
             )}
@@ -360,7 +360,7 @@ export default function EditInfluencerModal({
               {...register("tiktok")}
             />
             {errors.tiktok && (
-              <p className="text-xs text-red-500 mt-1">
+              <p className="text-xs text-purple-500 mt-1">
                 {errors.tiktok.message}
               </p>
             )}

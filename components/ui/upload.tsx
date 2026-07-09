@@ -40,7 +40,7 @@ export default function Upload({ label, onFileSelect, multiple = false, existing
       {/* Upload Box */}
       <div
         onClick={() => fileInputRef.current?.click()}
-        className="border border-dashed border-red-600 rounded-lg p-3 text-center cursor-pointer hover:bg-red-50"
+        className="border border-dashed border-purple-600 rounded-lg p-3 text-center cursor-pointer hover:bg-red-50"
       >
         <p className="text-sm text-gray-500">
           Click to upload {multiple ? "images" : "an image"}. Supported formats: JPG, PNG, SVG. Max 10MB each.
@@ -67,7 +67,7 @@ export default function Upload({ label, onFileSelect, multiple = false, existing
               <button
                 type="button"
                 onClick={() => handleRemove(index)}
-                className="ml-2 text-red-500 hover:text-red-700"
+                className="ml-2 text-purple-500 hover:text-purple-700"
               >
                 <X size={16} />
               </button>

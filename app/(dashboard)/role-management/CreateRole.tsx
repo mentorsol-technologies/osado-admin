@@ -136,7 +136,7 @@ export default function AddRoleModal({ open, setOpen, onSave }: AddRoleModalProp
                         {...register("role")}
                     />
                     {errors.role && (
-                        <p className="text-xs text-red-500 mt-1">{errors.role.message}</p>
+                        <p className="text-xs text-purple-500 mt-1">{errors.role.message}</p>
                     )}
                 </div>
 
@@ -147,7 +147,7 @@ export default function AddRoleModal({ open, setOpen, onSave }: AddRoleModalProp
                         {...register("description")}
                     />
                     {errors.description && (
-                        <p className="text-xs text-red-500 mt-1">{errors.description.message}</p>
+                        <p className="text-xs text-purple-500 mt-1">{errors.description.message}</p>
                     )}
                 </div>
             </div>

@@ -28,7 +28,7 @@ function Calendar({
         nav: "space-x-1 flex items-center",
         nav_button: cn(
           buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent border-none p-0 text-white hover:text-red-500 hover:opacity-100"
+          "h-7 w-7 bg-transparent border-none p-0 text-white hover:text-purple-500 hover:opacity-100"
         ),
         nav_button_previous: "absolute left-1",
         nav_button_next: "absolute right-1",
@@ -39,14 +39,14 @@ function Calendar({
         cell: "h-9 w-9 text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-9 w-9 p-0 font-normal text-white hover:bg-red-600 hover:text-white focus:bg-red-600 focus:text-white"
+          "h-9 w-9 p-0 font-normal text-white hover:bg-purple-600 hover:text-white focus:bg-purple-600 focus:text-white"
         ),
         day_selected:
-          "bg-red-600 text-white hover:bg-red-600 hover:text-white focus:bg-red-600 focus:text-white rounded-md ring-0 shadow-none",
-        day_today: "border border-red-600 text-white font-semibold rounded-md",
+          "bg-purple-600 text-white hover:bg-purple-600 hover:text-white focus:bg-purple-600 focus:text-white rounded-md ring-0 shadow-none",
+        day_today: "border border-purple-600 text-white font-semibold rounded-md",
         day_outside: "text-gray-400 opacity-40",
         day_disabled: "text-gray-500 opacity-40",
-        day_range_middle: "bg-red-500 text-white",
+        day_range_middle: "bg-purple-500 text-white",
         day_hidden: "invisible",
         ...classNames,
       }}

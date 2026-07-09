@@ -91,7 +91,7 @@ const ForgetPassword = () => {
           <div className="pt-[110px]">
             <Button
               type="submit"
-              className="w-full text-white-100 bg-red-600 rounded-xl py-6 hover:bg-red-700"
+              className="w-full text-white-100 bg-brand rounded-xl py-6 hover:opacity-90"
             >
               Continue
             </Button>

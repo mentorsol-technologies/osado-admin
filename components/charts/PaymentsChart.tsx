@@ -92,7 +92,7 @@ export default function PaymentsChart() {
       <div className="flex flex-col gap-3 text-sm mt-4 py-4 ">
         <span className="flex justify-between items-center gap-2">
           <span className="flex items-center gap-2">
-            <span className="inline-block w-3 h-3 rounded-full bg-red-500"></span>
+            <span className="inline-block w-3 h-3 rounded-full bg-purple-500"></span>
             <span>Pending Payments</span>
           </span>
           <span className="font-medium text-white">5783</span>

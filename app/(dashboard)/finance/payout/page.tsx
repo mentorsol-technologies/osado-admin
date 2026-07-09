@@ -26,7 +26,7 @@ export default function PayoutPage() {
             row.status === "Confirmed"
               ? "text-green-400 border border-green-500/30"
               : row.status === "Canceled"
-              ? "text-red-400 border border-red-500/30"
+              ? "text-purple-400 border border-purple-500/30"
               : "text-blue-400 border border-blue-500/30"
           }`}
         >
@@ -47,7 +47,7 @@ export default function PayoutPage() {
         }
         if (row.status === "Pending") {
           return (
-            <button className="px-3 py-1 text-xs rounded bg-red-600 text-white">
+            <button className="px-3 py-1 text-xs rounded bg-purple-600 text-white">
               Approved
             </button>
           );

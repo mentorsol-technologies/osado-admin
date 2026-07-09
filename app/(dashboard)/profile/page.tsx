@@ -165,7 +165,7 @@ export default function ProfilePage() {
             <button
               type="button"
               onClick={handlePencilClick}
-              className="absolute bottom-0 left-20 flex h-8 w-8 items-center justify-center rounded-full bg-red-600 hover:bg-red-700"
+              className="absolute bottom-0 left-20 flex h-8 w-8 items-center justify-center rounded-full bg-brand hover:opacity-90"
             >
               <Pencil size={16} className="text-white" />
             </button>

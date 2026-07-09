@@ -115,7 +115,7 @@ export default function BusinessOwnerDetailsModal({
 
                         {/* KYC Status */}
                         {/* <div className="mt-8 flex items-center gap-3">
-                        <div className="bg-red-700 p-3 rounded-lg">
+                        <div className="bg-purple-700 p-3 rounded-lg">
                             <Shield size={22} className="text-white" />
                         </div>
                         <div>
@@ -129,7 +129,7 @@ export default function BusinessOwnerDetailsModal({
                             <div className="flex justify-between items-center">
                                 <h3 className="text-[18px] font-semibold">Events Info</h3>
 
-                                <button className="flex items-center gap-1 text-red-400 text-sm">
+                                <button className="flex items-center gap-1 text-purple-400 text-sm">
                                     View all <ArrowRight size={16} />
                                 </button>
                             </div>

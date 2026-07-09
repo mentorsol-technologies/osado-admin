@@ -50,8 +50,10 @@ export default function AccountDeletionRequestsPage() {
             row.status === "approved"
               ? "text-green-400 border border-green-500/30"
               : row.status === "rejected"
-                ? "text-red-400 border border-red-500/30"
-                : "text-blue-400 border border-blue-500/30"
+                ? "text-purple-400 border border-purple-500/30"
+                : row.status === "withdrawn"
+                  ? "text-gray-400 border border-gray-500/30"
+                  : "text-blue-400 border border-blue-500/30"
           }`}
         >
           {capitalizeFirstLetter(row.status)}
@@ -88,7 +90,7 @@ export default function AccountDeletionRequestsPage() {
       key: "request_status",
       mapTo: "status",
       label: "Status",
-      options: ["All", "Pending", "Approved", "Rejected"],
+      options: ["All", "Pending", "Approved", "Rejected", "Withdrawn"],
     },
   ];
 

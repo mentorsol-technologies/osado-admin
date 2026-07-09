@@ -60,7 +60,7 @@ export default function ServiceBookingPage() {
         <span
           className={`rounded px-2 py-1 text-xs ${row.status === "Active"
             ? "text-green-400 border border-green-500/30"
-            : "text-red-400 border border-red-500/30"
+            : "text-purple-400 border border-purple-500/30"
             }`}
         >
           {row.status}
@@ -84,7 +84,7 @@ export default function ServiceBookingPage() {
           </button>
 
           <button
-            className="p-1 rounded-md bg-red-600"
+            className="p-1 rounded-md bg-purple-600"
             onClick={() => {
               setSelectedBusiness(row);
               setSuspendOpen(true);

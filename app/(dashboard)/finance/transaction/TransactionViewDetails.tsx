@@ -35,7 +35,7 @@ const TransactionViewForm = ({
         status === "Confirmed",
       "text-blue-400 border border-blue-500/30 bg-blue-500/10":
         status === "Pending",
-      "text-red-400 border border-red-500/30 bg-red-500/10":
+      "text-purple-400 border border-purple-500/30 bg-purple-500/10":
         status === "Canceled",
     });
 
@@ -52,7 +52,7 @@ const TransactionViewForm = ({
         <div className="flex flex-col sm:flex-row w-full gap-3">
           {isConfirmed && (
             <Button
-              className="flex-1 bg-red-600 text-white hover:bg-red-700"
+              className="flex-1 bg-brand text-white hover:opacity-90"
               onClick={() => alert("Download Receipt")}
             >
               Download Receipt
@@ -81,7 +81,7 @@ const TransactionViewForm = ({
                   {transaction?.[field.key]}
                 </span>
                 {isCanceled && (
-                  <span className="text-red-400 text-xs mt-1">
+                  <span className="text-purple-400 text-xs mt-1">
                     Reason: Payment gateway error – transaction declined.
                   </span>
                 )}

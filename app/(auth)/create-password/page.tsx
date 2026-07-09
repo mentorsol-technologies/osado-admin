@@ -93,7 +93,7 @@ const ChangePasswordForm = () => {
         <div className="hidden md:flex items-center gap-[5px] text-[14px] md:text-[16px] font-normal !-mt-0.5">
           <span className="text-white-100">+965 6592 8329</span>
           <span className="text-white-100">-</span>
-          <button className="text-red-600 hover:underline">Edit</button>
+          <button className="text-purple-600 hover:underline">Edit</button>
         </div>
       </CardHeader>
       <CardContent>
@@ -140,7 +140,7 @@ const ChangePasswordForm = () => {
           <Button
             type="button"
             onClick={handleSubmit}
-            className="w-full text-white-100 bg-red-600 rounded-xl py-6 hover:bg-red-700"
+            className="w-full text-white-100 bg-brand rounded-xl py-6 hover:opacity-90"
             disabled={createNewPasswordMutation.isPending}
           >
             {createNewPasswordMutation.isPending ? "Resetting..." : "Reset Password"}

@@ -154,7 +154,7 @@ export default function EditCountryModal({
           <label className="block text-sm mb-1">Country Name</label>
           <CommonInput placeholder="Country Name" {...register("name")} />
           {errors.name && (
-            <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>
+            <p className="text-xs text-purple-500 mt-1">{errors.name.message}</p>
           )}
         </div>
 

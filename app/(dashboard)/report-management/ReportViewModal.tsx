@@ -139,7 +139,7 @@ const ReportViewModal: React.FC<ReportViewModalProps> = ({
                                     className={`rounded px-2 py-1 text-xs ${report.status === "resolved"
                                         ? "text-green-400 border border-green-500/30"
                                         : report.status === "dismissed"
-                                            ? "text-red-400 border border-red-500/30"
+                                            ? "text-purple-400 border border-purple-500/30"
                                             : "text-blue-400 border border-blue-500/30"
                                         }`}
                                 >

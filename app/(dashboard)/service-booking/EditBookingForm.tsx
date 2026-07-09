@@ -272,7 +272,7 @@ export default function EditBookingModal({
           <div className="flex flex-col sm:flex-row gap-3 w-full">
             <Button
               onClick={handleSubmit(onSubmit)}
-              className="flex-1 bg-red-600 hover:bg-red-700"
+              className="flex-1 bg-brand hover:opacity-90"
             >
               Submit
             </Button>
@@ -456,7 +456,7 @@ export default function EditBookingModal({
                 </Select>
 
                 {errors.service && (
-                  <p className="text-xs text-red-500">
+                  <p className="text-xs text-purple-500">
                     {errors.service.message}
                   </p>
                 )}
@@ -471,7 +471,7 @@ export default function EditBookingModal({
                   placeholder="Select Booking Time"
                 />
                 {errors.bookingTime && (
-                  <p className="text-xs text-red-500 mt-1">
+                  <p className="text-xs text-purple-500 mt-1">
                     {errors.bookingTime.message}
                   </p>
                 )}
@@ -481,7 +481,7 @@ export default function EditBookingModal({
                 <label className="block mb-1 text-sm">City</label>
                 <CommonInput placeholder="City" {...register("city")} />
                 {errors.city && (
-                  <p className="text-xs text-red-500">{errors.city.message}</p>
+                  <p className="text-xs text-purple-500">{errors.city.message}</p>
                 )}
               </div>
             </div>
@@ -549,7 +549,7 @@ export default function EditBookingModal({
               </SelectContent>
             </Select>
             {errors.status && (
-              <p className="text-xs text-red-500">{errors.status.message}</p>
+              <p className="text-xs text-purple-500">{errors.status.message}</p>
             )}
           </div>
         </form>

@@ -152,8 +152,10 @@ export default function AccountDeletionRequestDetailModal({
                   request.status === "approved"
                     ? "text-green-400 border border-green-500/30"
                     : request.status === "rejected"
-                      ? "text-red-400 border border-red-500/30"
-                      : "text-blue-400 border border-blue-500/30"
+                      ? "text-purple-400 border border-purple-500/30"
+                      : request.status === "withdrawn"
+                        ? "text-gray-400 border border-gray-500/30"
+                        : "text-blue-400 border border-blue-500/30"
                 }`}
               >
                 {capitalizeFirstLetter(request.status)}
@@ -204,6 +206,12 @@ export default function AccountDeletionRequestDetailModal({
               <p className="font-medium mb-1">Rejection Reason</p>
               <p className="text-sm text-gray-300">{request.rejectionReason}</p>
             </div>
+          )}
+
+          {request.status === "withdrawn" && (
+            <p className="text-sm text-gray-400">
+              The user withdrew this request themselves before it was reviewed.
+            </p>
           )}
 
           {/* Reject reason input */}

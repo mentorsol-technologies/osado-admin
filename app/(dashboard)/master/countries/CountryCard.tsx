@@ -33,7 +33,7 @@ export default function CountryCard({
         {/* Header */}
         <div className="flex items-center gap-3">
           {iconURL ? (
-            <div className="p-1 bg-red-700 rounded-lg flex items-center justify-center w-12 h-12">
+            <div className="p-1 bg-purple-700 rounded-lg flex items-center justify-center w-12 h-12">
               <Image
                 src={iconURL}
                 alt={name}
@@ -43,7 +43,7 @@ export default function CountryCard({
               />
             </div>
           ) : (
-            <div className="p-3 bg-red-700 rounded-lg">
+            <div className="p-3 bg-purple-700 rounded-lg">
               <Flag className="text-white h-6 w-6" />
             </div>
           )}
@@ -74,7 +74,7 @@ export default function CountryCard({
         {/* Actions */}
         <div className="flex gap-3 pt-2">
           <Button
-            className="bg-red-600 hover:bg-red-700 text-white flex-1"
+            className="bg-brand hover:opacity-90 text-white flex-1"
             onClick={onEdit}
           >
             Edit

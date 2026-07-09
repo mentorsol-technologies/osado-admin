@@ -57,7 +57,7 @@ export default function SubAdminPage() {
           className={`rounded px-4 py-1 text-sm ${
             row.status === "active"
               ? "text-green-400 border border-green-500/30"
-              : "text-red-400 border border-red-500/30"
+              : "text-purple-400 border border-purple-500/30"
           }`}
         >
           {row.status}
@@ -88,7 +88,7 @@ export default function SubAdminPage() {
             <BiStop size={16} />
           </button> */}
           <button
-            className="p-1 rounded-md bg-red-600 text-white"
+            className="p-1 rounded-md bg-purple-600 text-white"
             onClick={() => {
               setSelectedAdmin(row);
               setDeleteOpen(true);

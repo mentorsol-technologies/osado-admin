@@ -158,7 +158,7 @@ export default function AddSubAdminModal({
             {...register("fullName")}
           />
           {errors.fullName && (
-            <p className="text-xs text-red-500">{errors.fullName.message}</p>
+            <p className="text-xs text-purple-500">{errors.fullName.message}</p>
           )}
         </div>
         <div>
@@ -168,7 +168,7 @@ export default function AddSubAdminModal({
             {...register("surname")}
           />
           {errors.surname && (
-            <p className="text-xs text-red-500">{errors.surname.message}</p>
+            <p className="text-xs text-purple-500">{errors.surname.message}</p>
           )}
         </div>
       </div>
@@ -195,7 +195,7 @@ export default function AddSubAdminModal({
             {...register("email")}
           />
           {errors.email && (
-            <p className="text-xs text-red-500">{errors.email.message}</p>
+            <p className="text-xs text-purple-500">{errors.email.message}</p>
           )}
         </div>
         <div>
@@ -206,7 +206,7 @@ export default function AddSubAdminModal({
             {...register("password")}
           />
           {errors.password && (
-            <p className="text-xs text-red-500">{errors.password.message}</p>
+            <p className="text-xs text-purple-500">{errors.password.message}</p>
           )}
         </div>
       </div>

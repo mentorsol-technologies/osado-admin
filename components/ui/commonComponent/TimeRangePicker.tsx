@@ -81,7 +81,7 @@ export default function TimeRangePicker({
           onChange={handleSingleTimeChange}
           placeholder={placeholder}
         />
-        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+        {error && <p className="text-xs text-purple-500 mt-1">{error}</p>}
       </div>
     );
   }
@@ -109,7 +109,7 @@ export default function TimeRangePicker({
           disabledTime={start}
         />
       </div>
-      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+      {error && <p className="text-xs text-purple-500 mt-1">{error}</p>}
     </div>
   );
 }
@@ -211,7 +211,7 @@ function TimePickerInput({
                   className={cn(
                     "p-2 rounded hover:bg-black-400 text-sm transition-colors",
                     selectedHour === h
-                      ? "bg-red-600 text-white hover:bg-red-700"
+                      ? "bg-purple-600 text-white hover:bg-purple-700"
                       : "text-white-100"
                   )}
                 >
@@ -241,7 +241,7 @@ function TimePickerInput({
                   className={cn(
                     "p-2 rounded hover:bg-black-400 text-sm transition-colors",
                     selectedMinute === m
-                      ? "bg-red-600 text-white hover:bg-red-700"
+                      ? "bg-purple-600 text-white hover:bg-purple-700"
                       : "text-white-100",
                     `${selectedHour}:${m} ${selectedPeriod}` === disabledTime &&
                       "opacity-50 cursor-not-allowed hover:bg-transparent"
@@ -273,7 +273,7 @@ function TimePickerInput({
                   className={cn(
                     "p-2 rounded hover:bg-black-400 text-sm transition-colors",
                     selectedPeriod === p
-                      ? "bg-red-600 text-white hover:bg-red-700"
+                      ? "bg-purple-600 text-white hover:bg-purple-700"
                       : "text-white-100",
                     `${selectedHour}:${selectedMinute} ${p}` === disabledTime &&
                       "opacity-50 cursor-not-allowed hover:bg-transparent"

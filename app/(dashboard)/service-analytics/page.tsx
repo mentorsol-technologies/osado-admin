@@ -35,7 +35,7 @@ const columns = [
                 className={`rounded px-2 py-1 text-xs ${row.status === "Confirmed"
                     ? "text-green-400 border border-green-500/30"
                     : row.status === "Canceled"
-                        ? " text-red-400 border border-red-500/30"
+                        ? " text-purple-400 border border-purple-500/30"
                         : " text-blue-400 border border-blue-500/30"
                     }`}
             >
@@ -54,7 +54,7 @@ const columns = [
                 <button className="p-1 border border-black-600">
                     <MdOutlineEdit size={16} />
                 </button>
-                <button className="p-1 rounded-md  bg-red-600">
+                <button className="p-1 rounded-md  bg-purple-600">
                     <Trash2 size={16} />
                 </button>
             </div>

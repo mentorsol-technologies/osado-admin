@@ -41,7 +41,7 @@ const RoleManagement = () => {
     //       <button className="p-1 border border-black-600">
     //         <MdOutlineEdit size={16} />
     //       </button>
-    //       <button className="p-1 rounded-md bg-red-600">
+    //       <button className="p-1 rounded-md bg-purple-600">
     //         <BiStop size={16} />
     //       </button>
     //     </div>

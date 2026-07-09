@@ -32,7 +32,7 @@ export default function ServiceBookingPage() {
             row.status === "approved"
               ? "text-green-400 border border-green-500/30"
               : row.status === "rejected"
-                ? "text-red-400 border border-red-500/30"
+                ? "text-purple-400 border border-purple-500/30"
                 : "text-blue-400 border border-blue-500/30"
           }`}
         >
@@ -59,7 +59,7 @@ export default function ServiceBookingPage() {
               setSelectedKYC(row);
               setDeleteOpen(true);
             }}
-            className="p-1 rounded-md bg-red-600 hover:bg-red-700 text-white"
+            className="p-1 rounded-md bg-brand hover:opacity-90 text-white"
           >
             <BiStop size={16} />
           </button>

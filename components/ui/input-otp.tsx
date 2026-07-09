@@ -46,7 +46,7 @@ const InputOTPSlot = React.forwardRef<
         // Add rounded corners for first and last slots
         'first:rounded-l-[14px] last:rounded-r-[14px]',
         // Highlight active slot
-        isActive && 'ring-2 ring-red-600',
+        isActive && 'ring-2 ring-purple-600',
         // Merge with custom classes
         className
       )}

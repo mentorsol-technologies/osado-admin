@@ -29,7 +29,7 @@ export default function StatusReportModal({
         <div className="flex w-full justify-between gap-4">
           {/* VIEW REPORT BUTTON */}
           <Button
-            className="bg-red-700 hover:bg-red-800 text-white w-full py-6 rounded-xl text-lg"
+            className="bg-purple-700 hover:bg-purple-800 text-white w-full py-6 rounded-xl text-lg"
             onClick={onViewReport}
           >
             View Report

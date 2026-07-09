@@ -237,7 +237,7 @@ export default function EditServiceProviderModal({
               {...register("name")}
             />
             {errors.name && (
-              <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>
+              <p className="text-xs text-purple-500 mt-1">{errors.name.message}</p>
             )}
           </div>
 
@@ -248,7 +248,7 @@ export default function EditServiceProviderModal({
               {...register("email")}
             />
             {errors.email && (
-              <p className="text-xs text-red-500 mt-1">
+              <p className="text-xs text-purple-500 mt-1">
                 {errors.email.message}
               </p>
             )}
@@ -276,7 +276,7 @@ export default function EditServiceProviderModal({
               )}
             />
             {errors.city && (
-              <p className="text-xs text-red-500 mt-1">{errors.city.message}</p>
+              <p className="text-xs text-purple-500 mt-1">{errors.city.message}</p>
             )}
           </div>
           <div>
@@ -286,7 +286,7 @@ export default function EditServiceProviderModal({
               {...register("phoneNumber")}
             />
             {errors.phoneNumber && (
-              <p className="text-xs text-red-500 mt-1">
+              <p className="text-xs text-purple-500 mt-1">
                 {errors.phoneNumber.message}
               </p>
             )}
@@ -302,11 +302,11 @@ export default function EditServiceProviderModal({
             {...register("bio")}
             rows={4}
             placeholder="Enter description"
-            className="focus:outline-none focus:ring-1 focus:ring-red-600 resize-none"
+            className="focus:outline-none focus:ring-1 focus:ring-purple-600 resize-none"
           />
 
           {errors.bio && (
-            <p className="text-xs text-red-500 mt-1">{errors.bio.message}</p>
+            <p className="text-xs text-purple-500 mt-1">{errors.bio.message}</p>
           )}
         </div>
 
@@ -319,7 +319,7 @@ export default function EditServiceProviderModal({
                 key={cat.id}
                 onClick={() => toggleCategory(cat.id)}
                 className={`cursor-pointer px-4 py-1 rounded-full ${selectedCategories.includes(cat.id)
-                    ? "bg-red-600 text-white"
+                    ? "bg-purple-600 text-white"
                     : "bg-gray-700 text-gray-300"
                   }`}
               >
@@ -338,7 +338,7 @@ export default function EditServiceProviderModal({
               {...register("instagram")}
             />
             {errors.instagram && (
-              <p className="text-xs text-red-500 mt-1">
+              <p className="text-xs text-purple-500 mt-1">
                 {errors.instagram.message}
               </p>
             )}
@@ -351,7 +351,7 @@ export default function EditServiceProviderModal({
               {...register("tiktok")}
             />
             {errors.tiktok && (
-              <p className="text-xs text-red-500 mt-1">
+              <p className="text-xs text-purple-500 mt-1">
                 {errors.tiktok.message}
               </p>
             )}

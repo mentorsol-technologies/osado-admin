@@ -167,7 +167,7 @@ export default function AddEventModal({ open, setOpen }: AddEventModalProps) {
         <div className="flex flex-col sm:flex-row gap-3 w-full">
           <Button
             onClick={handleSubmit(onSubmit)}
-            className="flex-1 bg-red-600 hover:bg-red-700"
+            className="flex-1 bg-brand hover:opacity-90"
             disabled={isPending}
           >
             {isPending ? "Submitting..." : "Submit"}
@@ -203,7 +203,7 @@ export default function AddEventModal({ open, setOpen }: AddEventModalProps) {
           <label className="block text-sm mb-1">Title</label>
           <CommonInput placeholder="Enter title" {...register("title")} />
           {errors.title && (
-            <p className="text-xs text-red-500">{errors.title.message}</p>
+            <p className="text-xs text-purple-500">{errors.title.message}</p>
           )}
         </div>
         {/* Price & Price type */}
@@ -216,7 +216,7 @@ export default function AddEventModal({ open, setOpen }: AddEventModalProps) {
               {...register("price", { valueAsNumber: true })}
             />
             {errors.price && (
-              <p className="text-xs text-red-500">{errors.price.message}</p>
+              <p className="text-xs text-purple-500">{errors.price.message}</p>
             )}
           </div>
           <div>
@@ -231,7 +231,7 @@ export default function AddEventModal({ open, setOpen }: AddEventModalProps) {
               }}
             />
             {errors?.priceType && (
-              <p className="text-xs text-red-500">{errors.priceType.message}</p>
+              <p className="text-xs text-purple-500">{errors.priceType.message}</p>
             )}
           </div>
         </div>
@@ -252,7 +252,7 @@ export default function AddEventModal({ open, setOpen }: AddEventModalProps) {
               })()}
             />
             {errors.date && (
-              <p className="text-xs text-red-500">{errors.date.message}</p>
+              <p className="text-xs text-purple-500">{errors.date.message}</p>
             )}
           </div>
           <div>
@@ -284,7 +284,7 @@ export default function AddEventModal({ open, setOpen }: AddEventModalProps) {
             <label className="block text-sm mb-1">Country</label>
             <CommonInput {...register("country")} />
             {errors.country && (
-              <p className="text-xs text-red-500">{errors.country.message}</p>
+              <p className="text-xs text-purple-500">{errors.country.message}</p>
             )}
           </div>
         </div>
@@ -295,7 +295,7 @@ export default function AddEventModal({ open, setOpen }: AddEventModalProps) {
             <label className="block text-sm mb-1">City</label>
             <CommonInput {...register("city")} />
             {errors.city && (
-              <p className="text-xs text-red-500">{errors.city.message}</p>
+              <p className="text-xs text-purple-500">{errors.city.message}</p>
             )}
           </div>
           <div>
@@ -310,7 +310,7 @@ export default function AddEventModal({ open, setOpen }: AddEventModalProps) {
               </SelectContent>
             </Select>
             {errors.status && (
-              <p className="text-xs text-red-500">{errors.status.message}</p>
+              <p className="text-xs text-purple-500">{errors.status.message}</p>
             )}
           </div>
         </div>
@@ -324,7 +324,7 @@ export default function AddEventModal({ open, setOpen }: AddEventModalProps) {
                 key={cat.id}
                 onClick={() => toggleCategory(cat.id)}
                 className={`flex items-center gap-2 cursor-pointer px-3 py-2 border transition-all ${selectedCategories.includes(cat.id)
-                  ? "bg-red-600 text-white border-red-700"
+                  ? "bg-purple-600 text-white border-purple-700"
                   : "bg-gray-800 text-gray-300 border-gray-700 hover:bg-gray-700"
                   }`}
               >
@@ -340,7 +340,7 @@ export default function AddEventModal({ open, setOpen }: AddEventModalProps) {
             ))}
           </div>
           {errors.categoryId && (
-            <p className="text-xs text-red-500 mt-1">
+            <p className="text-xs text-purple-500 mt-1">
               {errors.categoryId.message}
             </p>
           )}
@@ -349,7 +349,7 @@ export default function AddEventModal({ open, setOpen }: AddEventModalProps) {
           <label className="block text-sm mb-1">Bio</label>
           <Textarea placeholder="Enter bio..." {...register("bio")} />
           {errors.bio && (
-            <p className="text-xs text-red-500">{errors.bio.message}</p>
+            <p className="text-xs text-purple-500">{errors.bio.message}</p>
           )}
         </div>
       </div>

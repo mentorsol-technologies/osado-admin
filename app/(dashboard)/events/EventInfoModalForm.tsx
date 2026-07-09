@@ -145,7 +145,7 @@ export default function EventInfoModal({
               />
               <div>
                 <p className="text-sm font-semibold">{event?.creator?.name}</p>
-                <div className="text-red-600 flex gap-2 items-center">
+                <div className="text-purple-600 flex gap-2 items-center">
                   <User size={14} />
                   <p className="text-xs">Organizer</p>
                 </div>
@@ -256,7 +256,7 @@ function Section({
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-white">{title}</h3>
           {showViewAll && (
-            <Button variant="link" className="p-0 text-red-600">
+            <Button variant="link" className="p-0 text-purple-600">
               View all
             </Button>
           )}

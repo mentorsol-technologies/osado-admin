@@ -46,7 +46,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
       {cards.map((stat, index) => (
         <div key={index} className="stat-card bg-black-500 rounded-2xl">
           <div className="flex flex-col gap-  mb-2 lg:mb-4">
-            <div className="w-6 h-6 lg:w-8 lg:h-8 bg-red-600  rounded-lg flex items-center justify-center">
+            <div className="w-6 h-6 lg:w-8 lg:h-8 bg-purple-600  rounded-lg flex items-center justify-center">
               <PartyPopper className="w-3 h-3 lg:w-4 lg:h-4 text-white" />
             </div>
             <h3 className="text-xs lg:text-sm font-normal">{stat.title}</h3>
@@ -62,7 +62,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
                   className={`text-xs px-1.5 lg:px-2 py-0.5 lg:py-1 rounded-full ${
                     stat.positive
                       ? "bg-green-500/20 text-green-400"
-                      : "bg-red-500/20 text-red-400"
+                      : "bg-purple-500/20 text-purple-400"
                   }`}
                 >
                   {stat.change}

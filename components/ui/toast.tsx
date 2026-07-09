@@ -32,7 +32,7 @@ const toastVariants = cva(
         default: 'border bg-background text-foreground',
         destructive: 'border-destructive bg-destructive text-destructive-foreground',
         success: 'border-green-500 bg-green-50 text-green-900',
-        error: 'border-red-500 bg-red-50 text-red-900',
+        error: 'border-purple-500 bg-red-50 text-purple-900',
         info: 'border-blue-500 bg-blue-50 text-blue-900',
       },
     },
@@ -79,7 +79,7 @@ const ToastClose = React.forwardRef<
   <ToastPrimitives.Close
     ref={ref}
     className={cn(
-      'absolute right-2 top-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600',
+      'absolute right-2 top-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 group-[.destructive]:text-purple-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-purple-400 group-[.destructive]:focus:ring-offset-purple-600',
       className
     )}
     toast-close=""

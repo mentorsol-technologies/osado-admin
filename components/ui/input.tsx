@@ -259,7 +259,7 @@ const CommonInput = React.forwardRef<HTMLInputElement, CommonInputProps>(
           )}
         </div>
         {error && errorMessage && (
-          <p className="text-red-500 text-[12px] transition-all">
+          <p className="text-purple-500 text-[12px] transition-all">
             {errorMessage}
           </p>
         )}

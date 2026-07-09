@@ -13,6 +13,7 @@ const config: Config = {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+        brand: "linear-gradient(90deg, #8B5EEF 0%, #663FB0 100%)",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -85,16 +86,16 @@ const config: Config = {
           800: "#040507",
           900: "#000000",
         },
-        red: {
-          100: "#F9D6D8",
-          200: "#F2AEB2",
-          300: "#EB878B",
-          400: "#E35F64",
-          500: "#DC383D",
-          600: "#9D1016",
-          700: "#830D13",
-          800: "#690A0F",
-          900: "#4F070B",
+        purple: {
+          100: "#F3EDFC",
+          200: "#E1D0F7",
+          300: "#C7A8F0",
+          400: "#A87AE8",
+          500: "#8B5EEF",
+          600: "#663FB0",
+          700: "#533387",
+          800: "#3F2766",
+          900: "#2C1B49",
         },
         blue: {
           100: "#E6F0FF",
@@ -127,7 +128,7 @@ const config: Config = {
         dashboard: {
           bg: "#0f0f0f",
           card: "#1a1a1a",
-          accent: "#dc2626",
+          accent: "#663FB0",
           success: "#10b981",
         },
       },

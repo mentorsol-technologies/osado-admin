@@ -55,14 +55,14 @@ export default function TopProvidersCard({
                     <div className="text-sm space-y-1 text-gray-300 w-full">
                         <p className="flex justify-between flex-wrap">
                             <span className="flex items-center gap-1">
-                                <span className="p-1 bg-red-700 rounded-lg">
+                                <span className="p-1 bg-purple-700 rounded-lg">
                                     <Icon className="text-white h-4 w-4" />
                                 </span>
                                 <span className="font-semibold">{title}</span>
                             </span>
                             <span className="flex items-center flex-wrap">
                                 <span>{rating.toFixed(1)}/5</span>
-                                <Star className="w-4 h-4 text-red-500 ml-1 fill-red-500" />
+                                <Star className="w-4 h-4 text-purple-500 ml-1 fill-purple-500" />
                             </span>
                         </p>
                         <p className="flex justify-between flex-wrap">
@@ -83,7 +83,7 @@ export default function TopProvidersCard({
                 {/* Actions */}
                 <div className="flex gap-3 w-full flex-wrap mt-6">
                     <Button
-                        className="bg-red-600 hover:bg-red-700 text-white flex-1"
+                        className="bg-brand hover:opacity-90 text-white flex-1"
                         onClick={onEdit}
                     >
                         Edit

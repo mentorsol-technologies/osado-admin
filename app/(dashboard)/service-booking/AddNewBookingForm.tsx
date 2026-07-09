@@ -417,7 +417,7 @@ export default function AddBookingModal({
                   </SelectContent>
                 </Select>
                 {errors.service && (
-                  <p className="text-xs text-red-500">
+                  <p className="text-xs text-purple-500">
                     {errors.service.message}
                   </p>
                 )}
@@ -431,7 +431,7 @@ export default function AddBookingModal({
                   placeholder="Select Booking Time"
                 />
                 {errors.bookingTime && (
-                  <p className="text-xs text-red-500 mt-1">
+                  <p className="text-xs text-purple-500 mt-1">
                     {errors.bookingTime.message}
                   </p>
                 )}
@@ -441,7 +441,7 @@ export default function AddBookingModal({
                 <label className="block mb-1 text-sm">City</label>
                 <CommonInput placeholder="City" {...register("city")} />
                 {errors.city && (
-                  <p className="text-xs text-red-500">{errors.city.message}</p>
+                  <p className="text-xs text-purple-500">{errors.city.message}</p>
                 )}
               </div>
             </div>

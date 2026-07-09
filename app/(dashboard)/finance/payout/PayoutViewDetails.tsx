@@ -33,7 +33,7 @@ const PayoutViewForm = ({
         status === "Confirmed",
       "text-blue-400 border border-blue-500/30 bg-blue-500/10":
         status === "Pending",
-      "text-red-400 border border-red-500/30 bg-red-500/10":
+      "text-purple-400 border border-purple-500/30 bg-purple-500/10":
         status === "Canceled",
     });
 
@@ -87,7 +87,7 @@ const PayoutViewForm = ({
                   {payout?.[field.key]}
                 </span>
                 {isCanceled && (
-                  <span className="text-red-400 text-xs mt-1">
+                  <span className="text-purple-400 text-xs mt-1">
                     Invalid bank account details provided.
                   </span>
                 )}

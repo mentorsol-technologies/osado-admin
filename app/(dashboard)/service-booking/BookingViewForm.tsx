@@ -26,7 +26,7 @@ const BookingViewForm = ({
     clsx("px-3 py-1 rounded-md border text-sm font-medium w-fit", {
       "text-green-400 border border-green-500/30": status === "Confirmed",
       "text-blue-400 border border-blue-500/30": status === "Pending",
-      "text-red-500 border border-red-500/30": status === "Canceled",
+      "text-purple-500 border border-purple-500/30": status === "Canceled",
     });
 
   if (isLoading) return <p className="p-4 text-white">Loading...</p>;

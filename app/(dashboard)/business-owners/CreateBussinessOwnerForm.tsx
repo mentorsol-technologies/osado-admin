@@ -95,7 +95,7 @@ export default function AddBusinessOwnerModal({
         <div className="flex flex-col sm:flex-row gap-3 w-full">
           <Button
             onClick={handleSubmit(onSubmit)}
-            className="flex-1 bg-red-600 hover:bg-red-700 rounded-lg"
+            className="flex-1 bg-brand hover:opacity-90 rounded-lg"
             disabled={isPending}
           >
             {isPending ? "Submitting..." : "Submit"}
@@ -121,7 +121,7 @@ export default function AddBusinessOwnerModal({
             {...register("name")}
           />
           {errors.name && (
-            <p className="text-xs text-red-500">{errors.name.message}</p>
+            <p className="text-xs text-purple-500">{errors.name.message}</p>
           )}
         </div>
         {/* Surname */}
@@ -132,7 +132,7 @@ export default function AddBusinessOwnerModal({
             {...register("surName")}
           />
           {errors.surName && (
-            <p className="text-xs text-red-500">{errors.surName.message}</p>
+            <p className="text-xs text-purple-500">{errors.surName.message}</p>
           )}
         </div>
 
@@ -144,7 +144,7 @@ export default function AddBusinessOwnerModal({
             {...register("email")}
           />
           {errors.email && (
-            <p className="text-xs text-red-500">{errors.email.message}</p>
+            <p className="text-xs text-purple-500">{errors.email.message}</p>
           )}
         </div>
         <div>
@@ -165,7 +165,7 @@ export default function AddBusinessOwnerModal({
             showCountryDropdown
           />
           {errors.phoneNumber && (
-            <p className="text-xs text-red-500">{errors.phoneNumber.message}</p>
+            <p className="text-xs text-purple-500">{errors.phoneNumber.message}</p>
           )}
         </div>
       </div>
@@ -178,7 +178,7 @@ export default function AddBusinessOwnerModal({
           {...register("password")}
         />
         {errors.password && (
-          <p className="text-xs text-red-500">{errors.password.message}</p>
+          <p className="text-xs text-purple-500">{errors.password.message}</p>
         )}
       </div>
     </Modal>

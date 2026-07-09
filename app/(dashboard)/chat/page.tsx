@@ -387,7 +387,7 @@ const Chat = () => {
                                             </p>
                                         </div>
                                         {conversation.unreadCount && conversation.unreadCount > 0 && (
-                                            <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                            <span className="bg-purple-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                                                 {conversation.unreadCount}
                                             </span>
                                         )}
@@ -515,7 +515,7 @@ const Chat = () => {
                     />
                     <div className="flex items-center justify-between mt-2">
                         <div className="flex items-center gap-2">
-                            <span className={`w-2 h-2 rounded-full ${socketConnected ? "bg-green-500" : "bg-red-500"}`} />
+                            <span className={`w-2 h-2 rounded-full ${socketConnected ? "bg-green-500" : "bg-purple-500"}`} />
                             <span className="text-xs text-gray-500">
                                 {socketConnected ? "Connected" : "Disconnected"}
                             </span>
@@ -568,7 +568,7 @@ const Chat = () => {
 
                 <Button
                     variant="link"
-                    className="mt-8 text-red-500 hover:text-red-400 flex items-center gap-2 p-0"
+                    className="mt-8 text-purple-500 hover:text-purple-400 flex items-center gap-2 p-0"
                 >
                     <Eye size={16} />
                     <span className="font-medium">View Profile</span>

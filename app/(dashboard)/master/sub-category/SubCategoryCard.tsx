@@ -31,7 +31,7 @@ export default function SubCategoryCard({
       <CardContent className="p-4 flex flex-col justify-between h-full">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-red-700 rounded-lg flex items-center justify-center w-12 h-12">
+          <div className="p-2 bg-purple-700 rounded-lg flex items-center justify-center w-12 h-12">
             {iconUrl ? (
               <Image
                 src={iconUrl}
@@ -70,7 +70,7 @@ export default function SubCategoryCard({
         {/* Actions */}
         <div className="flex gap-3 pt-4 mt-4">
           <Button
-            className="bg-red-600 hover:bg-red-700 text-white flex-1"
+            className="bg-brand hover:opacity-90 text-white flex-1"
             onClick={onEdit}
           >
             Edit

@@ -67,7 +67,7 @@ export default function OwnerViewModal({
   const statusClasses = clsx(
     "px-3 py-1 rounded-md border text-sm font-medium w-fit",
     data.status === "Active" && "text-green-400 border-green-500/30",
-    data.status === "Suspended" && "text-red-400 border-red-500/30",
+    data.status === "Suspended" && "text-purple-400 border-purple-500/30",
   );
 
   return (
@@ -123,7 +123,7 @@ export default function OwnerViewModal({
         {/* <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg "> */}
         {/* Left side with icon + text */}
         {/* <div className="flex items-center gap-3">
-            <div className="w-[45px] h-[45px] flex items-center justify-center rounded-lg bg-red-600">
+            <div className="w-[45px] h-[45px] flex items-center justify-center rounded-lg bg-purple-600">
               <Shield size={22} className="text-white" />
             </div>{" "}
             <div className="flex flex-col gap-2">
@@ -156,7 +156,7 @@ export default function OwnerViewModal({
         <div className="rounded-lg">
           <div className="flex items-center justify-between mb-4">
             <p className="font-medium">Events Info</p>
-            <button className="flex items-center gap-1 text-xs text-red-500 hover:underline">
+            <button className="flex items-center gap-1 text-xs text-purple-500 hover:underline">
               View all
               <ArrowRight size={12} />
             </button>
@@ -192,7 +192,7 @@ export default function OwnerViewModal({
         {/* Footer Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 pt-2">
           <Button
-            className="flex-1 bg-red-600 hover:bg-red-700"
+            className="flex-1 bg-brand hover:opacity-90"
             onClick={onSuspend}
           >
             Suspend

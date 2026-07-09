@@ -188,7 +188,7 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
         <div className="flex flex-col sm:flex-row gap-3 w-full">
           <Button
             onClick={handleSubmit(onSubmit)}
-            className="flex-1 bg-red-600 hover:bg-red-700"
+            className="flex-1 bg-brand hover:opacity-90"
           >
             Update
           </Button>
@@ -243,7 +243,7 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
               {...register("bannerTitle")}
             />
             {errors.bannerTitle && (
-              <p className="text-xs text-red-500">
+              <p className="text-xs text-purple-500">
                 {errors.bannerTitle.message}
               </p>
             )}
@@ -266,7 +266,7 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
               )}
             />
             {errors.linkType && (
-              <p className="text-xs text-red-500">{errors.linkType.message}</p>
+              <p className="text-xs text-purple-500">{errors.linkType.message}</p>
             )}
           </div>
         </div>
@@ -277,7 +277,7 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
             <label className="block text-sm mb-1">Link</label>
             <CommonInput placeholder="Your link" {...register("link")} />
             {errors.link && (
-              <p className="text-xs text-red-500">{errors.link.message}</p>
+              <p className="text-xs text-purple-500">{errors.link.message}</p>
             )}
           </div>
           <div>
@@ -299,7 +299,7 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
               )}
             />
             {errors.status && (
-              <p className="text-xs text-red-500">{errors.status.message}</p>
+              <p className="text-xs text-purple-500">{errors.status.message}</p>
             )}
           </div>
         </div>
@@ -361,7 +361,7 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
                 onClick={() => toggleCategory(cat)}
                 className={`cursor-pointer px-4 py-1 ${
                   selectedCategories?.includes(cat)
-                    ? "bg-red-600 text-white"
+                    ? "bg-purple-600 text-white"
                     : "bg-gray-700 text-gray-300"
                 }`}
               >
@@ -370,7 +370,7 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
             ))}
           </div>
           {errors.displayCategories && (
-            <p className="text-xs text-red-500 mt-1">
+            <p className="text-xs text-purple-500 mt-1">
               {errors.displayCategories.message}
             </p>
           )}

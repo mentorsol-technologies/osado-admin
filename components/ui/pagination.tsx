@@ -90,7 +90,7 @@ const Pagination: React.FC<PaginationProps> = ({
               className={cn(
                 "flex h-9 w-9 items-center justify-center rounded-lg border text-sm transition cursor-pointer",
                 currentPage === page
-                  ? "bg-red-600 text-white border-red-600 hover:bg-red-700"
+                  ? "bg-brand text-white border-purple-600 hover:opacity-90"
                   : "border-gray-700 text-gray-300 hover:bg-gray-800"
               )}
             >

@@ -73,7 +73,7 @@ const VerifyAccount = () => {
           <span className="text-white-100 text-[14px] md:text-[16px] font-normal">
             -
           </span>
-          <button className="text-red-600 text-[14px] md:text-[16px] font-normal hover:underline">
+          <button className="text-purple-600 text-[14px] md:text-[16px] font-normal hover:underline">
             Edit
           </button>
         </div>
@@ -86,7 +86,7 @@ const VerifyAccount = () => {
           <div className="text-white-100 text-[14px] md:text-[16px] font-normal">
             Resend code in
           </div>
-          <div className="text-red-600 text-[14px] md:text-[16px]">
+          <div className="text-purple-600 text-[14px] md:text-[16px]">
             {formatTime(timer)}
           </div>
         </div>
@@ -95,7 +95,7 @@ const VerifyAccount = () => {
           <Button
             type="submit"
             onClick={handleVerifyOtp}
-            className="w-full text-white-100 bg-red-600 rounded-xl py-6 hover:bg-red-700"
+            className="w-full text-white-100 bg-brand rounded-xl py-6 hover:opacity-90"
             disabled={verifyOtpMutation.isPending}
           >
             {verifyOtpMutation.isPending ? "Verifying..." : "Continue"}
