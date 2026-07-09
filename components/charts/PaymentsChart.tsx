@@ -11,7 +11,7 @@ import {
   SelectContent,
 } from "../ui/select";
 
-const COLORS = ["red", "blue"]; // red + blue
+const COLORS = ["#8B5EEF", "#80B2FF"]; // purple + light blue
 
 const data = [
   { name: "Pending Payments", value: 5783 },
@@ -100,7 +100,7 @@ export default function PaymentsChart() {
 
         <span className="flex justify-between items-center gap-2">
           <span className="flex items-center gap-2">
-            <span className="inline-block w-3 h-3 rounded-full bg-blue-500"></span>
+            <span className="inline-block w-3 h-3 rounded-full bg-blue-300"></span>
             <span>Refund Requests</span>
           </span>
           <span className="font-medium text-white">1177</span>
