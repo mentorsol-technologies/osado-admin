@@ -17,6 +17,7 @@ import {
   SelectItem,
   SelectContent,
 } from "../ui/select";
+import { brand } from "@/lib/theme/colors";
 
 const data = [
   { month: "Jun", revenue: 15000 },
@@ -73,8 +74,8 @@ export default function RevenueChart() {
         >
           <defs>
             <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#8B5EEF" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#8B5EEF" stopOpacity={0} />
+              <stop offset="5%" stopColor={brand[500]} stopOpacity={0.8} />
+              <stop offset="95%" stopColor={brand[500]} stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
@@ -103,7 +104,7 @@ export default function RevenueChart() {
           <Area
             type="monotone"
             dataKey="revenue"
-            stroke="#8B5EEF"
+            stroke={brand[500]}
             fillOpacity={1}
             fill="url(#colorRevenue)"
             strokeWidth={2}

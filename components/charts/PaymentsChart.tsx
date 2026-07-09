@@ -10,8 +10,9 @@ import {
   SelectItem,
   SelectContent,
 } from "../ui/select";
+import { brand } from "@/lib/theme/colors";
 
-const COLORS = ["#8B5EEF", "#80B2FF"]; // purple + light blue
+const COLORS = [brand[500], "#80B2FF"]; // brand purple + light blue
 
 const data = [
   { name: "Pending Payments", value: 5783 },

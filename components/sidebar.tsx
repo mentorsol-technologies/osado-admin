@@ -133,7 +133,7 @@ export function Sidebar({ onClose }: SidebarProps) {
   return (
     <div className="h-full flex flex-col overflow-y-auto bg-black-500 border-r border-black-300 px-7">
       {/* Logo */}
-      <div className="flex items-center justify-center py-7">
+      <div className="flex items-center justify-center py-5">
         <Image src="/Logo.png" alt="OSADO Logo" width={135} height={37} />
         {onClose && (
           <button
@@ -162,7 +162,7 @@ export function Sidebar({ onClose }: SidebarProps) {
                     onClick={() => handleAccordion(item.label)}
                     className={`sidebar-item w-full justify-between ${
                       isActive
-                        ? "bg-purple-600 text-white"
+                        ? "active text-white"
                         : "text-gray-300 hover:text-white"
                     }`}
                   >
@@ -232,7 +232,7 @@ export function Sidebar({ onClose }: SidebarProps) {
                   onClick={onClose}
                   className={`sidebar-item ${
                     isActive
-                      ? "bg-purple-600 text-white"
+                      ? "active text-white"
                       : "text-gray-300 hover:text-white"
                   }`}
                 >

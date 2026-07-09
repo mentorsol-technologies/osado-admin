@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import { brand, brandGradient } from "./lib/theme/colors";
 
 const config: Config = {
   darkMode: ["class"],
@@ -13,7 +14,7 @@ const config: Config = {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
-        brand: "linear-gradient(90deg, #8B5EEF 0%, #663FB0 100%)",
+        brand: brandGradient,
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -86,17 +87,7 @@ const config: Config = {
           800: "#040507",
           900: "#000000",
         },
-        purple: {
-          100: "#F3EDFC",
-          200: "#E1D0F7",
-          300: "#C7A8F0",
-          400: "#A87AE8",
-          500: "#8B5EEF",
-          600: "#663FB0",
-          700: "#533387",
-          800: "#3F2766",
-          900: "#2C1B49",
-        },
+        purple: brand,
         blue: {
           100: "#E6F0FF",
           200: "#B3D1FF",
@@ -128,7 +119,7 @@ const config: Config = {
         dashboard: {
           bg: "#0f0f0f",
           card: "#1a1a1a",
-          accent: "#663FB0",
+          accent: brand[600],
           success: "#10b981",
         },
       },

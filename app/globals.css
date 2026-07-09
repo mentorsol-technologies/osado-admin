@@ -50,6 +50,11 @@
   font-display: swap;
 }
 :root {
+  /* --primary/--destructive/--ring/--chart-1 below are RGB triplets for
+     lib/theme/colors.ts's brand[600] (#663FB0 = 102 63 176). Plain CSS can't
+     import that TS file, so these must be updated by hand if the brand color
+     ever changes - everything else (Tailwind classes, the brand gradient,
+     and all chart components) derives automatically from that one file. */
   --background: 15 15 15;
   --foreground: 255 255 255;
   --card: 26 26 26;
@@ -103,7 +108,7 @@ html body * {
   }
 
   .sidebar-item.active {
-    @apply bg-purple-600 text-white-100;
+    @apply bg-brand text-white-100;
   }
 
   .stat-card {
