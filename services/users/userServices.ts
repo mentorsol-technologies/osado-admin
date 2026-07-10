@@ -50,3 +50,9 @@ export const updateInfluencerServiceProvider = async (
   const response = await api.patch(`/users/${id}/update`, data);
   return response;
 };
+
+// Delete a Service Provider
+export const deleteServiceProvider = async (id: string) => {
+  const response = await api.delete(`/users/service-providers/${id}`);
+  return response;
+};

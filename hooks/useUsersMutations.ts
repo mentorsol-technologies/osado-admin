@@ -1,5 +1,6 @@
 import {
   getCurrentUser,
+  deleteServiceProvider,
   getUsersList,
   getUserUploadLink,
   updateInfluencerServiceProvider,
@@ -46,6 +47,22 @@ export const useUpdateInfluencerServiceProviderMutation = () => {
     },
     onError: (error: any) => {
       const message = error?.response?.data?.message || "Update failed!";
+      toast.error(message);
+    },
+  });
+};
+
+export const useDeleteServiceProviderMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteServiceProvider(id),
+    onSuccess: () => {
+      toast.success("Service provider deleted successfully!");
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+    onError: (error: any) => {
+      const message =
+        error?.response?.data?.message || "Failed to delete service provider!";
       toast.error(message);
     },
   });

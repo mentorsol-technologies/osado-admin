@@ -11,6 +11,7 @@ interface DeleteConfirmModalProps {
   onConfirm: () => void;
   confirmText?: string;
   cancelText?: string;
+  isLoading?: boolean;
 }
 
 export default function DeleteConfirmModal({
@@ -21,6 +22,7 @@ export default function DeleteConfirmModal({
   onConfirm,
   confirmText = "Delete",
   cancelText = "Cancel",
+  isLoading = false,
 }: DeleteConfirmModalProps) {
   return (
     <Modal
@@ -32,18 +34,17 @@ export default function DeleteConfirmModal({
       footer={
         <div className="flex flex-col sm:flex-row  gap-3 w-full">
           <Button
-            onClick={() => {
-              onConfirm();
-              onOpenChange(false);
-            }}
+            onClick={onConfirm}
             className="flex-1"
+            disabled={isLoading}
           >
-            {confirmText}
+            {isLoading ? "Deleting..." : confirmText}
           </Button>
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             className="flex-1"
+            disabled={isLoading}
           >
             {cancelText}
           </Button>

@@ -8,7 +8,7 @@ import Image from "next/image";
 import Pagination from "@/components/ui/pagination";
 import ProvidersCard from "./ProvidersCard";
 import EditServiceProviderModal from "./EditServiceProvidersModal";
-import { useGetUsersListQuery } from "@/hooks/useUsersMutations";
+import { useGetUsersListQuery, useDeleteServiceProviderMutation } from "@/hooks/useUsersMutations";
 import { applyFilters } from "@/lib/filterHelper";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
@@ -41,6 +41,8 @@ const ServiceProviders = () => {
   ];
 
   const { data, isLoading } = useGetUsersListQuery();
+  const { mutate: deleteServiceProvider, isPending: isDeleting } =
+    useDeleteServiceProviderMutation();
 
   const serviceProviderList = useMemo(() => {
     const users = data || [];
@@ -80,7 +82,13 @@ const ServiceProviders = () => {
   };
 
   const handleDelete = () => {
-    console.log("Service Provider deleted:", selectedProviders);
+    if (!selectedProviders?.id) return;
+    deleteServiceProvider(selectedProviders.id, {
+      onSuccess: () => {
+        setDeleteOpen(false);
+        setSelectedProviders(null);
+      },
+    });
   };
 
   const handleAnalyticsClick = () => {
@@ -185,6 +193,7 @@ const ServiceProviders = () => {
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         onConfirm={handleDelete}
+        isLoading={isDeleting}
         title="Delete Service Provider"
         description={`Are you sure you want to delete "${selectedProviders?.title}"? This action cannot be undone.`}
       />

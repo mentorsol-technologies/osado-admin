@@ -26,7 +26,6 @@ import {
   useGetServiceUsersListQuery,
 } from "@/hooks/useServiceBookingMutations";
 import GooglePlacesAutocomplete from "@/components/ui/GooglePlacesAutocomplete";
-import TimeRangePicker from "@/components/ui/commonComponent/TimeRangePicker";
 
 const schema = z.object({
   service: z.string().min(1, "Service is required"),
@@ -85,15 +84,10 @@ export default function AddBookingModal({
     },
   });
 
-  const [filterDate, setFilterDate] = useState("");
-  const [filterTime, setFilterTime] = useState("");
-
   const bookingDateRaw = watch("bookingDate");
   const bookingTimeRaw = watch("bookingTime");
 
   const bookingDateISO = bookingDateRaw ? bookingDateRaw.split("T")[0] : "";
-
-  const filterDateISO = filterDate ? filterDate.split("T")[0] : "";
 
   const {
     data: serviceProviderList,
@@ -102,17 +96,17 @@ export default function AddBookingModal({
   } = useGetServiceProviderListQuery(
     {
       searchQuery: "",
-      bookingDate: filterDateISO,
-      bookingTime: filterTime,
+      bookingDate: bookingDateISO,
+      bookingTime: bookingTimeRaw,
     },
     false,
   );
 
   useEffect(() => {
-    if (filterDateISO && filterTime) {
+    if (bookingDateISO && bookingTimeRaw) {
       fetchProviders();
     }
-  }, [filterDateISO, filterTime, fetchProviders]);
+  }, [bookingDateISO, bookingTimeRaw, fetchProviders]);
 
   const providerIdValue = watch("providerId");
   const { data: servicesList } = GetServiceListQuery(providerIdValue);
@@ -154,8 +148,6 @@ export default function AddBookingModal({
       providerId: "",
       userId: "",
     });
-    setFilterDate("");
-    setFilterTime("");
     setSelectedFilters({});
     setSelectedProvider(null);
     setSelectedUser(null);
@@ -179,8 +171,8 @@ export default function AddBookingModal({
   };
 
   const filters: Filter[] = [
-    { key: "date", label: "Date", type: "date" },
-    { key: "timeRange", label: "Time Range", type: "time" },
+    { key: "date", label: "Booking Date", type: "date" },
+    { key: "timeRange", label: "Booking Time", type: "time" },
   ];
 
   const handleFilterChange = (key: string, value: string) => {
@@ -194,9 +186,10 @@ export default function AddBookingModal({
       return updated;
     });
 
-    // Only update filter state for provider fetching, not booking form values
-    if (key === "date") setFilterDate(value);
-    if (key === "timeRange") setFilterTime(value);
+    // This IS the booking date/time - also drives provider availability lookup,
+    // so there's a single date/time input instead of asking for it twice.
+    if (key === "date") setValue("bookingDate", value);
+    if (key === "timeRange") setValue("bookingTime", value);
   };
 
   const providerPackages = servicesList?.portfolios?.[0]?.packages || [];
@@ -263,12 +256,17 @@ export default function AddBookingModal({
           onSubmit={handleSubmit(onSubmit)}
           className="space-y-6"
         >
-          {/* Filters */}
+          {/* Booking Date/Time - also drives provider availability lookup below */}
           <FiltersBar
             filters={filters}
             selectedFilters={selectedFilters}
             onFilterChange={handleFilterChange}
           />
+          {(errors.bookingDate || errors.bookingTime) && (
+            <p className="text-xs text-purple-500 -mt-4">
+              {errors.bookingDate?.message || errors.bookingTime?.message}
+            </p>
+          )}
 
           {/* Providers + Users */}
           <div className="flex justify-between gap-6 mb-8">
@@ -423,21 +421,6 @@ export default function AddBookingModal({
                 )}
               </div>
               <div>
-                <label className="block mb-1 text-sm">Booking Time</label>
-                <TimeRangePicker
-                  value={watch("bookingTime") || ""}
-                  onChange={(val) => setValue("bookingTime", val)}
-                  mode="single"
-                  placeholder="Select Booking Time"
-                />
-                {errors.bookingTime && (
-                  <p className="text-xs text-purple-500 mt-1">
-                    {errors.bookingTime.message}
-                  </p>
-                )}
-              </div>
-
-              <div>
                 <label className="block mb-1 text-sm">City</label>
                 <CommonInput placeholder="City" {...register("city")} />
                 {errors.city && (
@@ -447,21 +430,6 @@ export default function AddBookingModal({
             </div>
 
             <div className="flex-1 space-y-6">
-              <div>
-                <label className="block mb-1 text-sm">Booking Date</label>
-                <CommonInput
-                  placeholder="Booking date"
-                  type="calendar"
-                  value={watch("bookingDate")}
-                  onChange={(e) => setValue("bookingDate", e.target.value)}
-                  minDate={(() => {
-                    const d = new Date();
-                    d.setHours(0, 0, 0, 0);
-                    return d;
-                  })()}
-                />
-              </div>
-
               <div>
                 <label className="block text-sm mb-1">Location</label>
                 <GooglePlacesAutocomplete
