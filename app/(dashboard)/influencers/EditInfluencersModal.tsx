@@ -31,8 +31,14 @@ const schema = z.object({
   email: z.string().email("Valid email is required"),
   phone: z.string().min(1, "Phone number is required"),
   description: z.string().min(1, "Description is required"),
-  instagram: z.string().min(1, "Instagram link is required"),
-  tiktok: z.string().min(1, "TikTok link is required"),
+  instagram: z
+    .string()
+    .min(1, "Instagram link is required")
+    .regex(/\./, "Enter a valid link (e.g. instagram.com/username)"),
+  tiktok: z
+    .string()
+    .min(1, "TikTok link is required")
+    .regex(/\./, "Enter a valid link (e.g. tiktok.com/@username)"),
   categories: z.array(z.string()).min(1, "Select at least one category"),
 });
 
@@ -193,7 +199,7 @@ export default function EditInfluencerModal({
         </div>
       }
     >
-      <div className="max-h-[70vh] overflow-y-auto px-2 pb-4 text-white">
+      <div className="px-2 pb-4 text-white">
         {/* Profile Image */}
         <div className="flex flex-col items-center mb-6 relative">
           <div className="relative">
@@ -243,7 +249,7 @@ export default function EditInfluencerModal({
               {...register("name")}
             />
             {errors.name && (
-              <p className="text-xs text-purple-500 mt-1">{errors.name.message}</p>
+              <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>
             )}
           </div>
 
@@ -254,7 +260,7 @@ export default function EditInfluencerModal({
               {...register("email")}
             />
             {errors.email && (
-              <p className="text-xs text-purple-500 mt-1">
+              <p className="text-xs text-red-500 mt-1">
                 {errors.email.message}
               </p>
             )}
@@ -282,7 +288,7 @@ export default function EditInfluencerModal({
               )}
             />
             {errors.city && (
-              <p className="text-xs text-purple-500 mt-1">{errors.city.message}</p>
+              <p className="text-xs text-red-500 mt-1">{errors.city.message}</p>
             )}
           </div>
           <div>
@@ -292,7 +298,7 @@ export default function EditInfluencerModal({
               {...register("phone")}
             />
             {errors.phone && (
-              <p className="text-xs text-purple-500 mt-1">
+              <p className="text-xs text-red-500 mt-1">
                 {errors.phone.message}
               </p>
             )}
@@ -312,7 +318,7 @@ export default function EditInfluencerModal({
           />
 
           {errors.description && (
-            <p className="text-xs text-purple-500 mt-1">
+            <p className="text-xs text-red-500 mt-1">
               {errors.description.message}
             </p>
           )}
@@ -348,7 +354,7 @@ export default function EditInfluencerModal({
               {...register("instagram")}
             />
             {errors.instagram && (
-              <p className="text-xs text-purple-500 mt-1">
+              <p className="text-xs text-red-500 mt-1">
                 {errors.instagram.message}
               </p>
             )}
@@ -360,7 +366,7 @@ export default function EditInfluencerModal({
               {...register("tiktok")}
             />
             {errors.tiktok && (
-              <p className="text-xs text-purple-500 mt-1">
+              <p className="text-xs text-red-500 mt-1">
                 {errors.tiktok.message}
               </p>
             )}

@@ -81,7 +81,7 @@ export default function TimeRangePicker({
           onChange={handleSingleTimeChange}
           placeholder={placeholder}
         />
-        {error && <p className="text-xs text-purple-500 mt-1">{error}</p>}
+        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
       </div>
     );
   }
@@ -109,7 +109,7 @@ export default function TimeRangePicker({
           disabledTime={start}
         />
       </div>
-      {error && <p className="text-xs text-purple-500 mt-1">{error}</p>}
+      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
     </div>
   );
 }
@@ -180,8 +180,9 @@ function TimePickerInput({
         <button
           type="button"
           className={cn(
-            "flex items-center min-h-[51px] w-full rounded-[14px] border border-black-300 bg-black-500 px-[14px] gap-2",
-            "text-white-100 text-sm font-normal focus:outline-none focus:ring-1 focus:ring-black-300",
+            "flex items-center min-h-[51px] w-full rounded-[14px] border border-black-300 bg-black-500 px-[14px] gap-2 transition-colors",
+            "text-white-100 text-sm font-normal focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500",
+            "data-[state=open]:border-purple-500 data-[state=open]:ring-1 data-[state=open]:ring-purple-500",
             !value && "text-gray-400"
           )}
         >
@@ -209,7 +210,7 @@ function TimePickerInput({
                     handleSelect(h, selectedMinute, selectedPeriod);
                   }}
                   className={cn(
-                    "p-2 rounded hover:bg-black-400 text-sm transition-colors",
+                    "p-2 rounded hover:bg-black-400 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-purple-400",
                     selectedHour === h
                       ? "bg-purple-600 text-white hover:bg-purple-700"
                       : "text-white-100"
@@ -239,7 +240,7 @@ function TimePickerInput({
                     `${selectedHour}:${m} ${selectedPeriod}` === disabledTime
                   }
                   className={cn(
-                    "p-2 rounded hover:bg-black-400 text-sm transition-colors",
+                    "p-2 rounded hover:bg-black-400 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-purple-400",
                     selectedMinute === m
                       ? "bg-purple-600 text-white hover:bg-purple-700"
                       : "text-white-100",
@@ -271,7 +272,7 @@ function TimePickerInput({
                     `${selectedHour}:${selectedMinute} ${p}` === disabledTime
                   }
                   className={cn(
-                    "p-2 rounded hover:bg-black-400 text-sm transition-colors",
+                    "p-2 rounded hover:bg-black-400 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-purple-400",
                     selectedPeriod === p
                       ? "bg-purple-600 text-white hover:bg-purple-700"
                       : "text-white-100",

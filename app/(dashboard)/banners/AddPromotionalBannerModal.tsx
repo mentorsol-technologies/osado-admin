@@ -153,7 +153,7 @@ export default function AddPromotionalBannerModal({
         </div>
       }
     >
-      <div className="max-h-[70vh] overflow-y-auto pr-2">
+      <div>
         {/* Upload Image */}
         <div className="mb-4">
           <Upload
@@ -175,7 +175,7 @@ export default function AddPromotionalBannerModal({
               {...register("bannerTitle")}
             />
             {errors.bannerTitle && (
-              <p className="text-xs text-purple-500">
+              <p className="text-xs text-red-500">
                 {errors.bannerTitle.message}
               </p>
             )}
@@ -192,7 +192,7 @@ export default function AddPromotionalBannerModal({
               </SelectContent>
             </Select>
             {errors.linkType && (
-              <p className="text-xs text-purple-500">{errors.linkType.message}</p>
+              <p className="text-xs text-red-500">{errors.linkType.message}</p>
             )}
           </div>
         </div>
@@ -203,7 +203,7 @@ export default function AddPromotionalBannerModal({
             <label className="block text-sm mb-1">Link</label>
             <CommonInput placeholder="Your link" {...register("link")} />
             {errors.link && (
-              <p className="text-xs text-purple-500">{errors.link.message}</p>
+              <p className="text-xs text-red-500">{errors.link.message}</p>
             )}
           </div>
           <div>
@@ -218,7 +218,7 @@ export default function AddPromotionalBannerModal({
               </SelectContent>
             </Select>
             {errors.status && (
-              <p className="text-xs text-purple-500">{errors.status.message}</p>
+              <p className="text-xs text-red-500">{errors.status.message}</p>
             )}
           </div>
         </div>
@@ -289,7 +289,7 @@ export default function AddPromotionalBannerModal({
             ))}
           </div>
           {errors.category && (
-            <p className="text-xs text-purple-500 mt-1">
+            <p className="text-xs text-red-500 mt-1">
               {errors.category.message}
             </p>
           )}

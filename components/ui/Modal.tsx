@@ -40,9 +40,11 @@ export default function Modal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={`fixed left-1/2 top-1/2 z-50 w-[95%] ${sizeClasses[size]} -translate-x-1/2 -translate-y-1/2 rounded-xl bg-black-400 p-6 shadow-lg`}>
+      <DialogContent
+        className={`fixed left-1/2 top-1/2 z-50 w-[95%] ${sizeClasses[size]} -translate-x-1/2 -translate-y-1/2 rounded-xl bg-black-400 p-6 shadow-lg max-h-[85vh] flex flex-col`}
+      >
         {/* Header with close button inside */}
-        <DialogHeader>
+        <DialogHeader className="shrink-0">
           <DialogTitle className={modalFontClasses}>{title}</DialogTitle>
           {description && (
             <DialogDescription className="text-sm text-white mt-1">
@@ -51,10 +53,12 @@ export default function Modal({
           )}
         </DialogHeader>
 
-        {/* Main content */}
-        <div className="space-y-4">{children}</div>
+        {/* Main content - the only scrollable region, so header/footer stay fixed */}
+        <div className="space-y-4 flex-1 min-h-0 overflow-y-auto pr-1">
+          {children}
+        </div>
         {/* Footer */}
-        {footer && <DialogFooter>{footer}</DialogFooter>}
+        {footer && <DialogFooter className="shrink-0">{footer}</DialogFooter>}
       </DialogContent>
     </Dialog>
   );

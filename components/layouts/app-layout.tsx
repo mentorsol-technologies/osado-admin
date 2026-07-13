@@ -51,7 +51,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         />
       )}
 
-      <div className="flex-1 lg:ml-[300px]">
+      <div className="flex-1 min-w-0 lg:ml-[300px]">
         <div className="sticky top-0 z-30 bg-dashboard-bg border-b border-gray-800">
           <Navbar onMenuClick={() => setSidebarOpen(true)} />
         </div>

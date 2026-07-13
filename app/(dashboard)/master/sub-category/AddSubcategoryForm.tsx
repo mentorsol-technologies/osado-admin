@@ -190,7 +190,7 @@ export default function AddSubCategoryModal({
             {...register("name")}
           />
           {errors.name && (
-            <p className="text-xs text-purple-500 mt-1">{errors.name.message}</p>
+            <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>
           )}
         </div>
 
@@ -212,7 +212,7 @@ export default function AddSubCategoryModal({
             </SelectContent>
           </Select>
           {errors.status && (
-            <p className="text-xs text-purple-500 mt-1">{errors.status.message}</p>
+            <p className="text-xs text-red-500 mt-1">{errors.status.message}</p>
           )}
         </div>
       </div>
@@ -247,7 +247,7 @@ export default function AddSubCategoryModal({
           </SelectContent>
         </Select>
         {errors.assign_category && (
-          <p className="text-xs text-purple-500 mt-1">
+          <p className="text-xs text-red-500 mt-1">
             {errors.assign_category.message}
           </p>
         )}

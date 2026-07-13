@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { CommonTable } from "@/components/ui/table/commonTable";
 import { Plus, Eye, Edit, Trash2,File } from "lucide-react";
 import TransactionViewForm from "./TransactionViewDetails";
+import { exportToCsv } from "@/lib/utils";
 
 
 export default function TransactionPage() {
@@ -127,7 +128,7 @@ export default function TransactionPage() {
         <Button
           leftIcon={<File size={18} />}
           className="w-full sm:w-auto"
-          //   onClick={() => setAddOpen(true)}
+          onClick={() => exportToCsv("transactions.csv", data)}
         >
           Generate CSV Report
         </Button>

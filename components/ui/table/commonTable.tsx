@@ -267,7 +267,7 @@ export function CommonTable<T extends { [key: string]: any }>({
   // ------------------ Render ------------------
 
   return (
-    <div className="w-[100vw] md:w-auto rounded-2xl bg-black-500 p-2 text-white">
+    <div className="w-full rounded-2xl bg-black-500 p-2 text-white">
       {(title || action) && (
         <div className="mb-4 flex items-center justify-between">
           {title && <h3 className="text-2xl font-semibold px-3">{title}</h3>}
@@ -324,8 +324,8 @@ export function CommonTable<T extends { [key: string]: any }>({
       <div
         className={`${mobileView === "card" ? "hidden sm:block" : "block"} relative h-[610px]`}
       >
-        <div className="overflow-y-auto h-full">
-          <Table className="w-full border-collapse text-sm">
+        <div className="overflow-auto h-full">
+          <Table className="w-full min-w-max border-collapse text-sm">
             <TableHeader>
               <TableRow className="text-left border-b border-black-500">
                 {columns.map((col) => (

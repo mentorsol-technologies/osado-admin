@@ -175,7 +175,7 @@ export default function EditRankModal({
           <label className="block text-sm mb-1">Title</label>
           <CommonInput placeholder="Write title" {...register("title")} />
           {errors.title && (
-            <p className="text-xs text-purple-500 mt-1">{errors.title.message}</p>
+            <p className="text-xs text-red-500 mt-1">{errors.title.message}</p>
           )}
         </div>
 
@@ -197,7 +197,7 @@ export default function EditRankModal({
             </SelectContent>
           </Select>
           {errors.status && (
-            <p className="text-xs text-purple-500 mt-1">{errors.status.message}</p>
+            <p className="text-xs text-red-500 mt-1">{errors.status.message}</p>
           )}
         </div>
       </div>
@@ -223,7 +223,7 @@ export default function EditRankModal({
             </SelectContent>
           </Select>
           {errors.noOfEventsVisited && (
-            <p className="text-xs text-purple-500 mt-1">
+            <p className="text-xs text-red-500 mt-1">
               {errors.noOfEventsVisited.message}
             </p>
           )}
@@ -248,7 +248,7 @@ export default function EditRankModal({
             </SelectContent>
           </Select>
           {errors.noOfReviews && (
-            <p className="text-xs text-purple-500 mt-1">
+            <p className="text-xs text-red-500 mt-1">
               {errors.noOfReviews.message}
             </p>
           )}

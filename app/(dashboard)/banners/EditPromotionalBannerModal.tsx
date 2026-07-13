@@ -202,7 +202,7 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
         </div>
       }
     >
-      <div className="max-h-[70vh] overflow-y-auto pr-2">
+      <div>
         {/* Upload Image */}
 
         <div className="mt-4">
@@ -243,7 +243,7 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
               {...register("bannerTitle")}
             />
             {errors.bannerTitle && (
-              <p className="text-xs text-purple-500">
+              <p className="text-xs text-red-500">
                 {errors.bannerTitle.message}
               </p>
             )}
@@ -266,7 +266,7 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
               )}
             />
             {errors.linkType && (
-              <p className="text-xs text-purple-500">{errors.linkType.message}</p>
+              <p className="text-xs text-red-500">{errors.linkType.message}</p>
             )}
           </div>
         </div>
@@ -277,7 +277,7 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
             <label className="block text-sm mb-1">Link</label>
             <CommonInput placeholder="Your link" {...register("link")} />
             {errors.link && (
-              <p className="text-xs text-purple-500">{errors.link.message}</p>
+              <p className="text-xs text-red-500">{errors.link.message}</p>
             )}
           </div>
           <div>
@@ -299,7 +299,7 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
               )}
             />
             {errors.status && (
-              <p className="text-xs text-purple-500">{errors.status.message}</p>
+              <p className="text-xs text-red-500">{errors.status.message}</p>
             )}
           </div>
         </div>
@@ -370,7 +370,7 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
             ))}
           </div>
           {errors.displayCategories && (
-            <p className="text-xs text-purple-500 mt-1">
+            <p className="text-xs text-red-500 mt-1">
               {errors.displayCategories.message}
             </p>
           )}

@@ -9,7 +9,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@radix-ui/react-popover";
+} from "@/components/ui/popover";
 import { format } from "date-fns";
 import { Calendar } from "./calendar";
 
@@ -101,8 +101,8 @@ const CommonInput = React.forwardRef<HTMLInputElement, CommonInputProps>(
           </Label>
         )}
         <div
-          className={`flex items-center min-h-[51px] w-full rounded-[14px] border border-black-300 bg-black-500 px-[14px] gap-2 
-              focus-within:border-black-300 focus-within:ring-1 focus-within:ring-black-300 ${className}`}
+          className={`flex items-center min-h-[51px] w-full rounded-[14px] border border-black-300 bg-black-500 px-[14px] gap-2 transition-colors
+              focus-within:border-purple-500 focus-within:ring-1 focus-within:ring-purple-500 ${className}`}
         >
           {/* Country Dropdown (unchanged) */}
           {showCountryDropdown && countries && selectedCountry && (
@@ -199,7 +199,7 @@ const CommonInput = React.forwardRef<HTMLInputElement, CommonInputProps>(
                 </button>
               </PopoverTrigger>
 
-              <PopoverContent className="p-0 bg-black-500 border border-gray-700 rounded-md shadow-xl z-[999999]">
+              <PopoverContent className="p-0 w-auto bg-black-500 border border-gray-700 rounded-md shadow-xl z-[999999]">
                 <div className="bg-black-500 p-2 rounded-md">
                   <Calendar
                     mode="single"
@@ -259,7 +259,7 @@ const CommonInput = React.forwardRef<HTMLInputElement, CommonInputProps>(
           )}
         </div>
         {error && errorMessage && (
-          <p className="text-purple-500 text-[12px] transition-all">
+          <p className="text-red-500 text-[12px] transition-all">
             {errorMessage}
           </p>
         )}

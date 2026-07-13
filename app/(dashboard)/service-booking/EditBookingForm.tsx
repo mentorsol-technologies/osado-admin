@@ -16,8 +16,8 @@ import {
 import { Button } from "@/components/ui/button";
 import CommonInput from "@/components/ui/input";
 import Modal from "@/components/ui/Modal";
-import { Eye, ChevronDown, RefreshCw } from "lucide-react";
-import FiltersBar, { Filter } from "@/components/ui/commonComponent/FiltersBar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Eye, ChevronDown, RefreshCw, User, Loader2 } from "lucide-react";
 import {
   GetServiceListQuery,
   usePopulatedBookingDetailsQuery,
@@ -29,6 +29,7 @@ import {
 } from "@/hooks/useServiceBookingMutations";
 import GooglePlacesAutocomplete from "@/components/ui/GooglePlacesAutocomplete";
 import TimeRangePicker from "@/components/ui/commonComponent/TimeRangePicker";
+import ViewProviderDetails from "./ViewBookingDetailsModal";
 
 const schema = z.object({
   service: z.string().min(1, "Service is required"),
@@ -92,18 +93,13 @@ export default function EditBookingModal({
   );
   const populatedData = data;
 
-  // Separate state for filter values (used to fetch providers)
-  const [filterDate, setFilterDate] = useState("");
-  const [filterTime, setFilterTime] = useState("");
-
   // watchers
   const bookingDateRaw = watch("bookingDate");
   const bookingTimeRaw = watch("bookingTime");
   const bookingDateISO = bookingDateRaw ? bookingDateRaw.split("T")[0] : "";
 
-  // Use filter values for provider query (not form booking values)
-  const filterDateISO = filterDate ? filterDate.split("T")[0] : "";
-
+  // The Booking Date/Time fields drive provider availability lookup directly -
+  // no separate filter inputs, so there's only one date/time to fill in.
   const {
     data: serviceProviderList,
     refetch: fetchProviders,
@@ -111,17 +107,17 @@ export default function EditBookingModal({
   } = useGetServiceProviderListQuery(
     {
       searchQuery: "",
-      bookingDate: filterDateISO,
-      bookingTime: filterTime,
+      bookingDate: bookingDateISO,
+      bookingTime: bookingTimeRaw,
     },
     false,
   );
 
   useEffect(() => {
-    if (filterDateISO && filterTime) {
+    if (bookingDateISO && bookingTimeRaw) {
       fetchProviders();
     }
-  }, [filterDateISO, filterTime, fetchProviders]);
+  }, [bookingDateISO, bookingTimeRaw, fetchProviders]);
 
   // service list based on providerId selected
   const providerIdValue = watch("providerId");
@@ -145,9 +141,6 @@ export default function EditBookingModal({
   const { mutate: updateServiceBooking } = useUpdateServiceBookingMutation();
 
   // local UI state
-  const [selectedFilters, setSelectedFilters] = useState<{
-    [k: string]: string;
-  }>({});
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [providerDropdownOpen, setProviderDropdownOpen] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<any>(null);
@@ -155,34 +148,21 @@ export default function EditBookingModal({
   const [selectedUser, setSelectedUser] = useState<any>(null);
 
   const handleProviderDropdownClick = async () => {
-    setProviderDropdownOpen((prev) => !prev);
-    if (!providerDropdownOpen) await fetchProviders();
+    const next = !providerDropdownOpen;
+    setProviderDropdownOpen(next);
+    if (next) {
+      setUserDropdownOpen(false);
+      await fetchProviders();
+    }
   };
 
   const handleUserDropdownClick = async () => {
-    setUserDropdownOpen((prev) => !prev);
-    if (!userDropdownOpen) await fetchUsers();
-  };
-
-  const filters: Filter[] = [
-    { key: "date", label: "Date", type: "date" },
-    { key: "timeRange", label: "Time Range", type: "time" },
-  ];
-
-  const handleFilterChange = (key: string, value: string) => {
-    setSelectedFilters((prev) => {
-      const updated = { ...prev };
-      if (prev[key] === value || value === "All" || value === "") {
-        delete updated[key];
-      } else {
-        updated[key] = value;
-      }
-      return updated;
-    });
-
-    // Only update filter state for provider fetching, not booking form values
-    if (key === "date") setFilterDate(value);
-    if (key === "timeRange") setFilterTime(value);
+    const next = !userDropdownOpen;
+    setUserDropdownOpen(next);
+    if (next) {
+      setProviderDropdownOpen(false);
+      await fetchUsers();
+    }
   };
 
   const providerPackages = servicesList?.portfolios?.[0]?.packages || [];
@@ -291,24 +271,25 @@ export default function EditBookingModal({
           onSubmit={handleSubmit(onSubmit)}
           className="space-y-6"
         >
-          {/* Filters */}
-          <FiltersBar
-            filters={filters}
-            selectedFilters={selectedFilters}
-            onFilterChange={handleFilterChange}
-          />
           {/* Providers + Users */}
           <div className="flex justify-between gap-6 mb-8">
             {/* Provider */}
             <div className="flex justify-between items-center w-full gap-3">
               <div className="flex items-center gap-3">
-                <img
-                  src={
-                    selectedProvider?.photoURL ||
-                    "https://via.placeholder.com/150"
-                  }
-                  className="w-12 h-12 rounded-full object-cover"
-                />
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src={providerPhoto} />
+                  <AvatarFallback>
+                    {selectedProvider?.name ||
+                    populatedData?.data?.[0]?.providerDetails?.name ? (
+                      (
+                        selectedProvider?.name ||
+                        populatedData?.data?.[0]?.providerDetails?.name
+                      )[0].toUpperCase()
+                    ) : (
+                      <User className="h-5 w-5" />
+                    )}
+                  </AvatarFallback>
+                </Avatar>
                 <div>
                   <p className="font-semibold text-white">
                     {selectedProvider?.name ||
@@ -328,7 +309,9 @@ export default function EditBookingModal({
                   onClick={() => setViewModalOpen(true)}
                 />
                 <ChevronDown
-                  className="h-5 w-5 text-white cursor-pointer"
+                  className={`h-5 w-5 text-white cursor-pointer transition-transform duration-200 ${
+                    providerDropdownOpen ? "rotate-180" : ""
+                  }`}
                   onClick={handleProviderDropdownClick}
                 />
               </div>
@@ -337,12 +320,25 @@ export default function EditBookingModal({
             {/* User */}
             <div className="flex justify-between items-center w-full gap-3">
               <div className="flex items-center gap-3">
-                <img
-                  src={
-                    selectedUser?.photoURL || "https://via.placeholder.com/150"
-                  }
-                  className="w-12 h-12 rounded-full object-cover"
-                />
+                <Avatar className="h-12 w-12">
+                  <AvatarImage
+                    src={
+                      selectedUser?.photoURL ||
+                      populatedData?.data?.[0]?.customer?.photoURL
+                    }
+                  />
+                  <AvatarFallback>
+                    {selectedUser?.name ||
+                    populatedData?.data?.[0]?.customer?.name ? (
+                      (
+                        selectedUser?.name ||
+                        populatedData?.data?.[0]?.customer?.name
+                      )[0].toUpperCase()
+                    ) : (
+                      <User className="h-5 w-5" />
+                    )}
+                  </AvatarFallback>
+                </Avatar>
                 <div>
                   <p className="font-semibold text-white">
                     {selectedUser?.name ||
@@ -350,12 +346,14 @@ export default function EditBookingModal({
                       "Select User"}
                   </p>
                   <p className="text-xs text-gray-400">
-                    {selectedUser?.role || "Customer"}
+                    {selectedUser?.role?.role || "Customer"}
                   </p>
                 </div>
               </div>
               <ChevronDown
-                className="h-5 w-5 text-white cursor-pointer"
+                className={`h-5 w-5 text-white cursor-pointer transition-transform duration-200 ${
+                  userDropdownOpen ? "rotate-180" : ""
+                }`}
                 onClick={handleUserDropdownClick}
               />
             </div>
@@ -363,9 +361,12 @@ export default function EditBookingModal({
 
           {/* Dropdown Lists */}
           {providerDropdownOpen && (
-            <div className="mt-2 w-64 bg-[#111] border border-gray-700 rounded-md shadow-lg z-50 max-h-64 overflow-y-auto">
+            <div className="mt-2 w-full bg-[#111] border border-gray-700 rounded-md shadow-lg z-50 max-h-64 overflow-y-auto animate-in fade-in-0 slide-in-from-top-2 duration-200">
               {isFetchingProviders ? (
-                <p className="p-3 text-gray-300">Loading...</p>
+                <div className="flex items-center justify-center gap-2 p-4 text-gray-300">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="text-sm">Loading...</span>
+                </div>
               ) : serviceProviderList?.length > 0 ? (
                 serviceProviderList.map((item: any) => (
                   <div
@@ -378,10 +379,12 @@ export default function EditBookingModal({
                     }}
                     className="p-2 flex items-center gap-3 hover:bg-gray-800 cursor-pointer"
                   >
-                    <img
-                      src={item.photoURL || "https://via.placeholder.com/40"}
-                      className="w-8 h-8 rounded-full"
-                    />
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={item.photoURL} />
+                      <AvatarFallback>
+                        {item.name ? item.name[0].toUpperCase() : <User className="h-4 w-4" />}
+                      </AvatarFallback>
+                    </Avatar>
                     <div>
                       <p className="text-white text-sm">{item.name}</p>
                       <p className="text-gray-400 text-xs capitalize">
@@ -397,9 +400,12 @@ export default function EditBookingModal({
           )}
 
           {userDropdownOpen && (
-            <div className="mt-2 w-64 bg-[#111] border border-gray-700 rounded-md shadow-lg z-50 max-h-64 overflow-y-auto">
+            <div className="mt-2 w-full bg-[#111] border border-gray-700 rounded-md shadow-lg z-50 max-h-64 overflow-y-auto animate-in fade-in-0 slide-in-from-top-2 duration-200">
               {isFetchingUsers ? (
-                <p className="p-3 text-gray-300">Loading...</p>
+                <div className="flex items-center justify-center gap-2 p-4 text-gray-300">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="text-sm">Loading...</span>
+                </div>
               ) : userList?.length > 0 ? (
                 userList.map((item: any) => (
                   <div
@@ -411,10 +417,12 @@ export default function EditBookingModal({
                     }}
                     className="p-2 flex items-center gap-3 hover:bg-gray-800 cursor-pointer"
                   >
-                    <img
-                      src={item.photoURL || "https://via.placeholder.com/40"}
-                      className="w-8 h-8 rounded-full"
-                    />
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={item.photoURL} />
+                      <AvatarFallback>
+                        {item.name ? item.name[0].toUpperCase() : <User className="h-4 w-4" />}
+                      </AvatarFallback>
+                    </Avatar>
                     <div>
                       <p className="text-white text-sm">{item.name}</p>
                       <p className="text-gray-400 text-xs capitalize">
@@ -456,7 +464,7 @@ export default function EditBookingModal({
                 </Select>
 
                 {errors.service && (
-                  <p className="text-xs text-purple-500">
+                  <p className="text-xs text-red-500">
                     {errors.service.message}
                   </p>
                 )}
@@ -471,7 +479,7 @@ export default function EditBookingModal({
                   placeholder="Select Booking Time"
                 />
                 {errors.bookingTime && (
-                  <p className="text-xs text-purple-500 mt-1">
+                  <p className="text-xs text-red-500 mt-1">
                     {errors.bookingTime.message}
                   </p>
                 )}
@@ -481,7 +489,7 @@ export default function EditBookingModal({
                 <label className="block mb-1 text-sm">City</label>
                 <CommonInput placeholder="City" {...register("city")} />
                 {errors.city && (
-                  <p className="text-xs text-purple-500">{errors.city.message}</p>
+                  <p className="text-xs text-red-500">{errors.city.message}</p>
                 )}
               </div>
             </div>
@@ -495,6 +503,11 @@ export default function EditBookingModal({
                   value={watch("bookingDate")}
                   onChange={(e) => setValue("bookingDate", e.target.value)}
                 />
+                {errors.bookingDate && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.bookingDate.message}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -549,11 +562,17 @@ export default function EditBookingModal({
               </SelectContent>
             </Select>
             {errors.status && (
-              <p className="text-xs text-purple-500">{errors.status.message}</p>
+              <p className="text-xs text-red-500">{errors.status.message}</p>
             )}
           </div>
         </form>
       </Modal>
+
+      <ViewProviderDetails
+        open={viewModalOpen}
+        setOpen={setViewModalOpen}
+        providerId={selectedProvider?.id}
+      />
     </>
   );
 }

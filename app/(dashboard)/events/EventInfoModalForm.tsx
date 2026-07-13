@@ -69,7 +69,7 @@ export default function EventInfoModal({
   return (
     <>
       <Modal open={open} onOpenChange={onOpenChange} title="Event Info">
-        <div className="max-h-[80vh] overflow-y-auto pr-2">
+        <div>
           {/* Header image */}
           <div className="relative h-60 w-full overflow-hidden rounded-xl ">
             <Image

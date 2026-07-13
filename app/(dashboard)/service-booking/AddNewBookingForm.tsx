@@ -15,8 +15,8 @@ import {
 import { Button } from "@/components/ui/button";
 import CommonInput from "@/components/ui/input";
 import Modal from "@/components/ui/Modal";
-import { Eye, ChevronDown } from "lucide-react";
-import FiltersBar, { Filter } from "@/components/ui/commonComponent/FiltersBar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Eye, ChevronDown, User, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import ViewProviderDetails from "./ViewBookingDetailsModal";
 import {
@@ -26,6 +26,7 @@ import {
   useGetServiceUsersListQuery,
 } from "@/hooks/useServiceBookingMutations";
 import GooglePlacesAutocomplete from "@/components/ui/GooglePlacesAutocomplete";
+import TimeRangePicker from "@/components/ui/commonComponent/TimeRangePicker";
 
 const schema = z.object({
   service: z.string().min(1, "Service is required"),
@@ -126,9 +127,6 @@ export default function AddBookingModal({
 
   const { mutate: createServiceBooking } = useCreateServiceBookingMutation();
 
-  const [selectedFilters, setSelectedFilters] = useState<{
-    [key: string]: string;
-  }>({});
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [providerDropdownOpen, setProviderDropdownOpen] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<any>(null);
@@ -148,7 +146,6 @@ export default function AddBookingModal({
       providerId: "",
       userId: "",
     });
-    setSelectedFilters({});
     setSelectedProvider(null);
     setSelectedUser(null);
     setProviderDropdownOpen(false);
@@ -161,35 +158,21 @@ export default function AddBookingModal({
   };
 
   const handleProviderDropdownClick = async () => {
-    setProviderDropdownOpen((prev) => !prev);
-    if (!providerDropdownOpen) await fetchProviders();
+    const next = !providerDropdownOpen;
+    setProviderDropdownOpen(next);
+    if (next) {
+      setUserDropdownOpen(false);
+      await fetchProviders();
+    }
   };
 
   const handleUserDropdownClick = async () => {
-    setUserDropdownOpen((prev) => !prev);
-    if (!userDropdownOpen) await fetchUsers();
-  };
-
-  const filters: Filter[] = [
-    { key: "date", label: "Booking Date", type: "date" },
-    { key: "timeRange", label: "Booking Time", type: "time" },
-  ];
-
-  const handleFilterChange = (key: string, value: string) => {
-    setSelectedFilters((prev) => {
-      const updated = { ...prev };
-      if (prev[key] === value || value === "All" || value === "") {
-        delete updated[key];
-      } else {
-        updated[key] = value;
-      }
-      return updated;
-    });
-
-    // This IS the booking date/time - also drives provider availability lookup,
-    // so there's a single date/time input instead of asking for it twice.
-    if (key === "date") setValue("bookingDate", value);
-    if (key === "timeRange") setValue("bookingTime", value);
+    const next = !userDropdownOpen;
+    setUserDropdownOpen(next);
+    if (next) {
+      setProviderDropdownOpen(false);
+      await fetchUsers();
+    }
   };
 
   const providerPackages = servicesList?.portfolios?.[0]?.packages || [];
@@ -256,30 +239,21 @@ export default function AddBookingModal({
           onSubmit={handleSubmit(onSubmit)}
           className="space-y-6"
         >
-          {/* Booking Date/Time - also drives provider availability lookup below */}
-          <FiltersBar
-            filters={filters}
-            selectedFilters={selectedFilters}
-            onFilterChange={handleFilterChange}
-          />
-          {(errors.bookingDate || errors.bookingTime) && (
-            <p className="text-xs text-purple-500 -mt-4">
-              {errors.bookingDate?.message || errors.bookingTime?.message}
-            </p>
-          )}
-
           {/* Providers + Users */}
           <div className="flex justify-between gap-6 mb-8">
             {/* Provider */}
             <div className="flex justify-between items-center w-full gap-3">
               <div className="flex items-center gap-3">
-                <img
-                  src={
-                    selectedProvider?.photoURL ||
-                    "https://via.placeholder.com/150"
-                  }
-                  className="w-12 h-12 rounded-full object-cover"
-                />
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src={selectedProvider?.photoURL} />
+                  <AvatarFallback>
+                    {selectedProvider?.name ? (
+                      selectedProvider.name[0].toUpperCase()
+                    ) : (
+                      <User className="h-5 w-5" />
+                    )}
+                  </AvatarFallback>
+                </Avatar>
                 <div>
                   <p className="font-semibold text-white">
                     {selectedProvider?.name || "Select Provider"}
@@ -295,7 +269,9 @@ export default function AddBookingModal({
                   onClick={() => setViewModalOpen(true)}
                 />
                 <ChevronDown
-                  className="h-5 w-5 text-white cursor-pointer"
+                  className={`h-5 w-5 text-white cursor-pointer transition-transform duration-200 ${
+                    providerDropdownOpen ? "rotate-180" : ""
+                  }`}
                   onClick={handleProviderDropdownClick}
                 />
               </div>
@@ -304,12 +280,16 @@ export default function AddBookingModal({
             {/* User */}
             <div className="flex justify-between items-center w-full gap-3">
               <div className="flex items-center gap-3">
-                <img
-                  src={
-                    selectedUser?.photoURL || "https://via.placeholder.com/150"
-                  }
-                  className="w-12 h-12 rounded-full object-cover"
-                />
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src={selectedUser?.photoURL} />
+                  <AvatarFallback>
+                    {selectedUser?.name ? (
+                      selectedUser.name[0].toUpperCase()
+                    ) : (
+                      <User className="h-5 w-5" />
+                    )}
+                  </AvatarFallback>
+                </Avatar>
                 <div>
                   <p className="font-semibold text-white">
                     {selectedUser?.name || "Select User"}
@@ -320,7 +300,9 @@ export default function AddBookingModal({
                 </div>
               </div>
               <ChevronDown
-                className="h-5 w-5 text-white cursor-pointer"
+                className={`h-5 w-5 text-white cursor-pointer transition-transform duration-200 ${
+                  userDropdownOpen ? "rotate-180" : ""
+                }`}
                 onClick={handleUserDropdownClick}
               />
             </div>
@@ -328,9 +310,12 @@ export default function AddBookingModal({
 
           {/* Dropdown Lists */}
           {providerDropdownOpen && (
-            <div className=" mt-2 w-64 bg-[#111] border border-gray-700 rounded-md shadow-lg z-50 max-h-64 overflow-y-auto">
+            <div className="mt-2 w-full bg-[#111] border border-gray-700 rounded-md shadow-lg z-50 max-h-64 overflow-y-auto animate-in fade-in-0 slide-in-from-top-2 duration-200">
               {isFetching ? (
-                <p className="p-3 text-gray-300">Loading...</p>
+                <div className="flex items-center justify-center gap-2 p-4 text-gray-300">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="text-sm">Loading...</span>
+                </div>
               ) : serviceProviderList?.data.length > 0 ? (
                 serviceProviderList.data.map((item: any) => (
                   <div
@@ -342,10 +327,12 @@ export default function AddBookingModal({
                     }}
                     className="p-2 flex items-center gap-3 hover:bg-gray-800 cursor-pointer"
                   >
-                    <img
-                      src={item.photoURL || "https://via.placeholder.com/40"}
-                      className="w-8 h-8 rounded-full"
-                    />
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={item.photoURL} />
+                      <AvatarFallback>
+                        {item.name ? item.name[0].toUpperCase() : <User className="h-4 w-4" />}
+                      </AvatarFallback>
+                    </Avatar>
                     <div>
                       <p className="text-white text-sm">{item.name}</p>
                       <p className="text-gray-400 text-xs capitalize">
@@ -361,9 +348,12 @@ export default function AddBookingModal({
           )}
 
           {userDropdownOpen && (
-            <div className="mt-2 w-64 bg-[#111] border border-gray-700 rounded-md shadow-lg z-50 max-h-64 overflow-y-auto">
+            <div className="mt-2 w-full bg-[#111] border border-gray-700 rounded-md shadow-lg z-50 max-h-64 overflow-y-auto animate-in fade-in-0 slide-in-from-top-2 duration-200">
               {isFetchingUsers ? (
-                <p className="p-3 text-gray-300">Loading...</p>
+                <div className="flex items-center justify-center gap-2 p-4 text-gray-300">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="text-sm">Loading...</span>
+                </div>
               ) : userList?.length > 0 ? (
                 userList.map((item: any) => (
                   <div
@@ -375,10 +365,12 @@ export default function AddBookingModal({
                     }}
                     className="p-2 flex items-center gap-3 hover:bg-gray-800 cursor-pointer"
                   >
-                    <img
-                      src={item.photoURL || "https://via.placeholder.com/40"}
-                      className="w-8 h-8 rounded-full"
-                    />
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={item.photoURL} />
+                      <AvatarFallback>
+                        {item.name ? item.name[0].toUpperCase() : <User className="h-4 w-4" />}
+                      </AvatarFallback>
+                    </Avatar>
                     <div>
                       <p className="text-white text-sm">{item.name}</p>
                       <p className="text-gray-400 text-xs capitalize">
@@ -415,8 +407,22 @@ export default function AddBookingModal({
                   </SelectContent>
                 </Select>
                 {errors.service && (
-                  <p className="text-xs text-purple-500">
+                  <p className="text-xs text-red-500">
                     {errors.service.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block mb-1 text-sm">Booking Time</label>
+                <TimeRangePicker
+                  value={watch("bookingTime") || ""}
+                  onChange={(val) => setValue("bookingTime", val)}
+                  mode="single"
+                  placeholder="Select Booking Time"
+                />
+                {errors.bookingTime && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.bookingTime.message}
                   </p>
                 )}
               </div>
@@ -424,12 +430,31 @@ export default function AddBookingModal({
                 <label className="block mb-1 text-sm">City</label>
                 <CommonInput placeholder="City" {...register("city")} />
                 {errors.city && (
-                  <p className="text-xs text-purple-500">{errors.city.message}</p>
+                  <p className="text-xs text-red-500">{errors.city.message}</p>
                 )}
               </div>
             </div>
 
             <div className="flex-1 space-y-6">
+              <div>
+                <label className="block mb-1 text-sm">Booking Date</label>
+                <CommonInput
+                  placeholder="Booking date"
+                  type="calendar"
+                  value={watch("bookingDate")}
+                  onChange={(e) => setValue("bookingDate", e.target.value)}
+                  minDate={(() => {
+                    const d = new Date();
+                    d.setHours(0, 0, 0, 0);
+                    return d;
+                  })()}
+                />
+                {errors.bookingDate && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.bookingDate.message}
+                  </p>
+                )}
+              </div>
               <div>
                 <label className="block text-sm mb-1">Location</label>
                 <GooglePlacesAutocomplete
