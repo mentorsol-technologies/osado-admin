@@ -119,7 +119,7 @@ export default function RefundBookingModal({
           <label className="block text-sm mb-1">Refund Amount</label>
           <CommonInput placeholder="Write amount" {...register("amount")} />
           {errors.amount && (
-            <p className="text-xs text-purple-500 mt-1">{errors.amount.message}</p>
+            <p className="text-xs text-red-500 mt-1">{errors.amount.message}</p>
           )}
         </div>
 
@@ -153,7 +153,7 @@ export default function RefundBookingModal({
             </SelectContent>
           </Select>
           {errors.reason && (
-            <p className="text-xs text-purple-500 mt-1">{errors.reason.message}</p>
+            <p className="text-xs text-red-500 mt-1">{errors.reason.message}</p>
           )}
         </div>
       </div>

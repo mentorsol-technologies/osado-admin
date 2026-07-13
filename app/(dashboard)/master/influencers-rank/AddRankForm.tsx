@@ -175,7 +175,7 @@ export default function AddRankModal({
           <label className="block text-sm mb-1">Title</label>
           <CommonInput placeholder="Write title" {...register("title")} />
           {errors.title && (
-            <p className="text-xs text-purple-500 mt-1">{errors.title.message}</p>
+            <p className="text-xs text-red-500 mt-1">{errors.title.message}</p>
           )}
         </div>
 
@@ -196,7 +196,7 @@ export default function AddRankModal({
             </SelectContent>
           </Select>
           {errors.status && (
-            <p className="text-xs text-purple-500 mt-1">{errors.status.message}</p>
+            <p className="text-xs text-red-500 mt-1">{errors.status.message}</p>
           )}
         </div>
       </div>
@@ -225,7 +225,7 @@ export default function AddRankModal({
             </SelectContent>
           </Select>
           {errors.noOfEventsVisited && (
-            <p className="text-xs text-purple-500 mt-1">
+            <p className="text-xs text-red-500 mt-1">
               {errors.noOfEventsVisited.message}
             </p>
           )}
@@ -255,7 +255,7 @@ export default function AddRankModal({
             </SelectContent>
           </Select>
           {errors.noOfReviews && (
-            <p className="text-xs text-purple-500 mt-1">
+            <p className="text-xs text-red-500 mt-1">
               {errors.noOfReviews.message}
             </p>
           )}

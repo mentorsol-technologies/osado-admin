@@ -21,8 +21,8 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-[url('/images/AuthBg.png')] bg-cover bg-center flex flex-col p-4">
-      <div className="w-full max-w-md mx-auto mb-2 text-center">
+    <div className="min-h-screen bg-[url('/images/AuthBg.png')] bg-cover bg-center flex flex-col items-center justify-center p-4">
+      <div className="w-full max-w-md mx-auto mb-14 text-center">
         <Image
           src="/Logo.png"
           alt="OSADO Logo"
@@ -33,9 +33,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
         />
       </div>
 
-      <div className="flex flex-1 items-center justify-center">
-        <div className="w-full max-w-md">{children}</div>
-      </div>
+      <div className="w-full max-w-md">{children}</div>
     </div>
   );
 }

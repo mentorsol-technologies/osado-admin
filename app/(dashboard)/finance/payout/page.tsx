@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { CommonTable } from "@/components/ui/table/commonTable";
 import { Eye, File } from "lucide-react";
 import PayoutViewForm from "./PayoutViewDetails";
+import { exportToCsv } from "@/lib/utils";
 
 export default function PayoutPage() {
   const [openViewModal, setOpenViewModal] = useState(false);
@@ -133,7 +134,11 @@ export default function PayoutPage() {
     <div className="p-4 bg-black-500 !min-h-[calc(100vh-120px)] rounded-lg">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
         <h2 className="lg:text-3xl text-xl  font-medium text-white">Payouts</h2>
-        <Button leftIcon={<File size={18} />} className="w-full sm:w-auto">
+        <Button
+          leftIcon={<File size={18} />}
+          className="w-full sm:w-auto"
+          onClick={() => exportToCsv("payouts.csv", data)}
+        >
           Generate CSV Report
         </Button>
       </div>

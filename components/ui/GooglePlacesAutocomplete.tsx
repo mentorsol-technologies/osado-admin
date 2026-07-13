@@ -140,7 +140,7 @@ const GooglePlacesAutocomplete = React.forwardRef<
 
     if (loadError) {
       return (
-        <div className="text-purple-500 text-sm">Error loading Google API</div>
+        <div className="text-red-500 text-sm">Error loading Google API</div>
       );
     }
 
@@ -170,7 +170,7 @@ const GooglePlacesAutocomplete = React.forwardRef<
           )}
         </div>
 
-        {error && <p className="text-xs text-purple-500 mt-1">{error}</p>}
+        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
       </div>
     );
   }

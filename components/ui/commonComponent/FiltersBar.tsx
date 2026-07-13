@@ -60,7 +60,9 @@ const FiltersBar = ({
             value={search}
             onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
             icon={<Search />}
-            className="w-full border-black-200 md:w-64"
+            className={`w-full md:w-64 ${
+              search ? "border-purple-500" : "border-black-200"
+            }`}
           />
         </div>
       )}
@@ -85,7 +87,11 @@ const FiltersBar = ({
                 <PopoverTrigger asChild>
                   <button
                     type="button"
-                    className="flex gap-10 h-[51px] items-center justify-between rounded-[14px] border border-black-300 bg-black-500 px-4 text-sm text-gray-200"
+                    className={`flex gap-10 h-[51px] items-center justify-between rounded-[14px] border bg-black-500 px-4 text-sm transition-colors focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 data-[state=open]:border-purple-500 data-[state=open]:ring-1 data-[state=open]:ring-purple-500 ${
+                      selectedDate
+                        ? "border-purple-500 text-white"
+                        : "border-black-300 text-gray-200"
+                    }`}
                   >
                     {selectedDate
                       ? format(selectedDate, "dd MMM yyyy")
@@ -134,7 +140,11 @@ const FiltersBar = ({
               value={selectedFilters[filter.key] || ""}
               onValueChange={(val) => onFilterChange(filter.key, val)}
             >
-              <SelectTrigger className="w-full md:w-[160px]">
+              <SelectTrigger
+                className={`w-full md:w-[160px] ${
+                  selectedFilters[filter.key] ? "border-purple-500" : ""
+                }`}
+              >
                 <SelectValue placeholder={filter.label} />
               </SelectTrigger>
               <SelectContent>

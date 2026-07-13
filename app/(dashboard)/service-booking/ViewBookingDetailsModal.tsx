@@ -3,7 +3,9 @@ import { Button } from "@/components/ui/button";
 import Modal from "@/components/ui/Modal";
 import BookingCarousel from "./BookingCarousel";
 import { useGetProviderDetailsInformationQuery } from "@/hooks/useServiceBookingMutations";
-import { Loader2 } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Loader2, User, UserX } from "lucide-react";
+import { ensureAbsoluteUrl } from "@/lib/utils";
 
 interface ViewProviderDetailsProps {
   open: boolean;
@@ -69,27 +71,30 @@ export default function ViewProviderDetails({
 
   return (
     <Modal open={open} onOpenChange={setOpen} title="" size="xl">
-      <div className="p-6 text-white space-y-6 max-h-[90vh] overflow-y-auto">
+      <div className="p-6 text-white space-y-6">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
           </div>
         ) : bookingsArray.length === 0 ? (
-          <div className="flex items-center justify-center py-12">
+          <div className="flex flex-col items-center justify-center gap-3 py-12">
+            <UserX className="w-10 h-10 text-gray-500" />
             <p className="text-gray-400">No provider details found</p>
           </div>
         ) : (
           <>
             {/* HEADER */}
             <div className="flex items-center gap-4">
-              <img
-                src={
-                  providerUser?.profileImage ||
-                  "https://via.placeholder.com/150"
-                }
-                className="w-20 h-20 rounded-full object-cover"
-                alt={providerUser?.name || "Provider"}
-              />
+              <Avatar className="h-20 w-20">
+                <AvatarImage src={providerUser?.profileImage} alt={providerUser?.name || "Provider"} />
+                <AvatarFallback>
+                  {providerUser?.name ? (
+                    providerUser.name[0].toUpperCase()
+                  ) : (
+                    <User className="h-8 w-8" />
+                  )}
+                </AvatarFallback>
+              </Avatar>
               <div>
                 <h2 className="text-xl font-semibold">
                   {providerUser?.name || "Unknown Provider"}
@@ -154,18 +159,20 @@ export default function ViewProviderDetails({
             {/* SOCIAL ICONS */}
             {socialLinks.length > 0 && (
               <div className="flex gap-3 flex-wrap">
-                {socialLinks.map((link) => (
-                  <Button
-                    key={link.name}
-                    onClick={() => {
-                      if (link.url && link.url.trim() !== "") {
-                        window.open(link.url, "_blank");
-                      }
-                    }}
-                  >
-                    {link.name}
-                  </Button>
-                ))}
+                {socialLinks.map((link) => {
+                  const url = ensureAbsoluteUrl(link.url);
+                  return (
+                    <Button
+                      key={link.name}
+                      disabled={!url}
+                      onClick={() => {
+                        if (url) window.open(url, "_blank");
+                      }}
+                    >
+                      {link.name}
+                    </Button>
+                  );
+                })}
               </div>
             )}
             <hr className="border-gray-700" />

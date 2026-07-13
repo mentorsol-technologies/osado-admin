@@ -107,7 +107,7 @@ export default function AccountDeletionRequestDetailModal({
       {isLoading || !request ? (
         <p className="text-white text-center py-6">Loading...</p>
       ) : (
-        <div className="rounded-2xl text-white px-6 py-6 space-y-6 max-h-[70vh] overflow-y-auto">
+        <div className="rounded-2xl text-white px-6 py-6 space-y-6">
           {/* Profile Section */}
           <div className="flex flex-col items-center text-center">
             <div className="w-20 h-20 rounded-full overflow-hidden bg-black-300">

@@ -219,7 +219,7 @@ export default function EditEventModal({
         </div>
       }
     >
-      <div className="max-h-[70vh] overflow-y-auto pr-2">
+      <div className="px-2">
         {/* Upload Section */}
         <div className="mb-4">
           <Upload
@@ -234,13 +234,13 @@ export default function EditEventModal({
         </div>
         {existingFiles.length > 0 && (
           <div className="mt-2">
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-col gap-2">
               {existingFiles.map((file) => (
-                <div key={file.id} className="relative">
+                <div key={file.id} className="relative w-full">
                   <img
                     src={file.url}
                     alt="Event Preview"
-                    className="w-20 h-20 rounded-md border object-cover"
+                    className="w-full h-28 mb-2 rounded-md border border-black-300 object-cover"
                     onError={(e) => {
                       console.error("Failed to load image:", file.url);
                       e.currentTarget.style.display = "none";
@@ -257,7 +257,7 @@ export default function EditEventModal({
           <label className="block text-sm mb-1">Title</label>
           <CommonInput placeholder="Enter title" {...register("title")} />
           {errors.title && (
-            <p className="text-xs text-purple-500">{errors.title.message}</p>
+            <p className="text-xs text-red-500">{errors.title.message}</p>
           )}
         </div>
 
@@ -270,7 +270,7 @@ export default function EditEventModal({
               {...register("price", { valueAsNumber: true })}
             />
             {errors.price && (
-              <p className="text-xs text-purple-500">{errors.price.message}</p>
+              <p className="text-xs text-red-500">{errors.price.message}</p>
             )}
           </div>
           <div>
@@ -280,7 +280,7 @@ export default function EditEventModal({
               {...register("priceType")}
             />
             {errors.priceType && (
-              <p className="text-xs text-purple-500">{errors.priceType.message}</p>
+              <p className="text-xs text-red-500">{errors.priceType.message}</p>
             )}
           </div>
         </div>
@@ -301,7 +301,7 @@ export default function EditEventModal({
               })()}
             />
             {errors.date && (
-              <p className="text-xs text-purple-500">{errors.date.message}</p>
+              <p className="text-xs text-red-500">{errors.date.message}</p>
             )}
           </div>
           <div>
@@ -333,7 +333,7 @@ export default function EditEventModal({
             <label className="block text-sm mb-1">Country</label>
             <CommonInput {...register("country")} />
             {errors.country && (
-              <p className="text-xs text-purple-500">{errors.country.message}</p>
+              <p className="text-xs text-red-500">{errors.country.message}</p>
             )}
           </div>
         </div>
@@ -344,7 +344,7 @@ export default function EditEventModal({
             <label className="block text-sm mb-1">City</label>
             <CommonInput {...register("city")} />
             {errors.city && (
-              <p className="text-xs text-purple-500">{errors.city.message}</p>
+              <p className="text-xs text-red-500">{errors.city.message}</p>
             )}
           </div>
           <div>
@@ -362,7 +362,7 @@ export default function EditEventModal({
               </SelectContent>
             </Select>
             {errors.status && (
-              <p className="text-xs text-purple-500">{errors.status.message}</p>
+              <p className="text-xs text-red-500">{errors.status.message}</p>
             )}
           </div>
         </div>
@@ -392,7 +392,7 @@ export default function EditEventModal({
             ))}
           </div>
           {errors.categoryId && (
-            <p className="text-xs text-purple-500 mt-1">
+            <p className="text-xs text-red-500 mt-1">
               {errors.categoryId.message}
             </p>
           )}
@@ -403,7 +403,7 @@ export default function EditEventModal({
           <label className="block text-sm mb-1">Bio</label>
           <Textarea placeholder="Enter bio..." {...register("bio")} />
           {errors.bio && (
-            <p className="text-xs text-purple-500">{errors.bio.message}</p>
+            <p className="text-xs text-red-500">{errors.bio.message}</p>
           )}
         </div>
       </div>

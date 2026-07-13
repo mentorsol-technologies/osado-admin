@@ -136,7 +136,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-gray-700" />
             <DropdownMenuItem
-              className="text-white"
+              className="text-white cursor-pointer"
               onClick={() => router.push("/profile")}
             >
               <User className="mr-2 h-4 w-4" />
@@ -146,7 +146,11 @@ export function Navbar({ onMenuClick }: NavbarProps) {
               Settings
             </DropdownMenuItem> */}
             <DropdownMenuSeparator className="bg-gray-700" />
-            <DropdownMenuItem className="text-white" onClick={handleLogout}>
+            <DropdownMenuItem
+              className="text-white cursor-pointer"
+              onClick={handleLogout}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

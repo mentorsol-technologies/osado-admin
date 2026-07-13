@@ -152,12 +152,12 @@ export default function EditSubAdminModal({
         <div>
           <label className="block text-sm mb-1">Full Name</label>
           <CommonInput placeholder="Write full name" {...register("fullName")} />
-          {errors.fullName && <p className="text-xs text-purple-500">{errors.fullName.message}</p>}
+          {errors.fullName && <p className="text-xs text-red-500">{errors.fullName.message}</p>}
         </div>
         <div>
           <label className="block text-sm mb-1">Surname</label>
           <CommonInput placeholder="Write your surname" {...register("surname")} />
-          {errors.surname && <p className="text-xs text-purple-500">{errors.surname.message}</p>}
+          {errors.surname && <p className="text-xs text-red-500">{errors.surname.message}</p>}
         </div>
       </div>
       {/* Phone Number  */}
@@ -179,12 +179,12 @@ export default function EditSubAdminModal({
         <div>
           <label className="block text-sm mb-1">Email Address</label>
           <CommonInput placeholder="Write email address" {...register("email")} />
-          {errors.email && <p className="text-xs text-purple-500">{errors.email.message}</p>}
+          {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
         </div>
         <div>
           <label className="block text-sm mb-1">Password</label>
           <CommonInput type="password" placeholder="Write password" {...register("password")} />
-          {errors.password && <p className="text-xs text-purple-500">{errors.password.message}</p>}
+          {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
         </div>
       </div>
 

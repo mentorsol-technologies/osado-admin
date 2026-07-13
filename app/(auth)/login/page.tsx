@@ -127,19 +127,19 @@ export default function LoginPage() {
             {isPending ? "Logging in..." : "Continue"}
           </Button>
 
-          <div className="flex items-center justify-center gap-2 text-sm text-white-100">
+          {/* <div className="flex items-center justify-center gap-2 text-sm text-white-100">
             Don&apos;t have an account?
             <Link href="/" className="hover:underline">
               Sign Up
             </Link>
-          </div>
+          </div> */}
         </form>
 
         {/* Social Logins */}
-        <div className="mt-6 flex justify-center items-center gap-5">
+        {/* <div className="mt-6 flex justify-center items-center gap-5">
           <Image src="/images/Google.png" alt="Google" width={58} height={58} />
           <Image src="/images/Apple.png" alt="Apple" width={58} height={58} />
-        </div>
+        </div> */}
       </CardContent>
     </Card>
   );

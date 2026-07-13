@@ -40,19 +40,29 @@ export default function ServiceBookingPage() {
     {
       key: "status",
       label: "Status",
-      render: (row: any) => (
-        <span
-          className={`rounded px-2 py-1 text-xs ${
-            row.status === "Confirmed"
-              ? " text-green-400 border border-green-500/30"
-              : row.status === "Canceled"
-                ? " text-purple-400 border border-purple-500/30"
-                : " text-blue-400 border border-blue-500/30"
-          }`}
-        >
-          {row.status}
-        </span>
-      ),
+      render: (row: any) => {
+        const statusColors: Record<string, string> = {
+          pending: "text-yellow-400 border-yellow-500/30",
+          accepted: "text-green-400 border-green-500/30",
+          completed: "text-emerald-400 border-emerald-500/30",
+          rejected: "text-red-400 border-red-500/30",
+          cancelled: "text-red-400 border-red-500/30",
+          expired: "text-gray-400 border-gray-500/30",
+          rescheduled: "text-blue-400 border-blue-500/30",
+          suspended: "text-orange-400 border-orange-500/30",
+        };
+        const colorClass =
+          statusColors[String(row.status).toLowerCase()] ||
+          "text-blue-400 border-blue-500/30";
+
+        return (
+          <span
+            className={`rounded px-2 py-1 text-xs capitalize border ${colorClass}`}
+          >
+            {row.status}
+          </span>
+        );
+      },
     },
     {
       key: "actions",
