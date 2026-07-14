@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Bell, User, Menu, LogOut } from "lucide-react";
+import { Search, User, Menu, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -95,15 +95,6 @@ export function Navbar({ onMenuClick }: NavbarProps) {
 
       {/* Right Side */}
       <div className="flex items-center">
-        {/* Notifications */}
-        <Button
-          // variant="ghost"
-          size="icon"
-          className="text-white-100 bg-transparent hover:bg-transparent"
-        >
-          <Bell className="h-5 w-5" />
-        </Button>
-
         {/* User Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
