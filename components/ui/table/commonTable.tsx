@@ -155,24 +155,18 @@ export function CommonTable<T extends { [key: string]: any }>({
   const filteredData = useMemo(() => {
     let result = [...(data || [])];
 
-    // 🔍 Search
-    if (search) {
-      result = result.filter((row) => {
-        const searchLower = search.toLowerCase();
+    // 🔍 Search - restricted to the columns actually shown to the user,
+    // so hidden/internal fields on the row (e.g. role metadata) can't
+    // produce false-positive matches against what the user can see.
+    const searchTerm = search.trim().toLowerCase();
+    if (searchTerm) {
+      const searchableKeys = columns
+        .map((col) => col.key as string)
+        .filter((key) => key !== "actions");
 
-        const checkValue = (val: any): boolean => {
-          if (val == null) return false;
-
-          // If object → search inside its values (recursive)
-          if (typeof val === "object") {
-            return Object.values(val).some((nested) => checkValue(nested));
-          }
-
-          return String(val).toLowerCase().includes(searchLower);
-        };
-
-        return Object.values(row).some((val) => checkValue(val));
-      });
+      result = result.filter((row) =>
+        searchableKeys.some((key) => getValue(row, key).includes(searchTerm)),
+      );
     }
 
     // 🎛 Filters
@@ -251,7 +245,7 @@ export function CommonTable<T extends { [key: string]: any }>({
     });
 
     return result;
-  }, [data, search, selectedFilters, filters]);
+  }, [data, search, selectedFilters, filters, columns]);
 
   const totalPages = Math.ceil(filteredData?.length / rowsPerPage);
 
