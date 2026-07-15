@@ -55,7 +55,7 @@ export default function ViewProviderDetails({
             photoURL: user?.profileImage || "",
           },
           priceType: "KWD",
-          price: pkg?.customPrice || pkg?.minPrice || "N/A",
+          price: pkg?.customPrice || pkg?.minPrice || "--",
           status: booking?.status,
           bookingId: booking?.id,
         };
@@ -124,7 +124,7 @@ export default function ViewProviderDetails({
               <div className="flex justify-between">
                 <p>Status</p>
                 <p className="font-medium capitalize">
-                  {bookingsArray?.[0]?.status ?? "N/A"}
+                  {bookingsArray?.[0]?.status ?? "--"}
                 </p>
               </div>
             </div>

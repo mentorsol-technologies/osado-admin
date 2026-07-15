@@ -171,7 +171,7 @@ export default function EventInfoModal({
                 influencerUsers.map((user: any) => (
                   <InfluencerCard
                     key={user.id}
-                    name={`${user.name} ${user.surName || ""}`}
+                    name={`${user.name || ""} ${user.surName || ""}`.trim() || "--"}
                     date={FormatDate(user?.invite?.createdAt)}
                     avatar={user.photoURL}
                   />
@@ -188,7 +188,7 @@ export default function EventInfoModal({
                 serviceProviders.map((user: any) => (
                   <BookedServiceProviderCard
                     key={user.id}
-                    name={`${user.name} ${user.surName || ""}`}
+                    name={`${user.name || ""} ${user.surName || ""}`.trim() || "--"}
                     date={FormatDate(user?.proposal?.createdAt)}
                     avatar={user.photoURL}
                   />

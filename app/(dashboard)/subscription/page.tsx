@@ -1,51 +1,174 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+"use client";
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, Filter, Shield } from "lucide-react";
-import CommonInput from "@/components/ui/input";
+import { Plus, Edit } from "lucide-react";
+import { BiStop } from "react-icons/bi";
+import { CommonTable, FilterConfig } from "@/components/ui/table/commonTable";
+import {
+  useGetSubscriptionPlansQuery,
+  useDeleteSubscriptionPlanMutation,
+} from "@/hooks/useSubscriptionMutations";
+import DeleteConfirmModal from "@/components/ui/commonComponent/DeleteConfirmModal";
+import SubscriptionPlanModal from "./SubscriptionPlanModal";
 
 export default function SubscriptionPage() {
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center mb-6">
-                   <h2 className="text-2xl font-bold text-white">Subscription</h2>
-                   <Button
-                       leftIcon={<Plus size={18} />}
-                   > 
-                       <span className="hidden md:inline">Add New subscription</span>
-                   </Button>
-                   </div>
+  const { data: plans } = useGetSubscriptionPlansQuery();
+  const { mutate: deletePlan, isPending: isDeleting } =
+    useDeleteSubscriptionPlanMutation();
 
-      <div className="flex flex-col lg:flex-row gap-4">
-        <CommonInput placeholder="Search subscriptions..." icon={<Search />} />
-        <Button
-          variant="outline"
-          className="border-gray-700 text-gray-300 hover:text-white w-full lg:w-auto"
+  const [addOpen, setAddOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<any>(null);
+
+  const tableData =
+    plans?.map((plan: any) => ({
+      name: plan.name || "--",
+      price: `${Math.round(Number(plan.price) || 0)} ${(plan.currency || "KWD").toUpperCase()}`,
+      billingCycle: plan.billingCycle === "yearly" ? "Yearly" : "Monthly",
+      status: plan.isActive ? "Active" : "Inactive",
+      raw: plan,
+    })) || [];
+
+  const columns = [
+    { key: "name", label: "Plan Name" },
+    { key: "price", label: "Price" },
+    { key: "billingCycle", label: "Billing Cycle" },
+    {
+      key: "status",
+      label: "Status",
+      render: (row: any) => (
+        <span
+          className={`rounded px-2 py-1 text-xs ${
+            row.status === "Active"
+              ? "text-green-400 border border-green-500/30"
+              : "text-red-400 border border-red-500/30"
+          }`}
         >
-          <Filter className="w-4 h-4 mr-2" />
-          Filter
+          {row.status}
+        </span>
+      ),
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      render: (row: any) => (
+        <div className="flex justify-center gap-3">
+          <button
+            className="p-1 border border-black-600"
+            onClick={() => {
+              setSelectedPlan(row.raw);
+              setEditOpen(true);
+            }}
+          >
+            <Edit size={16} />
+          </button>
+          <button
+            className="p-1 rounded-md bg-purple-600"
+            onClick={() => {
+              setSelectedPlan(row.raw);
+              setDeleteOpen(true);
+            }}
+          >
+            <BiStop size={16} />
+          </button>
+        </div>
+      ),
+    },
+  ];
+
+  const filters: FilterConfig[] = [
+    {
+      key: "sort_by",
+      label: "Sort by",
+      sortBy: true,
+      options: ["Newest", "Oldest", "A–Z", "Z–A"],
+    },
+  ];
+
+  const handleDelete = () => {
+    if (!selectedPlan?.id) return;
+    deletePlan(selectedPlan.id, {
+      onSuccess: () => {
+        setDeleteOpen(false);
+        setSelectedPlan(null);
+      },
+    });
+  };
+
+  return (
+    <div className="p-4 bg-black-500 !min-h-[calc(100vh-120px)] rounded-lg">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
+        <h2 className="lg:text-3xl text-xl font-medium text-white">
+          Subscription Plans
+        </h2>
+        <Button
+          leftIcon={<Plus size={18} />}
+          className="w-full sm:w-auto"
+          onClick={() => {
+            setSelectedPlan(null);
+            setAddOpen(true);
+          }}
+        >
+          Add New Subscription
         </Button>
       </div>
 
-      <Card className="bg-dashboard-card border-gray-800">
-        <CardHeader>
-          <CardTitle className="text-white">Subscription Management</CardTitle>
-          <CardDescription className="text-gray-400">
-            Manage subscription plans and user subscriptions
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-12 text-gray-400">
-            <Shield className="w-12 h-12 mx-auto mb-4 text-gray-600" />
-            <p>Subscription management interface will be implemented here</p>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="w-full">
+        <CommonTable
+          mobileView="card"
+          data={tableData}
+          columns={columns}
+          rowsPerPage={10}
+          filters={filters}
+          searchable
+          renderCardActions={(row: any) => (
+            <div className="flex gap-2 w-full">
+              <Button
+                className="flex-1"
+                onClick={() => {
+                  setSelectedPlan(row.raw);
+                  setEditOpen(true);
+                }}
+              >
+                Edit
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  setSelectedPlan(row.raw);
+                  setDeleteOpen(true);
+                }}
+              >
+                Delete
+              </Button>
+            </div>
+          )}
+        />
+      </div>
+
+      <SubscriptionPlanModal
+        open={addOpen}
+        setOpen={setAddOpen}
+        planData={null}
+      />
+
+      <SubscriptionPlanModal
+        open={editOpen}
+        setOpen={setEditOpen}
+        planData={selectedPlan}
+      />
+
+      <DeleteConfirmModal
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        onConfirm={handleDelete}
+        isLoading={isDeleting}
+        title="Delete Subscription Plan"
+        description={`Are you sure you want to delete "${selectedPlan?.name}"? This action cannot be undone.`}
+      />
     </div>
   );
 }

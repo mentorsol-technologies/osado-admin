@@ -36,6 +36,11 @@ const menuItems: MenuItem[] = [
     ],
   },
   {
+    icon: "/images/tdesign_user-business-filled.svg",
+    label: "Users",
+    href: "/users",
+  },
+  {
     icon: "/images/noun-influencer-7727039 1 (1).svg",
     label: "Influencers",
     href: "/influencers",
@@ -95,6 +100,11 @@ const menuItems: MenuItem[] = [
     ],
   },
   {
+    icon: "/images/material-symbols_finance-rounded.svg",
+    label: "Subscription Plans",
+    href: "/subscription",
+  },
+  {
     icon: "/images/eos-icons_admin.svg",
     label: "Sub Admin",
     href: "/sub-admin",
@@ -133,14 +143,27 @@ export function Sidebar({ onClose }: SidebarProps) {
   return (
     <div className="h-full flex flex-col overflow-y-auto bg-black-500 border-r border-black-300 px-7">
       {/* Logo */}
-      <div className="flex items-center justify-center py-5">
-        <Image src="/Logo.png" alt="OSADO Logo" width={135} height={37} />
+      <div className="flex items-center justify-between lg:justify-center py-5">
+        <Image
+          src="/Logo.png"
+          alt="OSADO Logo"
+          width={125}
+          height={20}
+          className="hidden lg:block max-h-18"
+        />
+        <Image
+          src="/Split-Logo.png"
+          alt="OSADO Logo"
+          width={80}
+          height={20}
+          className="block lg:hidden max-h-18"
+        />
         {onClose && (
           <button
             onClick={onClose}
-            className="lg:hidden text-gray-400 hover:text-white"
+            className="lg:hidden text-gray-300 hover:text-white"
           >
-            <X size={20} />
+            <X size={24} />
           </button>
         )}
       </div>
@@ -160,11 +183,10 @@ export function Sidebar({ onClose }: SidebarProps) {
                   {/* Parent button */}
                   <button
                     onClick={() => handleAccordion(item.label)}
-                    className={`sidebar-item w-full justify-between ${
-                      isActive
+                    className={`sidebar-item w-full justify-between ${isActive
                         ? "active text-white"
                         : "text-gray-300 hover:text-white"
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center gap-3">
                       <Image
@@ -177,9 +199,8 @@ export function Sidebar({ onClose }: SidebarProps) {
                     </div>
                     <ChevronDown
                       size={16}
-                      className={`transition-transform ${
-                        openMenu === item.label ? "rotate-180" : ""
-                      }`}
+                      className={`transition-transform ${openMenu === item.label ? "rotate-180" : ""
+                        }`}
                     />
                   </button>
 
@@ -193,16 +214,14 @@ export function Sidebar({ onClose }: SidebarProps) {
                             <Link
                               href={child.href ?? ""}
                               onClick={onClose}
-                              className={`sidebar-item w-full justify-between ${
-                                childActive
+                              className={`sidebar-item w-full justify-between ${childActive
                                   ? "bg-black-300 text-white"
                                   : "text-gray-300 hover:text-white"
-                              }`}
+                                }`}
                             >
                               <div
-                                className={`flex items-center gap-3 ${
-                                  child?.icon ? "" : "pl-2"
-                                }`}
+                                className={`flex items-center gap-3 ${child?.icon ? "" : "pl-2"
+                                  }`}
                               >
                                 {child?.icon && (
                                   <Image
@@ -230,11 +249,10 @@ export function Sidebar({ onClose }: SidebarProps) {
                 <Link
                   href={item.href ?? ""}
                   onClick={onClose}
-                  className={`sidebar-item ${
-                    isActive
+                  className={`sidebar-item ${isActive
                       ? "active text-white"
                       : "text-gray-300 hover:text-white"
-                  }`}
+                    }`}
                 >
                   <Image
                     src={item.icon}

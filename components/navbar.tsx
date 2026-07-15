@@ -71,15 +71,6 @@ export function Navbar({ onMenuClick }: NavbarProps) {
             <Menu className="h-5 w-5" />
           </Button>
         )}
-        <div className="lg:hidden">
-          <Image
-            src="/Logo.png"
-            alt="OSADO Logo"
-            width={110}
-            height={30}
-            className="object-contain"
-          />
-        </div>
       </div>
 
       {/* Search */}

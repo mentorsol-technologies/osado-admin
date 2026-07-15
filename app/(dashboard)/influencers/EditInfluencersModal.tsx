@@ -236,7 +236,7 @@ export default function EditInfluencerModal({
             </label>
           </div>
           <p className="text-gray-400 mt-2 text-sm">
-            ID: {influencerData?.id || "N/A"}
+            ID: {influencerData?.id || "--"}
           </p>
         </div>
 

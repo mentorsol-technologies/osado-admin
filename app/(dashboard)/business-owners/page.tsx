@@ -35,11 +35,12 @@ export default function ServiceBookingPage() {
     );
   };
   const tableData = owners?.map((item: any) => ({
-    full_name: `${item.user?.name} ${item.user?.surName || ""}`,
-    phone_number: item.user?.phoneNumber || "N/A",
-    email: item.user?.email,
-    registration_date: item.user?.createdAt?.split("T")[0],
-    active_events: item.eventsInfo?.activeEvents,
+    full_name:
+      `${item.user?.name || ""} ${item.user?.surName || ""}`.trim() || "--",
+    phone_number: item.user?.phoneNumber || "--",
+    email: item.user?.email || "--",
+    registration_date: item.user?.createdAt?.split("T")[0] || "--",
+    active_events: item.eventsInfo?.activeEvents ?? "--",
     status: item.user?.status === "active" ? "Active" : "Inactive",
 
     user: item.user,

@@ -80,7 +80,7 @@ export default function InfluencerCard({
             <p className="flex justify-between gap-2">
               <span className="flex-shrink-0">Location</span>
               <span className="font-semibold text-right break-words">
-                {city || "N/A"}
+                {city || "--"}
               </span>
             </p>
             <p className="flex justify-between flex-wrap">

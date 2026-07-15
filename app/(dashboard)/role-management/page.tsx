@@ -3,11 +3,12 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useRolesQuery } from "@/hooks/useRolesMutations";
-import { Plus } from "lucide-react";
+import { Plus, Shield } from "lucide-react";
 import { CommonTable, FilterConfig } from "@/components/ui/table/commonTable";
 import { MdOutlineEdit } from "react-icons/md";
 import { BiStop } from "react-icons/bi";
 import AddRoleModal from "./CreateRole";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const RoleManagement = () => {
   const { data: rolesList, isLoading } = useRolesQuery();
@@ -24,11 +25,12 @@ const RoleManagement = () => {
       key: "iconURL",
       label: "Icon",
       render: (row: any) => (
-        <img
-          src={row.iconURL}
-          alt={row.role}
-          className="w-8 h-8 rounded-full object-cover"
-        />
+        <Avatar className="h-8 w-8">
+          <AvatarImage src={row.iconURL} alt={row.role} />
+          <AvatarFallback>
+            <Shield className="h-4 w-4" />
+          </AvatarFallback>
+        </Avatar>
       ),
     },
     { key: "role", label: "Role" },

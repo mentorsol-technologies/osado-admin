@@ -230,7 +230,7 @@ export default function EditServiceProviderModal({
             </label>
           </div>
           <p className="text-gray-400 mt-2 text-sm">
-            ID: {providerData?.id || "N/A"}
+            ID: {providerData?.id || "--"}
           </p>
         </div>
 

@@ -56,3 +56,9 @@ export const deleteServiceProvider = async (id: string) => {
   const response = await api.delete(`/users/service-providers/${id}`);
   return response;
 };
+
+// Update any user's status (activate/suspend)
+export const updateUserStatus = async (id: string, status: string) => {
+  const response = await api.patch(`/users/${id}/status`, { status });
+  return response;
+};

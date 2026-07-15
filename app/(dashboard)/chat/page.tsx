@@ -324,7 +324,7 @@ const Chat = () => {
         return {
             name: activeOtherUser.name || "Unknown User",
             role: activeOtherUser.role || "User",
-            memberSince: activeOtherUser.memberSince || "N/A",
+            memberSince: activeOtherUser.memberSince || "--",
             location: activeOtherUser.location || "Unknown",
             status: activeOtherUser.status || "Active",
             avatar: activeOtherUser.avatar || "/images/Ellipse 5.png",
