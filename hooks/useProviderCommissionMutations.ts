@@ -1,14 +1,19 @@
 import {
   getProviderCommission,
   setProviderCommission,
+  type CommissionType,
 } from "@/services/providerCommissions/providerCommissionServices";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
-export const useGetProviderCommissionQuery = (providerId: string, enabled: boolean) => {
+export const useGetProviderCommissionQuery = (
+  providerId: string,
+  type: CommissionType,
+  enabled: boolean,
+) => {
   return useQuery({
-    queryKey: ["provider-commission", providerId],
-    queryFn: () => getProviderCommission(providerId),
+    queryKey: ["provider-commission", providerId, type],
+    queryFn: () => getProviderCommission(providerId, type),
     enabled,
   });
 };
@@ -16,11 +21,18 @@ export const useGetProviderCommissionQuery = (providerId: string, enabled: boole
 export const useSetProviderCommissionMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ providerId, rate }: { providerId: string; rate: number }) =>
-      setProviderCommission(providerId, rate),
-    onSuccess: (_data, { providerId }) => {
+    mutationFn: ({
+      providerId,
+      type,
+      rate,
+    }: {
+      providerId: string;
+      type: CommissionType;
+      rate: number;
+    }) => setProviderCommission(providerId, type, rate),
+    onSuccess: (_data, { providerId, type }) => {
       toast.success("Commission rate updated successfully!");
-      queryClient.invalidateQueries({ queryKey: ["provider-commission", providerId] });
+      queryClient.invalidateQueries({ queryKey: ["provider-commission", providerId, type] });
     },
     onError: (error: any) => {
       const message =

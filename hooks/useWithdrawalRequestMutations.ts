@@ -1,6 +1,7 @@
 import {
   getWithdrawalRequests,
   markWithdrawalRequestPaid,
+  rejectWithdrawalRequest,
 } from "@/services/withdrawalRequests/withdrawalRequestServices";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
@@ -24,6 +25,23 @@ export const useMarkWithdrawalRequestPaidMutation = () => {
     onError: (error: any) => {
       const message =
         error?.response?.data?.message || "Failed to mark withdrawal as paid!";
+      toast.error(message);
+    },
+  });
+};
+
+export const useRejectWithdrawalRequestMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) =>
+      rejectWithdrawalRequest(id, reason),
+    onSuccess: () => {
+      toast.success("Withdrawal request rejected!");
+      queryClient.invalidateQueries({ queryKey: ["withdrawal-requests"] });
+    },
+    onError: (error: any) => {
+      const message =
+        error?.response?.data?.message || "Failed to reject withdrawal request!";
       toast.error(message);
     },
   });

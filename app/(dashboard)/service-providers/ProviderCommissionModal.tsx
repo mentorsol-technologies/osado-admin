@@ -8,23 +8,33 @@ import {
   useGetProviderCommissionQuery,
   useSetProviderCommissionMutation,
 } from "@/hooks/useProviderCommissionMutations";
+import type { CommissionType } from "@/services/providerCommissions/providerCommissionServices";
 
 interface ProviderCommissionModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   providerId?: string | null;
   providerName?: string;
+  type?: CommissionType;
 }
+
+const HELP_TEXT: Record<CommissionType, string> = {
+  BOOKING:
+    "Percentage deducted from this provider's booking payments before crediting their wallet. 0% means they keep the full amount.",
+  EVENT:
+    "Percentage deducted from this business owner's event ticket payments before crediting their wallet. 0% means they keep the full amount.",
+};
 
 export default function ProviderCommissionModal({
   open,
   setOpen,
   providerId,
   providerName,
+  type = "BOOKING",
 }: ProviderCommissionModalProps) {
   const [rate, setRate] = useState<string>("");
 
-  const { data } = useGetProviderCommissionQuery(providerId || "", open && Boolean(providerId));
+  const { data } = useGetProviderCommissionQuery(providerId || "", type, open && Boolean(providerId));
   const { mutate: setCommission, isPending } = useSetProviderCommissionMutation();
 
   useEffect(() => {
@@ -39,7 +49,7 @@ export default function ProviderCommissionModal({
     if (Number.isNaN(parsed) || parsed < 0 || parsed > 100) return;
 
     setCommission(
-      { providerId, rate: parsed },
+      { providerId, type, rate: parsed },
       { onSuccess: () => setOpen(false) },
     );
   };
@@ -70,7 +80,7 @@ export default function ProviderCommissionModal({
             onChange={(e) => setRate(e.target.value)}
           />
           <p className="text-xs text-gray-400 mt-1">
-            Percentage deducted from this provider&apos;s booking payments before crediting their wallet. 0% means they keep the full amount.
+            {HELP_TEXT[type]}
           </p>
         </div>
       </div>

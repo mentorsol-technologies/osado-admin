@@ -19,8 +19,9 @@ interface EventCardProps {
     photoURL?: string;
   };
 
-  priceType: string;
-  price: string;
+  priceType?: string;
+  ticketPrice?: string | number;
+  isFree?: boolean;
   onEdit?: () => void;
   onSuspend?: () => void;
   onClick?: () => void;
@@ -35,7 +36,8 @@ export default function EventCard({
   city,
   time,
   creator,
-  price,
+  ticketPrice,
+  isFree,
   onEdit,
   onSuspend,
   onClick,
@@ -66,7 +68,9 @@ export default function EventCard({
         {/* Title + Price */}
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <h3 className="lg:text-lg font-semibold">{title}</h3>
-          <Badge className="w-fit sm:w-auto">{`${price} ${priceType}`}</Badge>
+          <Badge className="w-fit sm:w-auto">
+            {isFree ? "Free" : `${ticketPrice ?? "-"} ${priceType ?? ""}`}
+          </Badge>
         </div>
 
         {/* Categories */}

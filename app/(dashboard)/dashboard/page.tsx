@@ -4,18 +4,43 @@ import RevenueChart from "@/components/charts/RevenueChart";
 import { DashboardStats, StatsCards } from "@/components/dashboard/stats-cards";
 import { CommonTable, FilterConfig } from "@/components/ui/table/commonTable";
 import { useCategoriesQuery } from "@/hooks/useCategoryMutations";
-import { useGetDashboardStatsQuery } from "@/hooks/useProfileMutations";
+import {
+  useGetDashboardStatsQuery,
+  useGetRevenueChartQuery,
+} from "@/hooks/useProfileMutations";
 import { useGetUsersListQuery } from "@/hooks/useUsersMutations";
 import { Edit, Eye, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { MdOutlineEdit } from "react-icons/md";
+
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+const monthNameToYYYYMM = (monthName: string, year = new Date().getFullYear()) => {
+  const index = MONTH_NAMES.indexOf(monthName);
+  const monthNum = index >= 0 ? index + 1 : new Date().getMonth() + 1;
+  return `${year}-${String(monthNum).padStart(2, "0")}`;
+};
 
 export default function DashboardPage() {
   const router = useRouter();
   const { data, isLoading } = useGetUsersListQuery();
   const { data: CategoriesList } = useCategoriesQuery();
-  const { data: dashboardStats } = useGetDashboardStatsQuery();
+
+  const currentMonthName = MONTH_NAMES[new Date().getMonth()];
+  const [paymentsMonth, setPaymentsMonth] = useState(currentMonthName);
+  const [revenueMonth, setRevenueMonth] = useState(currentMonthName);
+
+  const { data: dashboardStats } = useGetDashboardStatsQuery(
+    monthNameToYYYYMM(paymentsMonth),
+  );
+  const { data: revenueChart } = useGetRevenueChartQuery(
+    monthNameToYYYYMM(revenueMonth),
+    6,
+  );
 
   const influencerList = useMemo(() => {
     const users = data || [];
@@ -125,10 +150,19 @@ export default function DashboardPage() {
       <StatsCards stats={dashboardStats as unknown as DashboardStats[]} />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <RevenueChart />
+          <RevenueChart
+            data={(revenueChart as any)?.data}
+            selectedMonth={revenueMonth}
+            onMonthChange={setRevenueMonth}
+          />
         </div>
         <div>
-          <PaymentsChart />
+          <PaymentsChart
+            pendingPaymentsCount={(dashboardStats as any)?.[0]?.pendingPaymentsCount}
+            pendingWithdrawalRequestsCount={(dashboardStats as any)?.[0]?.pendingWithdrawalRequestsCount}
+            selectedMonth={paymentsMonth}
+            onMonthChange={setPaymentsMonth}
+          />
         </div>
       </div>
       <div>

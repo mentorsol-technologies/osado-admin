@@ -7,6 +7,10 @@ export interface DashboardStats {
   activeEvents: number;
   upcomingEvents: number;
   totalBookings: number;
+  totalEventsChange?: number | null;
+  activeEventsChange?: number | null;
+  upcomingEventsChange?: number | null;
+  totalBookingsChange?: number | null;
 }
 interface StatsCardsProps {
   stats?: DashboardStats[];
@@ -19,26 +23,22 @@ export function StatsCards({ stats }: StatsCardsProps) {
     {
       title: "Total Events",
       value: statData?.totalEvents ?? 0,
-      change: "+12.5%",
-      positive: true,
+      change: statData?.totalEventsChange,
     },
     {
       title: "Active Events",
       value: statData?.activeEvents ?? 0,
-      change: "+5.4%",
-      positive: true,
+      change: statData?.activeEventsChange,
     },
     {
       title: "Upcoming Events",
       value: statData?.upcomingEvents ?? 0,
-      change: "+8.2%",
-      positive: true,
+      change: statData?.upcomingEventsChange,
     },
     {
       title: "Total Bookings",
       value: statData?.totalBookings ?? 0,
-      change: "+15.3%",
-      positive: true,
+      change: statData?.totalBookingsChange,
     },
   ];
   return (
@@ -57,17 +57,20 @@ export function StatsCards({ stats }: StatsCardsProps) {
               <p className="text-lg lg:text-2xl font-bold text-white">
                 {stat.value}
               </p>
-              <div className="flex items-center gap-2 mt-1">
-                <span
-                  className={`text-xs px-1.5 lg:px-2 py-0.5 lg:py-1 rounded-full ${
-                    stat.positive
-                      ? "bg-green-500/20 text-green-400"
-                      : "bg-purple-500/20 text-purple-400"
-                  }`}
-                >
-                  {stat.change}
-                </span>
-              </div>
+              {stat.change != null && (
+                <div className="flex items-center gap-2 mt-1">
+                  <span
+                    className={`text-xs px-1.5 lg:px-2 py-0.5 lg:py-1 rounded-full ${
+                      stat.change >= 0
+                        ? "bg-green-500/20 text-green-400"
+                        : "bg-red-500/20 text-red-400"
+                    }`}
+                  >
+                    {stat.change >= 0 ? "+" : ""}
+                    {stat.change}%
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>

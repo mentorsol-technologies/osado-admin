@@ -31,11 +31,6 @@ const ServiceProviders = () => {
 
   const filters = [
     {
-      key: "status",
-      label: "Status",
-      options: ["All", "Active", "Inactive", "Pending"],
-    },
-    {
       key: "sort_by",
       label: "Sort by",
       options: ["All", "Newest", "Oldest", "A–Z", "Z–A"],

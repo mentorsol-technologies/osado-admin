@@ -7,6 +7,7 @@ import { BiStop } from "react-icons/bi";
 import SuspendedBusinessOwnerModal from "./SuspendedBussinessOwnerForm";
 import AddBusinessOwnerModal from "./CreateBussinessOwnerForm";
 import OwnerViewModal from "./BussinessOwnerViewForm";
+import ProviderCommissionModal from "../service-providers/ProviderCommissionModal";
 import {
   useBussinessOwnerQuery,
   useSuspendBussinessOwnerMutation,
@@ -20,6 +21,7 @@ export default function ServiceBookingPage() {
   const [suspendOpen, setSuspendOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [AddOpen, setAddOpen] = useState(false);
+  const [commissionOpen, setCommissionOpen] = useState(false);
 
   const handleSuspendSubmit = (reason: string) => {
     suspendOwner(
@@ -93,6 +95,16 @@ export default function ServiceBookingPage() {
           >
             <BiStop size={16} />
           </button>
+
+          <button
+            className="px-3 py-1 text-xs rounded bg-purple-600 text-white"
+            onClick={() => {
+              setSelectedBusiness(row);
+              setCommissionOpen(true);
+            }}
+          >
+            Commission
+          </button>
         </div>
       ),
     },
@@ -143,7 +155,7 @@ export default function ServiceBookingPage() {
           filters={filters}
           searchable
           renderCardActions={(row) => (
-            <div className="flex gap-2 w-full">
+            <div className="flex gap-2 w-full flex-wrap">
               <Button
                 className="flex-1"
                 onClick={() => {
@@ -162,6 +174,16 @@ export default function ServiceBookingPage() {
                 }}
               >
                 View more
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  setSelectedBusiness(row);
+                  setCommissionOpen(true);
+                }}
+              >
+                Commission
               </Button>
             </div>
           )}
@@ -194,6 +216,15 @@ export default function ServiceBookingPage() {
           console.log("New Bussiness Owner Data:", data);
           setAddOpen(false); // close modal after save
         }}
+      />
+
+      {/* Commission Modal */}
+      <ProviderCommissionModal
+        open={commissionOpen}
+        setOpen={setCommissionOpen}
+        providerId={selectedBusiness?.user?.id}
+        providerName={selectedBusiness?.full_name}
+        type="EVENT"
       />
     </div>
   );

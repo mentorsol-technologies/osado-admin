@@ -40,7 +40,9 @@ export default function TransactionPage() {
           className={`rounded px-2 py-1 text-xs ${
             row.status === "Successful"
               ? "text-green-400 border border-green-500/30"
-              : "text-blue-400 border border-blue-500/30"
+              : row.status === "Rejected"
+                ? "text-red-400 border border-red-500/30"
+                : "text-blue-400 border border-blue-500/30"
           }`}
         >
           {row.status}
@@ -79,7 +81,13 @@ export default function TransactionPage() {
         time: createdAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         date: createdAt.toLocaleDateString(),
         amount: `${Number(transaction.amount).toFixed(3)} KWD`,
-        status: transaction.status === "SUCCESSFUL" ? "Successful" : "Pending",
+        status:
+          transaction.status === "SUCCESSFUL"
+            ? "Successful"
+            : transaction.status === "REJECTED"
+              ? "Rejected"
+              : "Pending",
+        rejectionReason: transaction.rejectionReason || "--",
       };
     }) || [];
 
@@ -92,7 +100,7 @@ export default function TransactionPage() {
     {
       key: "status",
       label: "Status",
-      options: ["Successful", "Pending"],
+      options: ["Successful", "Pending", "Rejected"],
     },
     {
       key: "type",

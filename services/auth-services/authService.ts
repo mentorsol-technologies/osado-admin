@@ -79,7 +79,15 @@ export const updateProfileService = async (data: UpdateProfilePayload) => {
 
 // Dashboard events card data
 
-export const getDashboardEventsDataService = async () => {
-  const res = await api.get("/auth/admin-dashboard");
+export const getDashboardEventsDataService = async (month?: string) => {
+  const res = await api.get("/auth/admin-dashboard", { params: { month } });
+  return res;
+};
+
+// Revenue Generated chart data
+export const getRevenueChartService = async (endMonth?: string, months?: number) => {
+  const res = await api.get("/payments/admin/revenue-chart", {
+    params: { endMonth, months },
+  });
   return res;
 };

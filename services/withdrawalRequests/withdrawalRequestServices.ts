@@ -9,3 +9,8 @@ export const markWithdrawalRequestPaid = async (id: string, transactionId: strin
   const response = await api.patch(`/withdrawal-requests/${id}/mark-paid`, { transactionId });
   return response;
 };
+
+export const rejectWithdrawalRequest = async (id: string, reason: string) => {
+  const response = await api.patch(`/withdrawal-requests/${id}/reject`, { reason });
+  return response;
+};

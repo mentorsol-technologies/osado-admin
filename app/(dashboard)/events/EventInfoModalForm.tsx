@@ -87,7 +87,7 @@ export default function EventInfoModal({
                 {event?.title}
               </h2>
               <Badge>
-                {event?.price} {event?.priceType}
+                {event?.isFree ? "Free" : `${event?.ticketPrice} ${event?.priceType}`}
               </Badge>
             </div>
             <div className="space-y-4">
@@ -99,6 +99,27 @@ export default function EventInfoModal({
                 <p className="text-white">Time</p>
                 <p> {formatTime(event?.time)} </p>
               </div>
+              {event?.isFree ? (
+                <div className="flex justify-between">
+                  <p className="text-white">Pricing</p>
+                  <p>Free</p>
+                </div>
+              ) : (
+                <>
+                  <div className="flex justify-between">
+                    <p className="text-white">Ticket Price</p>
+                    <p>{event?.ticketPrice} {event?.priceType}</p>
+                  </div>
+                  <div className="flex justify-between">
+                    <p className="text-white">Service Price</p>
+                    <p>{event?.servicePrice} {event?.priceType}</p>
+                  </div>
+                  <div className="flex justify-between">
+                    <p className="text-white">Influencer Price</p>
+                    <p>{event?.influencerPrice} {event?.priceType}</p>
+                  </div>
+                </>
+              )}
               <div className="flex justify-between gap-2">
                 <p className="text-white shrink-0">Location</p>
                 <p className="text-white text-right flex-1 break-words">

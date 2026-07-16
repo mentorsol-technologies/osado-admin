@@ -25,6 +25,9 @@ const TransactionViewForm = ({
     { label: "Date", key: "date" },
     { label: "Amount", key: "amount" },
     { label: "Status", key: "status" },
+    ...(transaction?.status === "Rejected"
+      ? [{ label: "Rejection Reason", key: "rejectionReason" }]
+      : []),
   ];
 
   const getStatusClasses = (status: string) =>
@@ -33,6 +36,8 @@ const TransactionViewForm = ({
         status === "Successful",
       "text-blue-400 border border-blue-500/30 bg-blue-500/10":
         status === "Pending",
+      "text-red-400 border border-red-500/30 bg-red-500/10":
+        status === "Rejected",
     });
 
   return (

@@ -19,6 +19,7 @@ import { uploadToS3 } from "@/lib/s3Upload";
 import { Badge } from "@/components/ui/badge";
 import Upload from "@/components/ui/upload";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { UploadEventLink } from "@/services/event-management/EventManagementServices";
 import {
   useCategoriesQuery,
@@ -28,25 +29,41 @@ import TimeRangePicker from "@/components/ui/commonComponent/TimeRangePicker";
 import GooglePlacesAutocomplete from "@/components/ui/GooglePlacesAutocomplete";
 
 // ✅ 1. Update schema: categoryId is now an array
-const schema = z.object({
-  image: z.any().optional(),
-  title: z.string().min(1, "Title is required"),
-  price: z.number().min(1, "Price is required"),
-  priceType: z
-    .string()
-    .regex(/^[A-Za-z\s]+$/, "Only alphabets are allowed")
-    .min(1, "Price type is required"),
-  date: z.string().min(1, "Select a date"),
-  time: z.string().min(1, "Select a time"),
-  country: z.string().min(1, "Select a country"),
-  city: z.string().min(1, "Enter a city"),
-  location: z.string().min(1, "Enter a location"),
-  status: z.string().min(1, "Select a status"),
-  categoryId: z.string().array().optional(),
-  bio: z.string().min(1, "Bio is required"),
-  latitude: z.number().optional(),
-  longitude: z.number().optional(),
-});
+const schema = z
+  .object({
+    image: z.any().optional(),
+    title: z.string().min(1, "Title is required"),
+    isFree: z.boolean().optional(),
+    ticketPrice: z.number().optional(),
+    servicePrice: z.number().optional(),
+    influencerPrice: z.number().optional(),
+    priceType: z.string().optional(),
+    date: z.string().min(1, "Select a date"),
+    time: z.string().min(1, "Select a time"),
+    country: z.string().min(1, "Select a country"),
+    city: z.string().min(1, "Enter a city"),
+    location: z.string().min(1, "Enter a location"),
+    status: z.string().min(1, "Select a status"),
+    categoryId: z.string().array().optional(),
+    bio: z.string().min(1, "Bio is required"),
+    latitude: z.number().optional(),
+    longitude: z.number().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.isFree) return;
+    if (!data.ticketPrice || data.ticketPrice < 1) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Ticket price is required", path: ["ticketPrice"] });
+    }
+    if (!data.servicePrice || data.servicePrice < 1) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Service price is required", path: ["servicePrice"] });
+    }
+    if (!data.influencerPrice || data.influencerPrice < 1) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Influencer price is required", path: ["influencerPrice"] });
+    }
+    if (!data.priceType || !/^[A-Za-z\s]+$/.test(data.priceType)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Price type is required (alphabets only)", path: ["priceType"] });
+    }
+  });
 
 type FormData = z.infer<typeof schema>;
 
@@ -107,7 +124,10 @@ export default function AddEventModal({ open, setOpen }: AddEventModalProps) {
   const handleResetForm = () => {
     reset({
       title: "",
-      price: 0,
+      isFree: false,
+      ticketPrice: 0,
+      servicePrice: 0,
+      influencerPrice: 0,
       priceType: "",
       date: "",
       time: "",
@@ -135,8 +155,11 @@ export default function AddEventModal({ open, setOpen }: AddEventModalProps) {
       photoIds: uploadIds,
       categoryIds: data.categoryId,
       bio: data.bio,
-      price: Number(data.price),
-      priceType: data.priceType,
+      isFree: data.isFree ?? false,
+      ticketPrice: data.isFree ? 0 : Number(data.ticketPrice),
+      servicePrice: data.isFree ? 0 : Number(data.servicePrice),
+      influencerPrice: data.isFree ? 0 : Number(data.influencerPrice),
+      priceType: data.isFree ? undefined : data.priceType,
       latitude: String(data.latitude),
       longitude: String(data.longitude),
     };
@@ -206,35 +229,72 @@ export default function AddEventModal({ open, setOpen }: AddEventModalProps) {
             <p className="text-xs text-red-500">{errors.title.message}</p>
           )}
         </div>
-        {/* Price & Price type */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="block text-sm mb-1">Price</label>
-            <CommonInput
-              type="number"
-              placeholder="Enter Price"
-              {...register("price", { valueAsNumber: true })}
-            />
-            {errors.price && (
-              <p className="text-xs text-red-500">{errors.price.message}</p>
-            )}
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Price Type</label>
-            <CommonInput
-              type="text"
-              placeholder="Enter Price Type"
-              {...register("priceType")}
-              onChange={(e) => {
-                const value = e.target.value.replace(/[^A-Za-z\s]/g, "");
-                setValue("priceType", value);
-              }}
-            />
-            {errors?.priceType && (
-              <p className="text-xs text-red-500">{errors.priceType.message}</p>
-            )}
-          </div>
+        {/* Free event toggle */}
+        <div className="mb-4">
+          <Checkbox
+            label="Mark event as Free"
+            checked={!!watch("isFree")}
+            onCheckedChange={(checked) => setValue("isFree", checked as boolean)}
+          />
         </div>
+
+        {!watch("isFree") && (
+          <>
+            {/* Ticket / Service / Influencer Price */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+              <div>
+                <label className="block text-sm mb-1">Ticket Price</label>
+                <CommonInput
+                  type="number"
+                  placeholder="Enter Ticket Price"
+                  {...register("ticketPrice", { valueAsNumber: true })}
+                />
+                {errors.ticketPrice && (
+                  <p className="text-xs text-red-500">{errors.ticketPrice.message}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm mb-1">Service Price</label>
+                <CommonInput
+                  type="number"
+                  placeholder="Enter Service Price"
+                  {...register("servicePrice", { valueAsNumber: true })}
+                />
+                {errors.servicePrice && (
+                  <p className="text-xs text-red-500">{errors.servicePrice.message}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm mb-1">Influencer Price</label>
+                <CommonInput
+                  type="number"
+                  placeholder="Enter Influencer Price"
+                  {...register("influencerPrice", { valueAsNumber: true })}
+                />
+                {errors.influencerPrice && (
+                  <p className="text-xs text-red-500">{errors.influencerPrice.message}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Price Type */}
+            <div className="mb-4">
+              <label className="block text-sm mb-1">Price Type</label>
+              <CommonInput
+                type="text"
+                placeholder="Enter Price Type"
+                {...register("priceType")}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/[^A-Za-z\s]/g, "");
+                  setValue("priceType", value);
+                }}
+              />
+              {errors?.priceType && (
+                <p className="text-xs text-red-500">{errors.priceType.message}</p>
+              )}
+            </div>
+          </>
+        )}
 
         {/* Date & Time */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
@@ -256,8 +316,8 @@ export default function AddEventModal({ open, setOpen }: AddEventModalProps) {
             )}
           </div>
           <div>
+            <label className="block text-sm mb-1">Time Range</label>
             <TimeRangePicker
-              label="Time Range"
               value={watch("time")}
               onChange={(val) => setValue("time", val)}
               error={errors.time?.message}

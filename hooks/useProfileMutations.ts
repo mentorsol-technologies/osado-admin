@@ -1,6 +1,7 @@
 import {
   getCurrentAdminService,
   getDashboardEventsDataService,
+  getRevenueChartService,
   updateProfileService,
   type UpdateProfilePayload,
 } from "@/services/auth-services/authService";
@@ -16,10 +17,17 @@ export const useCurrentAdminQuery = () => {
   });
 };
 
-export const useGetDashboardStatsQuery = () => {
+export const useGetDashboardStatsQuery = (month?: string) => {
   return useQuery({
-    queryKey: ["dashboardStats"],
-    queryFn: getDashboardEventsDataService,
+    queryKey: ["dashboardStats", month],
+    queryFn: () => getDashboardEventsDataService(month),
+  });
+};
+
+export const useGetRevenueChartQuery = (endMonth?: string, months?: number) => {
+  return useQuery({
+    queryKey: ["revenueChart", endMonth, months],
+    queryFn: () => getRevenueChartService(endMonth, months),
   });
 };
 

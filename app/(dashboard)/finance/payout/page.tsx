@@ -5,12 +5,14 @@ import { CommonTable } from "@/components/ui/table/commonTable";
 import { Eye, File } from "lucide-react";
 import PayoutViewForm from "./PayoutViewDetails";
 import MarkPaidModal from "./MarkPaidModal";
+import RejectWithdrawalModal from "./RejectWithdrawalModal";
 import { exportToCsv } from "@/lib/utils";
 import { useGetWithdrawalRequestsQuery } from "@/hooks/useWithdrawalRequestMutations";
 
 export default function PayoutPage() {
   const [openViewModal, setOpenViewModal] = useState(false);
   const [markPaidOpen, setMarkPaidOpen] = useState(false);
+  const [rejectOpen, setRejectOpen] = useState(false);
   const [selectedPayout, setSelectedPayout] = useState<any>(null);
 
   const { data: requests } = useGetWithdrawalRequestsQuery();
@@ -30,36 +32,14 @@ export default function PayoutPage() {
           className={`rounded px-2 py-1 text-xs ${
             row.status === "PAID"
               ? "text-green-400 border border-green-500/30"
-              : "text-blue-400 border border-blue-500/30"
+              : row.status === "REJECTED"
+                ? "text-red-400 border border-red-500/30"
+                : "text-blue-400 border border-blue-500/30"
           }`}
         >
           {row.status}
         </span>
       ),
-    },
-    {
-      key: "approval",
-      label: "Approval",
-      render: (row: any) => {
-        if (row.status === "PAID") {
-          return (
-            <button className="px-3 py-1 text-xs rounded bg-gray-500 text-white cursor-not-allowed">
-              Paid
-            </button>
-          );
-        }
-        return (
-          <button
-            className="px-3 py-1 text-xs rounded bg-purple-600 text-white"
-            onClick={() => {
-              setSelectedPayout(row);
-              setMarkPaidOpen(true);
-            }}
-          >
-            Mark as Paid
-          </button>
-        );
-      },
     },
     {
       key: "actions",
@@ -90,6 +70,7 @@ export default function PayoutPage() {
       paidDate: request.paidAt ? new Date(request.paidAt).toLocaleDateString() : "--",
       transactionId: request.transactionId || "--",
       status: request.status,
+      rejectionReason: request.rejectionReason || "--",
     })) || [];
 
   const filters = [
@@ -101,7 +82,7 @@ export default function PayoutPage() {
     {
       key: "status",
       label: "Status",
-      options: ["PENDING", "PAID"],
+      options: ["PENDING", "PAID", "REJECTED"],
     },
   ];
 
@@ -138,6 +119,12 @@ export default function PayoutPage() {
       <MarkPaidModal
         open={markPaidOpen}
         onOpenChange={setMarkPaidOpen}
+        withdrawalRequestId={selectedPayout?.id}
+      />
+
+      <RejectWithdrawalModal
+        open={rejectOpen}
+        onOpenChange={setRejectOpen}
         withdrawalRequestId={selectedPayout?.id}
       />
     </div>

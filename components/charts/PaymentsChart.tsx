@@ -1,7 +1,6 @@
 "use client";
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Label } from "recharts";
-import { CustomSelect } from "../ui/customeSelect";
 import {
   Select,
   SelectTrigger,
@@ -14,10 +13,6 @@ import { brand } from "@/lib/theme/colors";
 
 const COLORS = [brand[500], "#80B2FF"]; // brand purple + light blue
 
-const data = [
-  { name: "Pending Payments", value: 5783 },
-  { name: "Refund Requests", value: 1177 },
-];
 const months = [
   "January",
   "February",
@@ -32,17 +27,31 @@ const months = [
   "November",
   "December",
 ];
-export default function PaymentsChart() {
+
+interface PaymentsChartProps {
+  pendingPaymentsCount?: number;
+  pendingWithdrawalRequestsCount?: number;
+  selectedMonth?: string;
+  onMonthChange?: (month: string) => void;
+}
+
+export default function PaymentsChart({
+  pendingPaymentsCount = 0,
+  pendingWithdrawalRequestsCount = 0,
+  selectedMonth = months[new Date().getMonth()],
+  onMonthChange,
+}: PaymentsChartProps) {
+  const data = [
+    { name: "Pending Payments", value: pendingPaymentsCount },
+    { name: "Withdrawal Requests", value: pendingWithdrawalRequestsCount },
+  ];
   const total = data.reduce((acc, curr) => acc + curr.value, 0);
 
   return (
     <div className="w-full h-[450px] bg-black-500 rounded-2xl p-4 ">
       <div className="flex justify-between items-center">
         <h3 className="text-white text-2xl font-semibold">Payments</h3>
-        <Select
-          defaultValue="January"
-          onValueChange={(value) => console.log("Selected month:", value)}
-        >
+        <Select value={selectedMonth} onValueChange={onMonthChange ?? (() => {})}>
           <SelectTrigger className="w-[160px]">
             <SelectValue placeholder="Month" />
           </SelectTrigger>
@@ -75,7 +84,7 @@ export default function PaymentsChart() {
               />
             ))}
             <Label
-              value="Total Payments"
+              value="Needs Review"
               position="center"
               dy={-10}
               style={{ fill: "#ffffff", fontSize: "14px" }}
@@ -96,15 +105,15 @@ export default function PaymentsChart() {
             <span className="inline-block w-3 h-3 rounded-full bg-purple-500"></span>
             <span>Pending Payments</span>
           </span>
-          <span className="font-medium text-white">5783</span>
+          <span className="font-medium text-white">{pendingPaymentsCount}</span>
         </span>
 
         <span className="flex justify-between items-center gap-2">
           <span className="flex items-center gap-2">
             <span className="inline-block w-3 h-3 rounded-full bg-blue-300"></span>
-            <span>Refund Requests</span>
+            <span>Withdrawal Requests</span>
           </span>
-          <span className="font-medium text-white">1177</span>
+          <span className="font-medium text-white">{pendingWithdrawalRequestsCount}</span>
         </span>
       </div>
     </div>
