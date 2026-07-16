@@ -1,7 +1,9 @@
 "use client";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Modal from "@/components/ui/Modal";
 import clsx from "clsx";
+import MarkPaidModal from "./MarkPaidModal";
 
 interface PayoutViewFormProps {
   open: boolean;
@@ -14,93 +16,78 @@ const PayoutViewForm = ({
   onOpenChange,
   payout,
 }: PayoutViewFormProps) => {
+  const [markPaidOpen, setMarkPaidOpen] = useState(false);
+
   const payoutFields = [
-    { label: "Payout ID", key: "payout_id" },
-    { label: "Recipient", key: "recipient" },
-    { label: "Role", key: "role" },
-    { label: "Email", key: "email" },
-    { label: "Phone number", key: "phone" },
-    { label: "Amount", key: "amount" },
-    { label: "Payment method", key: "payment_method" },
-    { label: "Requested date", key: "requested_date" },
-    { label: "Processed date", key: "processed_date" },
+    { label: "Payout ID", key: "id" },
+    { label: "Recipient", key: "providerName" },
+    { label: "Email", key: "providerEmail" },
+    { label: "Amount", key: "amountDisplay" },
+    { label: "Requested date", key: "requestedDate" },
+    { label: "Paid date", key: "paidDate" },
+    { label: "Transaction ID", key: "transactionId" },
     { label: "Status", key: "status" },
   ];
 
   const getStatusClasses = (status: string) =>
     clsx("px-3 py-1 rounded-md border text-sm font-medium w-fit", {
-      "text-green-400 border border-green-500/30 bg-green-500/10":
-        status === "Confirmed",
-      "text-blue-400 border border-blue-500/30 bg-blue-500/10":
-        status === "Pending",
-      "text-purple-400 border border-purple-500/30 bg-purple-500/10":
-        status === "Canceled",
+      "text-green-400 border border-green-500/30 bg-green-500/10": status === "PAID",
+      "text-blue-400 border border-blue-500/30 bg-blue-500/10": status === "PENDING",
     });
 
-  const isConfirmed = payout?.status === "Confirmed";
-  const isPending = payout?.status === "Pending";
-  const isCanceled = payout?.status === "Canceled";
+  const isPending = payout?.status === "PENDING";
 
   return (
-    <Modal
-      open={open}
-      onOpenChange={onOpenChange}
-      title="Payout Details"
-      footer={
-        <div className="flex flex-col sm:flex-row w-full gap-3">
-          {isConfirmed && (
-            <Button
-              className="flex-1"
-              onClick={() => alert("Download Receipt")}
-            >
-              Download Receipt
-            </Button>
-          )}
+    <>
+      <Modal
+        open={open}
+        onOpenChange={onOpenChange}
+        title="Withdrawal Request Details"
+        footer={
+          <div className="flex flex-col sm:flex-row w-full gap-3">
             {isPending && (
+              <Button className="flex-1" onClick={() => setMarkPaidOpen(true)}>
+                Mark as Paid
+              </Button>
+            )}
             <Button
               className="flex-1"
-              onClick={() => alert("Payout Approved")}
+              variant="outline"
+              onClick={() => onOpenChange(false)}
             >
-              Approve
+              Back
             </Button>
-          )}
-          <Button
-            className="flex-1"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-          >
-            Back
-          </Button>
-        </div>
-      }
-    >
-      <div className="space-y-4">
-        {payoutFields.map((field) => (
-          <div
-            key={field.key}
-            className="flex justify-between items-center text-sm"
-          >
-            <span className="text-white">{field.label}</span>
-            {field.key === "status" ? (
-              <div className="flex flex-col items-end">
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          {payoutFields.map((field) => (
+            <div
+              key={field.key}
+              className="flex justify-between items-center text-sm"
+            >
+              <span className="text-white">{field.label}</span>
+              {field.key === "status" ? (
                 <span className={getStatusClasses(payout?.[field.key])}>
                   {payout?.[field.key]}
                 </span>
-                {isCanceled && (
-                  <span className="text-purple-400 text-xs mt-1">
-                    Invalid bank account details provided.
-                  </span>
-                )}
-              </div>
-            ) : (
-              <span className="text-white">
-                {payout?.[field.key] || "-"}
-              </span>
-            )}
-          </div>
-        ))}
-      </div>
-    </Modal>
+              ) : (
+                <span className="text-white">
+                  {payout?.[field.key] || "-"}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      </Modal>
+
+      <MarkPaidModal
+        open={markPaidOpen}
+        onOpenChange={setMarkPaidOpen}
+        withdrawalRequestId={payout?.id}
+        onSuccess={() => onOpenChange(false)}
+      />
+    </>
   );
 };
 

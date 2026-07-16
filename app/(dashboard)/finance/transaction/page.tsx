@@ -2,14 +2,25 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CommonTable } from "@/components/ui/table/commonTable";
-import { Plus, Eye, Edit, Trash2,File } from "lucide-react";
+import { Eye, File } from "lucide-react";
 import TransactionViewForm from "./TransactionViewDetails";
 import { exportToCsv } from "@/lib/utils";
+import { useGetWalletTransactionsQuery } from "@/hooks/useWalletTransactionsQuery";
 
+const ROLE_LABELS: Record<string, string> = {
+  service_provider: "Service Provider",
+  admin: "Admin",
+  subAdmin: "Sub Admin",
+  influencer: "Influencer",
+  business_owner: "Business Owner",
+  user: "User",
+};
 
 export default function TransactionPage() {
-   const [openViewModal, setOpenViewModal] = useState(false);
+  const [openViewModal, setOpenViewModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+
+  const { data: transactions } = useGetWalletTransactionsQuery();
 
   const columns = [
     { key: "transaction_id", label: "Transaction ID" },
@@ -27,11 +38,9 @@ export default function TransactionPage() {
       render: (row: any) => (
         <span
           className={`rounded px-2 py-1 text-xs ${
-            row.status === "Confirmed"
+            row.status === "Successful"
               ? "text-green-400 border border-green-500/30"
-              : row.status === "Canceled"
-                ? "text-purple-400 border border-purple-500/30"
-                : "text-blue-400 border border-blue-500/30"
+              : "text-blue-400 border border-blue-500/30"
           }`}
         >
           {row.status}
@@ -46,55 +55,33 @@ export default function TransactionPage() {
         <div className="flex justify-center gap-3">
           <button
             className="p-1 border border-black-600"
-           onClick={() => {
+            onClick={() => {
               setSelectedTransaction(row);
               setOpenViewModal(true);
             }}
           >
             <Eye size={16} />
           </button>
-
-          
         </div>
       ),
     },
   ];
 
-  const data = [
-    {
-      transaction_id: "TXN1001",
-      user_name: "John Doe",
-      role: "Influencer",
-      type: "Credit",
-      booking_reference: "Wedding Package",
-      time: "10:30 AM",
-      date: "2025-09-10",
-      amount: "$250.00",
-      status: "Confirmed",
-    },
-    {
-      transaction_id: "TXN1002",
-      user_name: "Jane Smith",
-      role: "Business Owner",
-      type: "Debit",
-      booking_reference: "Wedding Package",
-      time: "02:45 PM",
-      date: "2025-09-11",
-      amount: "$120.00",
-      status: "Pending",
-    },
-    {
-      transaction_id: "TXN1003",
-      user_name: "Michael Brown",
-      role: "Influencer",
-      type: "Credit",
-      booking_reference: "Wedding Package",
-      time: "09:15 AM",
-      date: "2025-09-12",
-      amount: "$500.00",
-      status: "Canceled",
-    },
-  ];
+  const data =
+    transactions?.map((transaction: any) => {
+      const createdAt = new Date(transaction.createdAt);
+      return {
+        transaction_id: transaction.id,
+        user_name: transaction.userName || "--",
+        role: ROLE_LABELS[transaction.role] || transaction.role || "--",
+        type: transaction.type === "EARNING" ? "Credit" : "Debit",
+        booking_reference: transaction.description || "--",
+        time: createdAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        date: createdAt.toLocaleDateString(),
+        amount: `${Number(transaction.amount).toFixed(3)} KWD`,
+        status: transaction.status === "SUCCESSFUL" ? "Successful" : "Pending",
+      };
+    }) || [];
 
   const filters = [
     {
@@ -105,12 +92,7 @@ export default function TransactionPage() {
     {
       key: "status",
       label: "Status",
-      options: ["Confirmed", "Pending", "Cancelled"],
-    },
-    {
-      key: "role",
-      label: "Role",
-      options: ["Influencer", "Business Owner"],
+      options: ["Successful", "Pending"],
     },
     {
       key: "type",
@@ -143,7 +125,6 @@ export default function TransactionPage() {
           rowsPerPage={5}
           filters={filters}
           searchable
-        
         />
       </div>
       <TransactionViewForm
@@ -151,7 +132,6 @@ export default function TransactionPage() {
         onOpenChange={setOpenViewModal}
         transaction={selectedTransaction}
       />
-      
     </div>
   );
 }

@@ -19,6 +19,7 @@ interface ProvidersCardProps {
   status: string;
   onEdit?: () => void;
   onDelete?: () => void;
+  onSetCommission?: () => void;
 }
 
 export default function ProvidersCard({
@@ -33,6 +34,7 @@ export default function ProvidersCard({
   status,
   onEdit,
   onDelete,
+  onSetCommission,
 }: ProvidersCardProps) {
   const Icon = IconProp || Award;
 
@@ -99,6 +101,13 @@ export default function ProvidersCard({
             onClick={onDelete}
           >
             Delete
+          </Button>
+          <Button
+            variant="outline"
+            className="border-black-200 text-white hover:bg-black-800 flex-1 basis-full"
+            onClick={onSetCommission}
+          >
+            Commission
           </Button>
         </div>
       </CardContent>

@@ -8,6 +8,7 @@ import Image from "next/image";
 import Pagination from "@/components/ui/pagination";
 import ProvidersCard from "./ProvidersCard";
 import EditServiceProviderModal from "./EditServiceProvidersModal";
+import ProviderCommissionModal from "./ProviderCommissionModal";
 import { useGetUsersListQuery, useDeleteServiceProviderMutation } from "@/hooks/useUsersMutations";
 import { applyFilters } from "@/lib/filterHelper";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,6 +24,7 @@ const ServiceProviders = () => {
   const [selectedProviders, setSelectedProviders] = useState<any>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [commissionOpen, setCommissionOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
   const pageSize = 8;
@@ -92,7 +94,7 @@ const ServiceProviders = () => {
   };
 
   const handleAnalyticsClick = () => {
-    router.push("/service-analytics");
+    router.push("/dashboard");
   };
 
   return (
@@ -104,7 +106,7 @@ const ServiceProviders = () => {
             Service Providers
           </h2>
           <Button
-            // onClick={handleAnalyticsClick}
+            onClick={handleAnalyticsClick}
             leftIcon={
               <Image
                 src="/images/Vector (1).svg"
@@ -172,6 +174,10 @@ const ServiceProviders = () => {
                     setSelectedProviders(provider);
                     setDeleteOpen(true);
                   }}
+                  onSetCommission={() => {
+                    setSelectedProviders(provider);
+                    setCommissionOpen(true);
+                  }}
                 />
               ))}
         </div>
@@ -206,6 +212,14 @@ const ServiceProviders = () => {
         onUpdate={(updatedData) => {
           console.log("Updated Provider:", updatedData);
         }}
+      />
+
+      {/* Commission Modal */}
+      <ProviderCommissionModal
+        open={commissionOpen}
+        setOpen={setCommissionOpen}
+        providerId={selectedProviders?.id}
+        providerName={selectedProviders?.name}
       />
     </div>
   );

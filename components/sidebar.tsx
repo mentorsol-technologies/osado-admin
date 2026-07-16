@@ -105,6 +105,11 @@ const menuItems: MenuItem[] = [
     href: "/subscription",
   },
   {
+    icon: "/images/material-symbols_finance-rounded.svg",
+    label: "Discount Codes",
+    href: "/discount-codes",
+  },
+  {
     icon: "/images/eos-icons_admin.svg",
     label: "Sub Admin",
     href: "/sub-admin",
