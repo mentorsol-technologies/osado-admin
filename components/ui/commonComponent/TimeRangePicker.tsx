@@ -9,6 +9,14 @@ import {
 import { Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// Minutes-since-midnight for a 12-hour hour/minute/period triple - lets us
+// compare candidate time-picker selections against "now" with plain numbers.
+function toMinutes(hour: string, minute: string, period: "AM" | "PM"): number {
+  let h = parseInt(hour, 10) % 12;
+  if (period === "PM") h += 12;
+  return h * 60 + parseInt(minute, 10);
+}
+
 interface TimeRangePickerProps {
   label?: string;
   value?: string;
@@ -16,6 +24,9 @@ interface TimeRangePickerProps {
   error?: string;
   mode?: "single" | "range";
   placeholder?: string;
+  // ISO date (yyyy-mm-dd) currently selected for the event - when this is
+  // today, times earlier than right now are disabled in both pickers.
+  selectedDate?: string;
 }
 
 export default function TimeRangePicker({
@@ -25,10 +36,20 @@ export default function TimeRangePicker({
   error,
   mode = "range",
   placeholder = "Select Time",
+  selectedDate,
 }: TimeRangePickerProps) {
   const [start, setStart] = useState<string>("");
   const [end, setEnd] = useState<string>("");
   const [singleTime, setSingleTime] = useState<string>("");
+
+  const isToday =
+    !!selectedDate && selectedDate === new Date().toISOString().slice(0, 10);
+  const minMinutes = isToday
+    ? (() => {
+        const now = new Date();
+        return now.getHours() * 60 + now.getMinutes();
+      })()
+    : undefined;
 
   useEffect(() => {
     if (mode === "range") {
@@ -80,6 +101,7 @@ export default function TimeRangePicker({
           value={singleTime}
           onChange={handleSingleTimeChange}
           placeholder={placeholder}
+          minMinutes={minMinutes}
         />
         {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
       </div>
@@ -100,12 +122,14 @@ export default function TimeRangePicker({
           onChange={(val) => handleTimeChange("start", val)}
           placeholder="Start Time"
           disabledTime={end}
+          minMinutes={minMinutes}
         />
         <span className="text-gray-400">to</span>
         <TimePickerInput
           value={end}
           onChange={(val) => handleTimeChange("end", val)}
           placeholder="End Time"
+          minMinutes={minMinutes}
           disabledTime={start}
         />
       </div>
@@ -119,6 +143,8 @@ interface TimePickerInputProps {
   onChange: (val: string) => void;
   placeholder?: string;
   disabledTime?: string;
+  // Candidate times before this many minutes-since-midnight are disabled.
+  minMinutes?: number;
 }
 
 function TimePickerInput({
@@ -126,6 +152,7 @@ function TimePickerInput({
   onChange,
   placeholder,
   disabledTime,
+  minMinutes,
 }: TimePickerInputProps) {
   const [open, setOpen] = useState(false);
 
@@ -201,24 +228,35 @@ function TimePickerInput({
               Hour
             </div>
             <div className="flex flex-col p-1 gap-1">
-              {hours.map((h) => (
-                <button
-                  key={h}
-                  type="button"
-                  onClick={() => {
-                    setSelectedHour(h);
-                    handleSelect(h, selectedMinute, selectedPeriod);
-                  }}
-                  className={cn(
-                    "p-2 rounded hover:bg-black-400 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-purple-400",
-                    selectedHour === h
-                      ? "bg-purple-600 text-white hover:bg-purple-700"
-                      : "text-white-100"
-                  )}
-                >
-                  {h}
-                </button>
-              ))}
+              {hours.map((h) => {
+                // Disable the hour only if EVERY minute/period combination for
+                // it is already past - comparing against the currently
+                // selected (often still-default) period would wrongly grey
+                // out every hour before the user has touched AM/PM at all.
+                const isPast =
+                  minMinutes !== undefined &&
+                  Math.max(toMinutes(h, "59", "AM"), toMinutes(h, "59", "PM")) < minMinutes;
+                return (
+                  <button
+                    key={h}
+                    type="button"
+                    disabled={isPast}
+                    onClick={() => {
+                      setSelectedHour(h);
+                      handleSelect(h, selectedMinute, selectedPeriod);
+                    }}
+                    className={cn(
+                      "p-2 rounded hover:bg-black-400 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-purple-400",
+                      selectedHour === h
+                        ? "bg-purple-600 text-white hover:bg-purple-700"
+                        : "text-white-100",
+                      isPast && "opacity-50 cursor-not-allowed hover:bg-transparent"
+                    )}
+                  >
+                    {h}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -228,29 +266,40 @@ function TimePickerInput({
               Min
             </div>
             <div className="flex flex-col p-1 gap-1">
-              {allMinutes.map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => {
-                    setSelectedMinute(m);
-                    handleSelect(selectedHour, m, selectedPeriod);
-                  }}
-                  disabled={
-                    `${selectedHour}:${m} ${selectedPeriod}` === disabledTime
-                  }
-                  className={cn(
-                    "p-2 rounded hover:bg-black-400 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-purple-400",
-                    selectedMinute === m
-                      ? "bg-purple-600 text-white hover:bg-purple-700"
-                      : "text-white-100",
-                    `${selectedHour}:${m} ${selectedPeriod}` === disabledTime &&
-                      "opacity-50 cursor-not-allowed hover:bg-transparent"
-                  )}
-                >
-                  {m}
-                </button>
-              ))}
+              {allMinutes.map((m) => {
+                const isSameAsOther =
+                  `${selectedHour}:${m} ${selectedPeriod}` === disabledTime;
+                // Same reasoning as the hour column: only disable if this
+                // minute is past for BOTH AM and PM of the selected hour, so
+                // picking a minute before period doesn't over-disable.
+                const isPast =
+                  minMinutes !== undefined &&
+                  Math.max(
+                    toMinutes(selectedHour, m, "AM"),
+                    toMinutes(selectedHour, m, "PM")
+                  ) < minMinutes;
+                const isDisabled = isSameAsOther || isPast;
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => {
+                      setSelectedMinute(m);
+                      handleSelect(selectedHour, m, selectedPeriod);
+                    }}
+                    disabled={isDisabled}
+                    className={cn(
+                      "p-2 rounded hover:bg-black-400 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-purple-400",
+                      selectedMinute === m
+                        ? "bg-purple-600 text-white hover:bg-purple-700"
+                        : "text-white-100",
+                      isDisabled && "opacity-50 cursor-not-allowed hover:bg-transparent"
+                    )}
+                  >
+                    {m}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -260,7 +309,16 @@ function TimePickerInput({
               Am/Pm
             </div>
             <div className="flex flex-col p-1 gap-1">
-              {periods.map((p) => (
+              {periods.map((p) => {
+                const isSameAsOther =
+                  `${selectedHour}:${selectedMinute} ${p}` === disabledTime;
+                // Best-case minute (:59) for this hour+period, so picking
+                // AM/PM before a minute doesn't over-disable either.
+                const isPast =
+                  minMinutes !== undefined &&
+                  toMinutes(selectedHour, "59", p as "AM" | "PM") < minMinutes;
+                const isDisabled = isSameAsOther || isPast;
+                return (
                 <button
                   key={p}
                   type="button"
@@ -268,21 +326,19 @@ function TimePickerInput({
                     setSelectedPeriod(p as "AM" | "PM");
                     handleSelect(selectedHour, selectedMinute, p);
                   }}
-                  disabled={
-                    `${selectedHour}:${selectedMinute} ${p}` === disabledTime
-                  }
+                  disabled={isDisabled}
                   className={cn(
                     "p-2 rounded hover:bg-black-400 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-purple-400",
                     selectedPeriod === p
                       ? "bg-purple-600 text-white hover:bg-purple-700"
                       : "text-white-100",
-                    `${selectedHour}:${selectedMinute} ${p}` === disabledTime &&
-                      "opacity-50 cursor-not-allowed hover:bg-transparent"
+                    isDisabled && "opacity-50 cursor-not-allowed hover:bg-transparent"
                   )}
                 >
                   {p}
                 </button>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

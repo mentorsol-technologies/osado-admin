@@ -28,6 +28,16 @@ import {
 import TimeRangePicker from "@/components/ui/commonComponent/TimeRangePicker";
 import GooglePlacesAutocomplete from "@/components/ui/GooglePlacesAutocomplete";
 
+// Parses "HH:MM AM/PM" into minutes-since-midnight, mirroring
+// TimeRangePicker's own internal comparison logic.
+function parseTimeToMinutes(value: string): number | null {
+  const match = value.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!match) return null;
+  let hours = parseInt(match[1], 10) % 12;
+  if (match[3].toUpperCase() === "PM") hours += 12;
+  return hours * 60 + parseInt(match[2], 10);
+}
+
 // ✅ 1. Update schema: categoryId is now an array
 const schema = z
   .object({
@@ -62,6 +72,18 @@ const schema = z
     }
     if (!data.priceType || !/^[A-Za-z\s]+$/.test(data.priceType)) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Price type is required (alphabets only)", path: ["priceType"] });
+    }
+
+    // Backstop for the picker's own past-time disabling - catches a stale
+    // selection if the date gets changed after a time was already picked.
+    const isToday = data.date === new Date().toISOString().slice(0, 10);
+    if (isToday) {
+      const startStr = data.time.split("-")[0]?.trim();
+      const startMinutes = startStr ? parseTimeToMinutes(startStr) : null;
+      const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes();
+      if (startMinutes !== null && startMinutes < nowMinutes) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Start time cannot be in the past", path: ["time"] });
+      }
     }
   });
 
@@ -117,8 +139,12 @@ export default function AddEventModal({ open, setOpen }: AddEventModalProps) {
 
       setUploadIds((prev) => [...prev, ...uploadedIds]);
       setValue("image", files);
-    } catch (error) {
+    } catch (error: any) {
       console.error("File upload failed:", error);
+      toast.error(
+        error?.response?.data?.message ||
+          "Failed to upload image. Please try a different file."
+      );
     }
   };
   const handleResetForm = () => {
@@ -321,6 +347,7 @@ export default function AddEventModal({ open, setOpen }: AddEventModalProps) {
               value={watch("time")}
               onChange={(val) => setValue("time", val)}
               error={errors.time?.message}
+              selectedDate={watch("date")}
             />
           </div>
         </div>

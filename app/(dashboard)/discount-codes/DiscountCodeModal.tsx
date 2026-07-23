@@ -14,26 +14,51 @@ import {
   useUpdateDiscountCodeMutation,
 } from "@/hooks/useDiscountCodeMutations";
 
-const schema = z.object({
-  code: z
-    .string()
-    .min(1, "Code is required")
-    .regex(
-      /^[A-Za-z0-9_-]+$/,
-      "Code may only contain letters, numbers, hyphens and underscores",
-    ),
-  description: z.string().optional(),
-  value: z
-    .number({ invalid_type_error: "Percentage is required" })
-    .min(0, "Percentage must be 0 or more")
-    .max(100, "Percentage cannot exceed 100"),
-  perUserLimit: z.number().min(1).optional(),
-  validFrom: z.string().optional(),
-  validUntil: z.string().optional(),
-  isActive: z.boolean(),
-});
+const todayStr = () => new Date().toISOString().slice(0, 10);
 
-type FormData = z.infer<typeof schema>;
+// Past-date restriction only applies to new codes - editing an existing code
+// shouldn't fail validation just because its original validFrom is now in
+// the past relative to today.
+const buildSchema = (isEdit: boolean) =>
+  z
+    .object({
+      code: z
+        .string()
+        .min(1, "Code is required")
+        .regex(
+          /^[A-Za-z0-9_-]+$/,
+          "Code may only contain letters, numbers, hyphens and underscores",
+        ),
+      description: z.string().optional(),
+      value: z
+        .number({ invalid_type_error: "Percentage is required" })
+        .min(0, "Percentage must be 0 or more")
+        .max(100, "Percentage cannot exceed 100"),
+      perUserLimit: z.number().min(1).optional(),
+      validFrom: z.string().optional(),
+      validUntil: z.string().optional(),
+      isActive: z.boolean(),
+    })
+    .superRefine((data, ctx) => {
+      if (isEdit) return;
+      const today = todayStr();
+      if (data.validFrom && data.validFrom < today) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Valid From cannot be in the past",
+          path: ["validFrom"],
+        });
+      }
+      if (data.validUntil && data.validUntil < today) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Valid Until cannot be in the past",
+          path: ["validUntil"],
+        });
+      }
+    });
+
+type FormData = z.infer<ReturnType<typeof buildSchema>>;
 
 interface DiscountCodeModalProps {
   open: boolean;
@@ -55,7 +80,7 @@ export default function DiscountCodeModal({
     control,
     formState: { errors },
   } = useForm<FormData>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(buildSchema(isEdit)),
     defaultValues: {
       isActive: true,
     },
@@ -168,11 +193,25 @@ export default function DiscountCodeModal({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm mb-1">Valid From</label>
-            <CommonInput type="date" {...register("validFrom")} />
+            <CommonInput
+              type="date"
+              min={isEdit ? undefined : todayStr()}
+              {...register("validFrom")}
+            />
+            {errors.validFrom && (
+              <p className="text-xs text-red-500 mt-1">{errors.validFrom.message}</p>
+            )}
           </div>
           <div>
             <label className="block text-sm mb-1">Valid Until</label>
-            <CommonInput type="date" {...register("validUntil")} />
+            <CommonInput
+              type="date"
+              min={isEdit ? undefined : todayStr()}
+              {...register("validUntil")}
+            />
+            {errors.validUntil && (
+              <p className="text-xs text-red-500 mt-1">{errors.validUntil.message}</p>
+            )}
           </div>
         </div>
 

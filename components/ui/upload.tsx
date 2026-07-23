@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { X } from "lucide-react";
 
 interface UploadProps {
@@ -14,7 +14,17 @@ interface UploadProps {
 export default function Upload({ label, onFileSelect, multiple = false, existingFiles = [],
 }: UploadProps) {
   const [files, setFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Object URLs are only good for this component's lifetime - build them
+  // whenever the selected files change, and revoke the previous batch so
+  // they don't leak.
+  useEffect(() => {
+    const urls = files.map((file) => URL.createObjectURL(file));
+    setPreviewUrls(urls);
+    return () => urls.forEach((url) => URL.revokeObjectURL(url));
+  }, [files]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
@@ -43,7 +53,7 @@ export default function Upload({ label, onFileSelect, multiple = false, existing
         className="border border-dashed border-purple-600 rounded-lg p-3 text-center cursor-pointer transition-colors hover:bg-purple-600/10"
       >
         <p className="text-sm text-gray-500">
-          Click to upload {multiple ? "images" : "an image"}. Supported formats: JPG, PNG, SVG. Max 10MB each.
+          Click to upload {multiple ? "images" : "an image"}. Supported formats: JPG, PNG, WEBP, SVG. Max 10MB each.
         </p>
         <input
           type="file"
@@ -63,7 +73,17 @@ export default function Upload({ label, onFileSelect, multiple = false, existing
               key={index}
               className="flex items-center justify-between p-2 border rounded-lg bg-gray-800 text-white text-sm"
             >
-              <span className="truncate">{file.name}</span>
+              <div className="flex items-center gap-2 min-w-0">
+                {previewUrls[index] && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={previewUrls[index]}
+                    alt={file.name}
+                    className="w-8 h-8 rounded object-cover flex-shrink-0"
+                  />
+                )}
+                <span className="truncate">{file.name}</span>
+              </div>
               <button
                 type="button"
                 onClick={() => handleRemove(index)}
