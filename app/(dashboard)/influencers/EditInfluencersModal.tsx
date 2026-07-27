@@ -27,18 +27,25 @@ import { useCategoriesQuery } from "@/hooks/useCategoryMutations";
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
-  city: z.string().min(1, "City is required"),
+  // Location (city) and description are optional - matches the mobile app.
+  city: z.string().optional(),
   email: z.string().email("Valid email is required"),
   phone: z.string().min(1, "Phone number is required"),
-  description: z.string().min(1, "Description is required"),
+  description: z.string().optional(),
+  // Optional to match the mobile app - only validate the format if a value
+  // is actually entered (empty is allowed).
   instagram: z
     .string()
-    .min(1, "Instagram link is required")
-    .regex(/\./, "Enter a valid link (e.g. instagram.com/username)"),
+    .optional()
+    .refine((v) => !v || /\./.test(v), {
+      message: "Enter a valid link (e.g. instagram.com/username)",
+    }),
   tiktok: z
     .string()
-    .min(1, "TikTok link is required")
-    .regex(/\./, "Enter a valid link (e.g. tiktok.com/@username)"),
+    .optional()
+    .refine((v) => !v || /\./.test(v), {
+      message: "Enter a valid link (e.g. tiktok.com/@username)",
+    }),
   categories: z.array(z.string()).min(1, "Select at least one category"),
 });
 
@@ -147,8 +154,11 @@ export default function EditInfluencerModal({
       email: data.email,
       phoneNumber: data.phone,
       bio: data.description,
-      instagramUrl: data.instagram,
-      tiktokUrl: data.tiktok,
+      // Send null (not "") for empty optional links - the backend validates
+      // these with @IsUrl, which rejects an empty string; null is skipped by
+      // @IsOptional and clears the field.
+      instagramUrl: data.instagram || null,
+      tiktokUrl: data.tiktok || null,
       categories: selectedCategories,
       photoId: uploadId || influencerData.photoId,
     };
@@ -343,6 +353,11 @@ export default function EditInfluencerModal({
             ))}
             {/* <Badge className="bg-[#2B2B2B] text-gray-400">+15</Badge> */}
           </div>
+          {errors.categories && (
+            <p className="text-xs text-red-500 mt-1">
+              {errors.categories.message}
+            </p>
+          )}
         </div>
 
         {/* Social Media Links */}

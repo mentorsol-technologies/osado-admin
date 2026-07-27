@@ -90,6 +90,16 @@ const CommonInput = React.forwardRef<HTMLInputElement, CommonInputProps>(
         : "password"
       : type;
 
+    // <input type="number"> lets users type "e"/"E" (scientific notation)
+    // and "+"/"-" (sign) - none of which are valid in a price/rate/quantity.
+    // Block them at the keystroke while still forwarding any caller onKeyDown.
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (type === "number" && ["e", "E", "+", "-"].includes(event.key)) {
+        event.preventDefault();
+      }
+      rest.onKeyDown?.(event);
+    };
+
     return (
       <div className="flex flex-col gap-1">
         {label && (
@@ -235,6 +245,7 @@ const CommonInput = React.forwardRef<HTMLInputElement, CommonInputProps>(
               maxLength={maxLength}
               autoComplete={autoComplete}
               {...rest}
+              onKeyDown={handleKeyDown}
             />
           )}
 

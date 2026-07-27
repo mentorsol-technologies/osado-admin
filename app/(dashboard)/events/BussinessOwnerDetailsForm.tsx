@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Shield, ArrowRight } from "lucide-react";
+import { User } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import { Button } from "@/components/ui/button";
 import { useBusinessOwnerInfoQuery, useSuspendBussinessMutation } from "@/hooks/useEventManagementMutations";
@@ -25,14 +25,23 @@ export default function BusinessOwnerDetailsModal({
 
     const user = data?.user;
     const events = data?.eventsInfo;
+    // Suspending an already-suspended owner only errors ("already suspended"),
+    // so hide the button in that case.
+    const isSuspended = String(user?.status).toLowerCase() === "suspended";
 
     const handleSuspendSubmit = (reason: string) => {
-        if (!events?.creator?.id || !reason) return;
+        // This endpoint's eventsInfo is only { liveEvents, activeEvents,
+        // totalEvents, cancelled } - it has no `creator`, so the old
+        // events.creator.id was always undefined and Suspend never fired.
+        // The owner to suspend is simply this modal's ownerId.
+        if (!ownerId || !reason) return;
 
         suspendOwner(
             {
-                id: events.creator.id,
-                data: { reason },
+                id: ownerId,
+                // Backend expects `suspendedReason` (SuspendBusinessOwnerRequestDto);
+                // sending `reason` would drop the text silently.
+                data: { suspendedReason: reason },
             },
             {
                 onSuccess: () => {
@@ -58,13 +67,28 @@ export default function BusinessOwnerDetailsModal({
 
                         {/* Profile Section */}
                         <div className="flex flex-col items-center">
-                            <Image
-                                src={user?.photoURL || "/images/event-default.png"}
-                                width={90}
-                                height={90}
-                                alt="profile"
-                                className="rounded-full object-cover"
-                            />
+                            {user?.photoURL ? (
+                                <Image
+                                    src={user.photoURL}
+                                    width={90}
+                                    height={90}
+                                    alt="profile"
+                                    className="rounded-full object-cover w-[90px] h-[90px]"
+                                />
+                            ) : (
+                                // No photo on file - show an avatar (name initial,
+                                // or a generic user icon when the name is missing)
+                                // rather than a broken/placeholder image.
+                                <div className="w-[90px] h-[90px] rounded-full bg-black-300 flex items-center justify-center">
+                                    {user?.name ? (
+                                        <span className="text-3xl font-semibold text-white uppercase">
+                                            {user.name.charAt(0)}
+                                        </span>
+                                    ) : (
+                                        <User size={40} className="text-gray-400" />
+                                    )}
+                                </div>
+                            )}
 
                             <h2 className="text-[24px] font-semibold mt-3">
                                 {user?.name} {user?.surName}
@@ -97,10 +121,12 @@ export default function BusinessOwnerDetailsModal({
                                 </p>
                             </div>
 
-                            {/* Country */}
+                            {/* Country - the user model has no country name, only
+                                the ISO country code (e.g. "KWT"); the old code
+                                showed `city` here, which mismatched the label. */}
                             <div className="flex justify-between">
                                 <p className="text-gray-300 w-1/3">Country</p>
-                                <p className="w-2/3 text-right">{user?.city || "—"}</p>
+                                <p className="w-2/3 text-right">{user?.countryCode || "—"}</p>
                             </div>
 
                             {/* Status */}
@@ -128,10 +154,6 @@ export default function BusinessOwnerDetailsModal({
                         <div className="mt-10">
                             <div className="flex justify-between items-center">
                                 <h3 className="text-[18px] font-semibold">Events Info</h3>
-
-                                <button className="flex items-center gap-1 text-purple-400 text-sm">
-                                    View all <ArrowRight size={16} />
-                                </button>
                             </div>
 
                             <div className="grid grid-cols-4 mt-4 text-center">
@@ -171,13 +193,15 @@ export default function BusinessOwnerDetailsModal({
                                 Chat
                             </Button>
 
-                            <Button
-                                variant="outline"
-                                className="flex-1"
-                                onClick={() => setSuspendOpen(true)}
-                            >
-                                Suspend
-                            </Button>
+                            {!isSuspended && (
+                                <Button
+                                    variant="outline"
+                                    className="flex-1"
+                                    onClick={() => setSuspendOpen(true)}
+                                >
+                                    Suspend
+                                </Button>
+                            )}
 
                             <Button
                                 variant="outline"

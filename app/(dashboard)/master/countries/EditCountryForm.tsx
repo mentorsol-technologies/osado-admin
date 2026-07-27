@@ -17,7 +17,15 @@ import { uploadToS3 } from "@/lib/s3Upload";
 
 const schema = z.object({
   name: z.string().min(2, "Country name is required"),
-  countryCode: z.string().optional(),
+  // Valid international calling code is 1-4 digits with an optional leading
+  // "+" (existing data is stored without the "+"). If present it must be a
+  // valid format (rejects "-5" or letters).
+  countryCode: z
+    .string()
+    .optional()
+    .refine((v) => !v || /^\+?\d{1,4}$/.test(v), {
+      message: "Enter a valid country code, e.g. +92",
+    }),
   image: z.any().optional(),
 });
 
@@ -164,8 +172,22 @@ export default function EditCountryModal({
           <CommonInput
             placeholder="+965"
             {...register("countryCode")}
-            type="number"
+            type="text"
+            onChange={(e) => {
+              // A calling code is "+" then 1-4 digits. Strip anything else,
+              // keep a single leading "+", and CAP the digits at 4 so an
+              // over-long value like "+9652364732" can't be typed at all.
+              const raw = e.target.value.replace(/[^\d+]/g, "");
+              const hasPlus = raw.startsWith("+");
+              const digits = raw.replace(/\+/g, "").slice(0, 4);
+              setValue("countryCode", (hasPlus ? "+" : "") + digits);
+            }}
           />
+          {errors.countryCode && (
+            <p className="text-xs text-red-500 mt-1">
+              {errors.countryCode.message}
+            </p>
+          )}
         </div>
       </div>
 

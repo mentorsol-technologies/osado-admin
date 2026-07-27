@@ -51,6 +51,8 @@ export const BussinessOwnerInfo = async (id: string) => {
 };
 
 export const ownerSuspended = async (id: string, data: any) => {
-  const response = await api.patch(`business-owner/${id}/suspend`, data);
+  // Must include the controller prefix - `business-owner/...` alone 404s.
+  // This is the same route the Business Owners page uses successfully.
+  const response = await api.patch(`admin/business-owners/${id}/suspend`, data);
   return response;
 };

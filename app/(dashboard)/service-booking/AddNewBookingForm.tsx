@@ -94,6 +94,9 @@ export default function AddBookingModal({
     data: serviceProviderList,
     refetch: fetchProviders,
     isFetching,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
   } = useGetServiceProviderListQuery(
     {
       searchQuery: "",
@@ -102,6 +105,22 @@ export default function AddBookingModal({
     },
     false,
   );
+
+  // Flatten every loaded page into one list for the dropdown.
+  const providers =
+    serviceProviderList?.pages?.flatMap((p: any) => p?.data ?? []) ?? [];
+
+  // Load the next page when the dropdown is scrolled near the bottom.
+  const handleProviderScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    if (
+      el.scrollHeight - el.scrollTop - el.clientHeight < 48 &&
+      hasNextPage &&
+      !isFetchingNextPage
+    ) {
+      fetchNextPage();
+    }
+  };
 
   useEffect(() => {
     if (bookingDateISO && bookingTimeRaw) {
@@ -310,37 +329,48 @@ export default function AddBookingModal({
 
           {/* Dropdown Lists */}
           {providerDropdownOpen && (
-            <div className="mt-2 w-full bg-[#111] border border-gray-700 rounded-md shadow-lg z-50 max-h-64 overflow-y-auto animate-in fade-in-0 slide-in-from-top-2 duration-200">
-              {isFetching ? (
+            <div
+              onScroll={handleProviderScroll}
+              className="mt-2 w-full bg-[#111] border border-gray-700 rounded-md shadow-lg z-50 max-h-64 overflow-y-auto animate-in fade-in-0 slide-in-from-top-2 duration-200"
+            >
+              {isFetching && providers.length === 0 ? (
                 <div className="flex items-center justify-center gap-2 p-4 text-gray-300">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   <span className="text-sm">Loading...</span>
                 </div>
-              ) : serviceProviderList?.data.length > 0 ? (
-                serviceProviderList.data.map((item: any) => (
-                  <div
-                    key={item.id}
-                    onClick={() => {
-                      setSelectedProvider(item);
-                      setValue("providerId", item.id);
-                      setProviderDropdownOpen(false);
-                    }}
-                    className="p-2 flex items-center gap-3 hover:bg-gray-800 cursor-pointer"
-                  >
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={item.photoURL} />
-                      <AvatarFallback>
-                        {item.name ? item.name[0].toUpperCase() : <User className="h-4 w-4" />}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-white text-sm">{item.name}</p>
-                      <p className="text-gray-400 text-xs capitalize">
-                        {item.role?.role || "Unknown Role"}
-                      </p>
+              ) : providers.length > 0 ? (
+                <>
+                  {providers.map((item: any) => (
+                    <div
+                      key={item.id}
+                      onClick={() => {
+                        setSelectedProvider(item);
+                        setValue("providerId", item.id);
+                        setProviderDropdownOpen(false);
+                      }}
+                      className="p-2 flex items-center gap-3 hover:bg-gray-800 cursor-pointer"
+                    >
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={item.photoURL} />
+                        <AvatarFallback>
+                          {item.name ? item.name[0].toUpperCase() : <User className="h-4 w-4" />}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-white text-sm">{item.name}</p>
+                        <p className="text-gray-400 text-xs capitalize">
+                          {item.role?.role || "Unknown Role"}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  ))}
+                  {isFetchingNextPage && (
+                    <div className="flex items-center justify-center gap-2 p-3 text-gray-400">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="text-xs">Loading more...</span>
+                    </div>
+                  )}
+                </>
               ) : (
                 <p className="p-3 text-gray-400">No providers found</p>
               )}

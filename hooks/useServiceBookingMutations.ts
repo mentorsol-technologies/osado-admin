@@ -10,7 +10,7 @@ import {
   UpdateServiceBooking,
   ViewServiceBookingDetails,
 } from "@/services/service-booking/ServiceBookingServices";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
 export const useGetAllServiceBookingListQuery = () => {
@@ -84,17 +84,34 @@ export const useGetServiceProviderListQuery = (
     searchQuery,
     bookingDate,
     bookingTime,
+    limit = 10,
   }: {
     searchQuery?: string;
     bookingDate?: string;
     bookingTime?: string;
+    limit?: number;
   },
   enabled: boolean = false
 ) => {
-  return useQuery({
-    queryKey: ["serviceProviders", searchQuery, bookingDate, bookingTime],
-    queryFn: () =>
-      GetServiceProviderList({ searchQuery, bookingDate, bookingTime }),
+  // Infinite (scroll) pagination so the provider dropdown loads every active
+  // provider a page at a time instead of only the first few.
+  return useInfiniteQuery({
+    queryKey: ["serviceProviders", searchQuery, bookingDate, bookingTime, limit],
+    queryFn: ({ pageParam }) =>
+      GetServiceProviderList({
+        searchQuery,
+        bookingDate,
+        bookingTime,
+        page: pageParam as number,
+        limit,
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage: any) => {
+      const page = Number(lastPage?.page) || 1;
+      const lim = Number(lastPage?.limit) || limit;
+      const total = Number(lastPage?.total) || 0;
+      return page * lim < total ? page + 1 : undefined;
+    },
     enabled,
     refetchOnWindowFocus: false,
   });
