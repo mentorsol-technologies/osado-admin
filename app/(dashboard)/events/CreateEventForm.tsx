@@ -39,14 +39,25 @@ function parseTimeToMinutes(value: string): number | null {
 }
 
 // ✅ 1. Update schema: categoryId is now an array
+// An empty <input type="number"> registered with valueAsNumber yields NaN,
+// and z.number() rejects NaN ("Expected number, received nan"). Because the
+// superRefine's isFree early-return doesn't skip these base rules, a NaN on a
+// hidden price field (Free event) fails validation. Normalising NaN to
+// undefined lets .optional() pass, while the superRefine still enforces the
+// prices when the event isn't free.
+const optionalPrice = z.preprocess(
+  (v) => (typeof v === "number" && Number.isNaN(v) ? undefined : v),
+  z.number().optional()
+);
+
 const schema = z
   .object({
     image: z.any().optional(),
     title: z.string().min(1, "Title is required"),
     isFree: z.boolean().optional(),
-    ticketPrice: z.number().optional(),
-    servicePrice: z.number().optional(),
-    influencerPrice: z.number().optional(),
+    ticketPrice: optionalPrice,
+    servicePrice: optionalPrice,
+    influencerPrice: optionalPrice,
     priceType: z.string().optional(),
     date: z.string().min(1, "Select a date"),
     time: z.string().min(1, "Select a time"),
@@ -56,6 +67,7 @@ const schema = z
     status: z.string().min(1, "Select a status"),
     categoryId: z.string().array().optional(),
     bio: z.string().min(1, "Bio is required"),
+    dressCode: z.string().min(1, "Dress code is required"),
     latitude: z.number().optional(),
     longitude: z.number().optional(),
   })
@@ -162,11 +174,19 @@ export default function AddEventModal({ open, setOpen }: AddEventModalProps) {
       location: "",
       status: "",
       bio: "",
+      dressCode: "",
       categoryId: [],
     });
 
     setUploadIds([]);
     setSelectedCategories([]);
+  };
+
+  // Safety net: if validation blocks submission, surface the first error
+  // instead of failing silently (e.g. a hidden/invalid field).
+  const onInvalid = (formErrors: typeof errors) => {
+    const firstError = Object.values(formErrors)[0] as { message?: string } | undefined;
+    toast.error(firstError?.message || "Please fill all required fields correctly.");
   };
 
   const onSubmit = (data: FormData) => {
@@ -181,6 +201,7 @@ export default function AddEventModal({ open, setOpen }: AddEventModalProps) {
       photoIds: uploadIds,
       categoryIds: data.categoryId,
       bio: data.bio,
+      dressCode: data.dressCode,
       isFree: data.isFree ?? false,
       ticketPrice: data.isFree ? 0 : Number(data.ticketPrice),
       servicePrice: data.isFree ? 0 : Number(data.servicePrice),
@@ -215,7 +236,7 @@ export default function AddEventModal({ open, setOpen }: AddEventModalProps) {
       footer={
         <div className="flex flex-col sm:flex-row gap-3 w-full">
           <Button
-            onClick={handleSubmit(onSubmit)}
+            onClick={handleSubmit(onSubmit, onInvalid)}
             className="flex-1 bg-brand hover:opacity-90"
             disabled={isPending}
           >
@@ -437,6 +458,16 @@ export default function AddEventModal({ open, setOpen }: AddEventModalProps) {
           <Textarea placeholder="Enter bio..." {...register("bio")} />
           {errors.bio && (
             <p className="text-xs text-red-500">{errors.bio.message}</p>
+          )}
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm mb-1">Dress Code</label>
+          <Textarea
+            placeholder="e.g. Formal attire - black tie"
+            {...register("dressCode")}
+          />
+          {errors.dressCode && (
+            <p className="text-xs text-red-500">{errors.dressCode.message}</p>
           )}
         </div>
       </div>

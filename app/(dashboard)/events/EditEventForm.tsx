@@ -47,6 +47,7 @@ const schema = z
     status: z.string().min(1, "Select a status"),
     categoryId: z.string().array().optional(),
     bio: z.string().min(1, "Bio is required"),
+    dressCode: z.string().min(1, "Dress code is required"),
     latitude: z.number().optional(),
     longitude: z.number().optional(),
   })
@@ -120,6 +121,7 @@ export default function EditEventModal({
         location: eventData.location || "",
         status: eventData.status || "ACTIVE",
         bio: eventData.bio || "",
+        dressCode: eventData.dressCode || "",
         categoryId: categoryIds,
       });
 
@@ -186,6 +188,7 @@ export default function EditEventModal({
       photoIds: uploadIds,
       categoryIds: data.categoryId,
       bio: data.bio,
+      dressCode: data.dressCode,
       isFree: data.isFree ?? false,
       ticketPrice: data.isFree ? 0 : Number(data.ticketPrice),
       servicePrice: data.isFree ? 0 : Number(data.servicePrice),
@@ -468,6 +471,17 @@ export default function EditEventModal({
           <Textarea placeholder="Enter bio..." {...register("bio")} />
           {errors.bio && (
             <p className="text-xs text-red-500">{errors.bio.message}</p>
+          )}
+        </div>
+        {/* Dress Code */}
+        <div className="mb-4">
+          <label className="block text-sm mb-1">Dress Code</label>
+          <Textarea
+            placeholder="e.g. Formal attire - black tie"
+            {...register("dressCode")}
+          />
+          {errors.dressCode && (
+            <p className="text-xs text-red-500">{errors.dressCode.message}</p>
           )}
         </div>
       </div>

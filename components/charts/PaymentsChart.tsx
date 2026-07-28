@@ -47,6 +47,13 @@ export default function PaymentsChart({
   ];
   const total = data.reduce((acc, curr) => acc + curr.value, 0);
 
+  // An all-zero pie renders nothing in recharts, leaving the card blank.
+  // When there's nothing to review, draw a full muted ring instead so the
+  // chart stays visible (center still shows the 0 total).
+  const isEmpty = total === 0;
+  const chartData = isEmpty ? [{ name: "No data", value: 1 }] : data;
+  const chartColors = isEmpty ? ["#3A3A46"] : COLORS;
+
   return (
     <div className="w-full h-[450px] bg-black-500 rounded-2xl p-4 ">
       <div className="flex justify-between items-center">
@@ -70,16 +77,16 @@ export default function PaymentsChart({
       <ResponsiveContainer width="100%" height={250}>
         <PieChart>
           <Pie
-            data={data}
+            data={chartData}
             innerRadius={85}
             outerRadius={100}
-            paddingAngle={2}
+            paddingAngle={isEmpty ? 0 : 2}
             dataKey="value"
           >
-            {data.map((entry, index) => (
+            {chartData.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}
-                fill={COLORS[index % COLORS.length]}
+                fill={chartColors[index % chartColors.length]}
                 stroke="none"
               />
             ))}
