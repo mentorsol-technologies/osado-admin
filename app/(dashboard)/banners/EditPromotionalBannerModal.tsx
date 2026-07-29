@@ -21,15 +21,24 @@ import { uploadToS3 } from "@/lib/s3Upload";
 import { useUpdateBannersMutation } from "@/hooks/useBannersMutations";
 import Image from "next/image";
 
+// Banners are only ever targeted at service providers and influencers.
+const TARGET_AUDIENCES = ["Service Providers", "Influencers"];
+
+// Older banners were saved against retired audiences ("All", "Users", ...).
+// Drop anything no longer offered so the badges reflect what will actually be
+// submitted, instead of silently re-saving a value the admin can't see.
+const sanitizeAudiences = (values?: string[] | null) =>
+  (values ?? []).filter((v) => TARGET_AUDIENCES.includes(v));
+
 const schema = z.object({
   image: z.any().optional(),
-  bannerTitle: z.string().min(1, "Banner title is required"),
-  linkType: z.string().min(1, "Link type is required"),
   link: z.string().url("Valid URL required"),
   status: z.string().min(1, "Status is required"),
   startDate: z.string().min(1, "Start date required"),
   endDate: z.string().min(1, "End date required"),
-  displayCategories: z.array(z.string()).min(1, "Select at least one category"),
+  displayCategories: z
+    .array(z.string())
+    .min(1, "Select at least one target audience"),
 });
 
 type FormData = z.infer<typeof schema> & { id?: string };
@@ -60,8 +69,6 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      bannerTitle: bannerData?.bannerTitle || "",
-      linkType: bannerData?.linkType || "external",
       link: bannerData?.link || "",
       status:
         bannerData?.status === "active"
@@ -75,7 +82,7 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
       endDate: bannerData?.endDate
         ? new Date(bannerData.endDate).toISOString().split("T")[0]
         : "",
-      displayCategories: bannerData?.displayCategories || ["All"],
+      displayCategories: sanitizeAudiences(bannerData?.displayCategories),
     },
   });
   const { mutate: updateBanner, isPending: isUploading } =
@@ -88,8 +95,6 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
   useEffect(() => {
     if (bannerData) {
       reset({
-        bannerTitle: bannerData.bannerTitle || "",
-        linkType: bannerData.linkType || "external",
         link: bannerData.link || "",
         status:
           bannerData.status === "active"
@@ -103,26 +108,21 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
         endDate: bannerData.endDate
           ? new Date(bannerData.endDate).toISOString().split("T")[0]
           : "",
-        displayCategories: bannerData.displayCategories || ["All"],
+        displayCategories: sanitizeAudiences(bannerData.displayCategories),
       });
 
       setPreviewUrl(bannerData.photoURL || "");
       setUploadIds([]);
-      setSelectedCategories(bannerData.displayCategories || ["All"]);
+      setSelectedCategories(sanitizeAudiences(bannerData.displayCategories));
     }
   }, [bannerData, reset]);
 
   const toggleCategory = (cat: string) => {
-    let updated: string[];
-    if (cat === "All") {
-      updated = ["All"];
-    } else {
-      updated = selectedCategories.includes(cat)
-        ? selectedCategories.filter((c) => c !== cat)
-        : [...selectedCategories.filter((c) => c !== "All"), cat];
-    }
+    const updated = selectedCategories.includes(cat)
+      ? selectedCategories.filter((c) => c !== cat)
+      : [...selectedCategories, cat];
     setSelectedCategories(updated);
-    setValue("displayCategories", updated);
+    setValue("displayCategories", updated, { shouldValidate: true });
   };
   const handleMultipleFileUpload = async (files: File[]) => {
     try {
@@ -157,13 +157,11 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
     }
 
     const payload = {
-      bannerTitle: data.bannerTitle,
       startDate: new Date(data.startDate).toISOString(),
       endDate: new Date(data.endDate).toISOString(),
       photoId: finalPhotoId,
       displayCategories: selectedCategories,
       status: data.status.toLowerCase(),
-      linkType: data.linkType,
       link: data.link,
     };
 
@@ -232,43 +230,6 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
               />
             </div>
           ) : null}
-        </div>
-
-        {/* Banner Title / Link Type */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="block text-sm mb-1">Banner Title</label>
-            <CommonInput
-              placeholder="Write title"
-              {...register("bannerTitle")}
-            />
-            {errors.bannerTitle && (
-              <p className="text-xs text-red-500">
-                {errors.bannerTitle.message}
-              </p>
-            )}
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Link Type</label>
-            <Controller
-              name="linkType"
-              control={control}
-              render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select link type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="internal">Internal</SelectItem>
-                    <SelectItem value="external">External</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.linkType && (
-              <p className="text-xs text-red-500">{errors.linkType.message}</p>
-            )}
-          </div>
         </div>
 
         {/* Link / Status */}
@@ -349,13 +310,7 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
         <div className="mb-4">
           <label className="block text-sm mb-2">Target Audience</label>
           <div className="flex flex-wrap gap-2">
-            {[
-              "All",
-              "Users",
-              "Photographers",
-              "Influencers",
-              "Business Owners",
-            ].map((cat) => (
+            {TARGET_AUDIENCES.map((cat) => (
               <Badge
                 key={cat}
                 onClick={() => toggleCategory(cat)}

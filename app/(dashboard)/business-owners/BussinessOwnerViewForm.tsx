@@ -154,13 +154,6 @@ export default function OwnerViewModal({
 
         {/* Events Info */}
         <div className="rounded-lg">
-          <div className="flex items-center justify-between mb-4">
-            <p className="font-medium">Events Info</p>
-            <button className="flex items-center gap-1 text-xs text-purple-500 hover:underline">
-              View all
-              <ArrowRight size={12} />
-            </button>
-          </div>
 
           {/* Responsive grid: 2 cols on mobile, 4 cols on sm+ screens */}
           <div className="grid grid-cols-2 sm:grid-cols-4  gap-4">

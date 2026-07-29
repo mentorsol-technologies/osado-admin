@@ -77,12 +77,6 @@ export default function BannersPage() {
   };
   const filters = [
     {
-      key: "type",
-      label: "Type",
-      options: ["Credit", "Debit"],
-    },
-
-    {
       key: "status",
       label: "Status",
       options: ["All", "Active", "Inactive", "Suspended"],

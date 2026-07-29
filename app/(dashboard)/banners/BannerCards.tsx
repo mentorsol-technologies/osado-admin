@@ -29,6 +29,9 @@ export default function BannerCard({
   onDelete,
 }: BannerCardProps) {
   const imageSrc = image || "/images/Ellipse 5.png";
+  // An already-suspended banner has nothing to suspend - hide the action.
+  // Compared case-insensitively since the API returns lowercase statuses.
+  const isSuspended = status?.toLowerCase() === "suspended";
   return (
     <div className="rounded-xl bg-black-500 border border-black-200 text-white shadow-lg overflow-hidden flex flex-col">
       {/* Image */}
@@ -85,7 +88,7 @@ export default function BannerCard({
 
           <div className="flex justify-between flex-wrap">
             <span className="text-white">Status</span>
-            <span>{status}</span>
+            <span className="capitalize">{status}</span>
           </div>
         </div>
       </div>
@@ -95,13 +98,15 @@ export default function BannerCard({
         <Button variant="default" onClick={onEdit} className="flex-1 ">
           Edit
         </Button>
-        <Button
-          variant="outline"
-          onClick={onSuspend}
-          className="flex-1 border-black-300 text-white"
-        >
-          Suspend
-        </Button>
+        {!isSuspended && (
+          <Button
+            variant="outline"
+            onClick={onSuspend}
+            className="flex-1 border-black-300 text-white"
+          >
+            Suspend
+          </Button>
+        )}
         <Button
           variant="outline"
           onClick={onDelete}

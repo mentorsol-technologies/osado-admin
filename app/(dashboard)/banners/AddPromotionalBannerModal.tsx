@@ -20,15 +20,16 @@ import { useCreateBannersMutation } from "@/hooks/useBannersMutations";
 import { uploadToS3 } from "@/lib/s3Upload";
 import { getBannerUploadLink } from "@/services/banners/bannersService";
 
+// Banners are only ever targeted at service providers and influencers.
+const TARGET_AUDIENCES = ["Service Providers", "Influencers"];
+
 const schema = z.object({
   image: z.any().optional(),
-  bannerTitle: z.string().min(1, "Banner title is required"),
-  linkType: z.string().min(1, "Link type is required"),
   link: z.string().url("Valid URL required"),
   status: z.string().min(1, "Status is required"),
   startDate: z.string().min(1, "Start date required"),
   endDate: z.string().min(1, "End date required"),
-  category: z.array(z.string()).min(1, "Select at least one category"),
+  category: z.array(z.string()).min(1, "Select at least one target audience"),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -58,35 +59,29 @@ export default function AddPromotionalBannerModal({
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      category: ["All"],
+      category: [],
     },
   });
 
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([
-    "All",
-  ]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [preview, setPreview] = useState<string | null>(null);
   const handleResetForm = () => {
     reset({
-      bannerTitle: "",
       startDate: "",
       endDate: "",
       status: "",
       link: "",
+      category: [],
     });
+    setSelectedCategories([]);
   };
 
   const toggleCategory = (cat: string) => {
-    let updated: string[];
-    if (cat === "All") {
-      updated = ["All"];
-    } else {
-      updated = selectedCategories.includes(cat)
-        ? selectedCategories.filter((c) => c !== cat)
-        : [...selectedCategories.filter((c) => c !== "All"), cat];
-    }
+    const updated = selectedCategories.includes(cat)
+      ? selectedCategories.filter((c) => c !== cat)
+      : [...selectedCategories, cat];
     setSelectedCategories(updated);
-    setValue("category", updated);
+    setValue("category", updated, { shouldValidate: true });
   };
   const handleMultipleFileUpload = async (files: File[]) => {
     try {
@@ -107,7 +102,6 @@ export default function AddPromotionalBannerModal({
 
   const onSubmit = (data: FormData) => {
     const payload = {
-      bannerTitle: data.bannerTitle,
       startDate: new Date(data.startDate).toISOString(),
       endDate: new Date(data.endDate).toISOString(),
       photoId: uploadIds[0],
@@ -164,37 +158,6 @@ export default function AddPromotionalBannerModal({
               await handleMultipleFileUpload(files);
             }}
           />
-        </div>
-
-        {/* Banner Title / Link Type */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="block text-sm mb-1">Banner Title</label>
-            <CommonInput
-              placeholder="Write title"
-              {...register("bannerTitle")}
-            />
-            {errors.bannerTitle && (
-              <p className="text-xs text-red-500">
-                {errors.bannerTitle.message}
-              </p>
-            )}
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Link Type</label>
-            <Select onValueChange={(val) => setValue("linkType", val)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select link type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="internal">Internal</SelectItem>
-                <SelectItem value="external">External</SelectItem>
-              </SelectContent>
-            </Select>
-            {errors.linkType && (
-              <p className="text-xs text-red-500">{errors.linkType.message}</p>
-            )}
-          </div>
         </div>
 
         {/* Link / Status */}
@@ -268,13 +231,7 @@ export default function AddPromotionalBannerModal({
         <div className="mb-4">
           <label className="block text-sm mb-2">Target Audience</label>
           <div className="flex flex-wrap gap-2">
-            {[
-              "All",
-              "Users",
-              "Photographers",
-              "Influencers",
-              "Business Owners",
-            ].map((cat) => (
+            {TARGET_AUDIENCES.map((cat) => (
               <Badge
                 key={cat}
                 onClick={() => toggleCategory(cat)}

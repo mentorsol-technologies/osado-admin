@@ -19,7 +19,6 @@ export default function ServiceBookingPage() {
   const [openViewModal, setOpenViewModal] = useState(false);
   const [selectedBusiness, setSelectedBusiness] = useState<any>(null);
   const [suspendOpen, setSuspendOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
   const [AddOpen, setAddOpen] = useState(false);
   const [commissionOpen, setCommissionOpen] = useState(false);
 
