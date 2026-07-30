@@ -13,6 +13,7 @@ import {
 } from "@/hooks/useEventManagementMutations";
 import { useState } from "react";
 import { formatTime, FormatDate } from "@/lib/utils";
+import { getDisplayName, getInitial } from "@/lib/displayName";
 import BusinessOwnerDetailsModal from "./BussinessOwnerDetailsForm";
 import DeleteConfirmModal from "@/components/ui/commonComponent/DeleteConfirmModal";
 
@@ -172,9 +173,9 @@ export default function EventInfoModal({
                 // No photo - show an avatar (name initial, or a user icon)
                 // instead of a remote random stock photo.
                 <div className="w-10 h-10 rounded-full bg-black-300 flex items-center justify-center flex-shrink-0">
-                  {event?.creator?.name ? (
+                  {getInitial(event?.creator) ? (
                     <span className="text-sm font-semibold text-white uppercase">
-                      {event.creator.name.charAt(0)}
+                      {getInitial(event?.creator)}
                     </span>
                   ) : (
                     <User size={20} className="text-gray-400" />
@@ -182,7 +183,9 @@ export default function EventInfoModal({
                 </div>
               )}
               <div>
-                <p className="text-sm font-semibold">{event?.creator?.name}</p>
+                <p className="text-sm font-semibold">
+                  {getDisplayName(event?.creator, "Unknown Organizer")}
+                </p>
                 <div className="text-purple-600 flex gap-2 items-center">
                   <User size={14} />
                   <p className="text-xs">Organizer</p>

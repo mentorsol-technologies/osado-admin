@@ -5,6 +5,7 @@ import { Calendar, MapPin, Clock, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate, formatTime } from "@/lib/utils";
+import { getDisplayName, getInitial } from "@/lib/displayName";
 
 interface EventCardProps {
   photos?: { url: string }[];
@@ -15,8 +16,11 @@ interface EventCardProps {
   time: string;
 
   creator?: {
-    name?: string;
-    photoURL?: string;
+    name?: string | null;
+    surName?: string | null;
+    email?: string | null;
+    phoneNumber?: string | null;
+    photoURL?: string | null;
   };
 
   priceType?: string;
@@ -44,9 +48,11 @@ export default function EventCard({
 }: EventCardProps) {
   const image = photos.length > 0 ? photos[0].url : "/images/Ellipse 4.png";
 
-  // Organizer fixed
-  const organizerName = creator?.name || "Unknown Organizer";
-  const organizerPhoto = creator?.photoURL || "/images/Ellipse 4.png";
+  // Accounts can exist without a name (phone signup), so fall back through the
+  // identifiers we do have rather than showing "Unknown Organizer".
+  const organizerName = getDisplayName(creator, "Unknown Organizer");
+  const organizerPhoto = creator?.photoURL || null;
+  const organizerInitial = getInitial(creator);
 
   return (
     <div className="rounded-xl bg-black-500 border border-black-200 text-white shadow-lg overflow-hidden flex flex-col cursor-pointer">
@@ -99,13 +105,27 @@ export default function EventCard({
 
         {/* Organizer */}
         <div className="flex items-center gap-3">
-          <Image
-            src={organizerPhoto}
-            alt={organizerName}
-            width={40}
-            height={40}
-            className="rounded-full object-cover w-9 h-9"
-          />
+          {/* Only show a real photo. With no photo, show the name initial (or a
+              user icon) - a stock portrait here reads as the organizer's face. */}
+          {organizerPhoto ? (
+            <Image
+              src={organizerPhoto}
+              alt={organizerName}
+              width={40}
+              height={40}
+              className="rounded-full object-cover w-9 h-9"
+            />
+          ) : (
+            <div className="w-9 h-9 rounded-full bg-black-300 flex items-center justify-center flex-shrink-0">
+              {organizerInitial ? (
+                <span className="text-sm font-semibold text-white uppercase">
+                  {organizerInitial}
+                </span>
+              ) : (
+                <User size={18} className="text-gray-400" />
+              )}
+            </div>
+          )}
 
           <div className="flex flex-col">
             <p className="text-sm font-medium">{organizerName}</p>

@@ -35,6 +35,7 @@ const schema = z
     image: z.any().optional(),
     title: z.string().min(1, "Title is required"),
     isFree: z.boolean().optional(),
+    isRecommended: z.boolean().optional(),
     ticketPrice: z.number().optional(),
     servicePrice: z.number().optional(),
     influencerPrice: z.number().optional(),
@@ -48,6 +49,7 @@ const schema = z
     categoryId: z.string().array().optional(),
     bio: z.string().min(1, "Bio is required"),
     dressCode: z.string().min(1, "Dress code is required"),
+    rules: z.string().optional(),
     latitude: z.number().optional(),
     longitude: z.number().optional(),
   })
@@ -110,6 +112,7 @@ export default function EditEventModal({
       reset({
         title: eventData.title || "",
         isFree: !!eventData.isFree,
+        isRecommended: !!eventData.isRecommended,
         ticketPrice: Number(eventData.ticketPrice) || 0,
         servicePrice: Number(eventData.servicePrice) || 0,
         influencerPrice: Number(eventData.influencerPrice) || 0,
@@ -122,6 +125,7 @@ export default function EditEventModal({
         status: eventData.status || "ACTIVE",
         bio: eventData.bio || "",
         dressCode: eventData.dressCode || "",
+        rules: eventData.rules || "",
         categoryId: categoryIds,
       });
 
@@ -189,7 +193,9 @@ export default function EditEventModal({
       categoryIds: data.categoryId,
       bio: data.bio,
       dressCode: data.dressCode,
+      rules: data.rules ?? "",
       isFree: data.isFree ?? false,
+      isRecommended: data.isRecommended ?? false,
       ticketPrice: data.isFree ? 0 : Number(data.ticketPrice),
       servicePrice: data.isFree ? 0 : Number(data.servicePrice),
       influencerPrice: data.isFree ? 0 : Number(data.influencerPrice),
@@ -290,12 +296,19 @@ export default function EditEventModal({
           )}
         </div>
 
-        {/* Free event toggle */}
-        <div className="mb-4">
+        {/* Free / Recommended toggles - side by side from lg up */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
           <Checkbox
             label="Mark event as Free"
             checked={!!watch("isFree")}
             onCheckedChange={(checked) => setValue("isFree", checked as boolean)}
+          />
+          <Checkbox
+            label="Mark event as Recommended"
+            checked={!!watch("isRecommended")}
+            onCheckedChange={(checked) =>
+              setValue("isRecommended", checked as boolean)
+            }
           />
         </div>
 
@@ -482,6 +495,24 @@ export default function EditEventModal({
           />
           {errors.dressCode && (
             <p className="text-xs text-red-500">{errors.dressCode.message}</p>
+          )}
+        </div>
+
+        {/* Rules */}
+        <div className="mb-4">
+          <label className="block text-sm mb-1">Rules</label>
+          <Textarea
+            rows={4}
+            placeholder={
+              "One rule per line, e.g.\nRespect other participants and event staff.\nArrive on time and follow the event schedule."
+            }
+            {...register("rules")}
+          />
+          <p className="text-xs text-gray-400 mt-1">
+            Each line is shown as a separate rule in the app.
+          </p>
+          {errors.rules && (
+            <p className="text-xs text-red-500">{errors.rules.message}</p>
           )}
         </div>
       </div>
