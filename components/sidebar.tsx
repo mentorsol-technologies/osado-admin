@@ -114,7 +114,11 @@ const menuItems: MenuItem[] = [
     label: "Sub Admin",
     href: "/sub-admin",
   },
-  // { icon: "/images/tabler_message-filled.svg", label: "Chat", href: "/chat" },
+  {
+    icon: "/images/tabler_message-filled.svg",
+    label: "Chat",
+    href: "/chat",
+  },
   {
     icon: "/images/mdi_image-edit.svg",
     label: "Banners Manager",

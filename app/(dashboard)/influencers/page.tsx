@@ -6,7 +6,10 @@ import { useMemo, useState } from "react";
 import InfluencerCard from "./InfluencersCard";
 import { Award, Crown, Star } from "lucide-react";
 import Pagination from "@/components/ui/pagination";
-import { useGetUsersListQuery } from "@/hooks/useUsersMutations";
+import {
+  useGetUsersListQuery,
+  useDeleteInfluencerMutation,
+} from "@/hooks/useUsersMutations";
 import { applyFilters } from "@/lib/filterHelper";
 import EditInfluencerModal from "./EditInfluencersModal";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,6 +24,8 @@ const InfluencersRank = () => {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 8;
+
+  const { mutate: deleteInfluencer } = useDeleteInfluencerMutation();
 
   const filters = [
     {
@@ -77,7 +82,14 @@ const InfluencersRank = () => {
   }, [filteredInfluencers, currentPage]);
 
   const handleDelete = () => {
-    console.log("Influencer deleted:", selectedInfluencers);
+    if (!selectedInfluencers?.id) return;
+
+    deleteInfluencer(selectedInfluencers.id, {
+      onSuccess: () => {
+        setDeleteOpen(false);
+        setSelectedInfluencers(null);
+      },
+    });
   };
 
   return (

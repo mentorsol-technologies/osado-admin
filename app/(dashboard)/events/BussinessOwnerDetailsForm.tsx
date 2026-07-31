@@ -6,19 +6,31 @@ import Modal from "@/components/ui/Modal";
 import { Button } from "@/components/ui/button";
 import { useBusinessOwnerInfoQuery, useSuspendBussinessMutation } from "@/hooks/useEventManagementMutations";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import SuspendedEventModal from "./SuspendEventModal";
 
 interface Props {
     ownerId: string;
     open: boolean;
     onOpenChange: (v: boolean) => void;
+    /**
+     * Which footer actions to offer.
+     *
+     * "full" (default) keeps Chat / Suspend / Back, so every existing usage is
+     * unchanged. "back-only" is for places where those actions make no sense -
+     * e.g. opened from the chat screen itself, where "Chat" would just link
+     * back to where you already are.
+     */
+    actions?: "full" | "back-only";
 }
 
 export default function BusinessOwnerDetailsModal({
     ownerId,
     open,
     onOpenChange,
+    actions = "full",
 }: Props) {
+    const router = useRouter();
     const { data, isLoading } = useBusinessOwnerInfoQuery(ownerId);
     const { mutate: suspendOwner } = useSuspendBussinessMutation()
     const [suspendOpen, setSuspendOpen] = useState(false);
@@ -189,11 +201,21 @@ export default function BusinessOwnerDetailsModal({
 
                         {/* Buttons */}
                         <div className="mt-12 flex justify-between gap-4">
-                            <Button className="flex-1">
-                                Chat
-                            </Button>
+                            {actions === "full" && (
+                                <Button
+                                    className="flex-1"
+                                    onClick={() => {
+                                        onOpenChange(false);
+                                        // The chat page opens (or creates) the
+                                        // conversation with this owner.
+                                        router.push(`/chat?userId=${ownerId}`);
+                                    }}
+                                >
+                                    Chat
+                                </Button>
+                            )}
 
-                            {!isSuspended && (
+                            {actions === "full" && !isSuspended && (
                                 <Button
                                     variant="outline"
                                     className="flex-1"

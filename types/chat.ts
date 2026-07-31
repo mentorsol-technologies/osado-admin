@@ -3,10 +3,21 @@
 export interface ChatUser {
     id: string;
     name: string;
+    surName?: string | null;
+    /**
+     * The API returns the profile picture as `photoURL`; `avatar` is kept for
+     * any caller still passing that shape. Read photoURL first.
+     */
+    photoURL?: string | null;
     avatar?: string;
     role?: string;
+    /** Address fields the profile panel builds "Location" from. */
+    city?: string | null;
+    state?: string | null;
     location?: string;
-    status?: "Active" | "Inactive" | "Away";
+    status?: string | null;
+    /** Account creation date - shown as "Member Since". */
+    createdAt?: string | null;
     memberSince?: string;
 }
 

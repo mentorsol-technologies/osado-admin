@@ -4,21 +4,37 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
-import { Smile, Send, Paperclip } from "lucide-react";
+import { Smile, Send, Paperclip, FileText, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
+import EmojiPicker, { EmojiClickData, Theme } from "emoji-picker-react";
 
 interface RichTextEditorProps {
-  onSend: (message: string, file?: File | null) => void;
+  onSend: (message: string, files?: File[]) => void;
   disabled?: boolean;
 }
+
+/** Keeps a single message's upload batch sane. */
+const MAX_ATTACHMENTS = 10;
+
+const ACCEPTED_TYPES = [
+  "image/jpg",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "text/plain",
+].join(",");
 
 const RichTextEditor: React.FC<RichTextEditorProps> = ({
   onSend,
   disabled = false,
 }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
   const [editorHeight, setEditorHeight] = useState(40);
@@ -63,13 +79,16 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const handleSend = useCallback(() => {
     if (disabled || !editor) return;
     const html = editor.getHTML().trim();
-    if ((!html || html === "<p></p>") && !selectedFile) return;
+    if ((!html || html === "<p></p>") && selectedFiles.length === 0) return;
 
-    onSend(html || "", selectedFile);
+    // Tiptap yields "<p></p>" for an empty document; send a genuinely empty
+    // string so attachment-only messages aren't stored with hollow markup.
+    const hasText = Boolean(html.replace(/<[^>]*>/g, "").trim());
+    onSend(hasText ? html : "", selectedFiles);
     editor.commands.clearContent();
     setEditorHeight(40);
-    setSelectedFile(null);
-  }, [disabled, editor, onSend, selectedFile]);
+    setSelectedFiles([]);
+  }, [disabled, editor, onSend, selectedFiles]);
 
   // Handle keyboard shortcuts (Enter to send, Shift+Enter for new line)
   useEffect(() => {
@@ -124,13 +143,18 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     fileInputRef.current?.click();
   };
 
-  // File change
+  // File change - append so several picks build up one batch
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
+    const picked = Array.from(e.target.files ?? []);
+    if (picked.length) {
+      setSelectedFiles((prev) => [...prev, ...picked].slice(0, MAX_ATTACHMENTS));
     }
+    // Reset so picking the same file again still fires onChange.
+    e.target.value = "";
   };
+
+  const removeFileAt = (index: number) =>
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
 
   return (
     <div
@@ -138,6 +162,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     >
       <input
         type="file"
+        multiple
+        accept={ACCEPTED_TYPES}
         ref={fileInputRef}
         onChange={handleFileChange}
         className="hidden"
@@ -168,10 +194,25 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           {showEmojiPicker && (
             <div
               ref={pickerRef}
-              className="absolute bottom-12 left-0 z-50 bg-[#1b1b1e] border border-[#2a2a2a] rounded-xl shadow-lg"
+              className="absolute bottom-12 left-0 z-50 border border-[#2a2a2a] rounded-xl shadow-lg overflow-hidden"
+              // The picker ships its own palette; these CSS variables pull it
+              // onto the app's dark theme instead of its default grey.
+              style={
+                {
+                  "--epr-bg-color": "#1b1b1e",
+                  "--epr-category-label-bg-color": "#1b1b1e",
+                  "--epr-text-color": "#e5e7eb",
+                  "--epr-hover-bg-color": "#2a2a35",
+                  "--epr-focus-bg-color": "#2a2a35",
+                  "--epr-picker-border-color": "#2a2a2a",
+                  "--epr-category-icon-active-color": "#a855f7",
+                  "--epr-emoji-hover-color": "#2a2a35",
+                } as React.CSSProperties
+              }
             >
               <EmojiPicker
                 onEmojiClick={handleEmojiClick}
+                theme={Theme.DARK}
                 lazyLoadEmojis
                 previewConfig={{ showPreview: false }}
                 searchDisabled
@@ -205,9 +246,42 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         <Send className="w-5 h-5" />
       </Button>
 
-      {selectedFile && (
-        <div className="absolute -top-7 left-4 text-xs text-gray-400 truncate max-w-[200px]">
-          📎 {selectedFile.name}
+      {/* Pending attachments - thumbnails for images, chips for documents */}
+      {selectedFiles.length > 0 && (
+        <div className="absolute bottom-full left-0 right-0 mb-2 flex flex-wrap gap-2 px-1">
+          {selectedFiles.map((file, index) => {
+            const isImage = file.type.startsWith("image/");
+            return (
+              <div
+                key={`${file.name}-${index}`}
+                className="relative group rounded-lg overflow-hidden border border-[#2a2a2a] bg-black-400"
+              >
+                {isImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={URL.createObjectURL(file)}
+                    alt={file.name}
+                    className="w-14 h-14 object-cover"
+                  />
+                ) : (
+                  <div className="w-14 h-14 flex flex-col items-center justify-center px-1">
+                    <FileText size={16} className="text-purple-400" />
+                    <span className="mt-0.5 text-[9px] text-gray-400 truncate w-full text-center">
+                      {file.name.split(".").pop()?.toUpperCase()}
+                    </span>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  aria-label={`Remove ${file.name}`}
+                  onClick={() => removeFileAt(index)}
+                  className="absolute top-0.5 right-0.5 bg-black/70 rounded-full p-0.5 text-white hover:bg-black"
+                >
+                  <X size={11} />
+                </button>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
