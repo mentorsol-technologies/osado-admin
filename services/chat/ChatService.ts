@@ -89,3 +89,8 @@ export const uploadChatAttachment = async (file: File): Promise<ChatAttachment> 
         isImage: file.type.startsWith("image/"),
     };
 };
+
+/** Clears the caller's unread counter for a conversation. */
+export const markChatConversationRead = async (conversationId: string) => {
+    return await api.patch(`/chat/conversations/${conversationId}/read`, {});
+};

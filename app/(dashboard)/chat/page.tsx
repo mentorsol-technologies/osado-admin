@@ -33,6 +33,7 @@ import { toast } from "react-toastify";
 import {
     uploadChatAttachment,
     isAttachmentTypeSupported,
+    markChatConversationRead,
     type ChatAttachment,
 } from "@/services/chat/ChatService";
 
@@ -212,6 +213,41 @@ const Chat = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [conversations?.length]);
 
+    /**
+     * Unread count for *us* in a conversation.
+     *
+     * The API returns the per-side counters (unreadCountUser1/2) but not a
+     * resolved `unreadCount`, so pick the side that isn't us.
+     */
+    const unreadFor = (conversation: ChatConversation) => {
+        const raw =
+            conversation.user1Id === currentUserId
+                ? (conversation as any).unreadCountUser1
+                : (conversation as any).unreadCountUser2;
+        return Number(raw) || 0;
+    };
+
+    /**
+     * Clear our unread counter for a conversation. The gateway handles this
+     * over the socket; REST covers the case where the socket is down.
+     */
+    const markConversationRead = useCallback(
+        async (conversationId: string) => {
+            try {
+                if (socketHelpers.isConnected()) {
+                    socketHelpers.markAsRead(conversationId);
+                } else {
+                    await markChatConversationRead(conversationId);
+                }
+                // Refresh so the badge disappears straight away.
+                queryClient.invalidateQueries({ queryKey: ["chatConversations"] });
+            } catch (error) {
+                console.error("Failed to mark conversation as read:", error);
+            }
+        },
+        [queryClient],
+    );
+
     const openConversation = (conversationId: string) => {
         setActiveConversationId(conversationId);
         setMobilePanel("chat");
@@ -294,6 +330,24 @@ const Chat = () => {
             socketHelpers.disconnect();
         };
     }, []);
+
+    // Opening a conversation clears its unread badge.
+    useEffect(() => {
+        if (!activeConversationId) return;
+        markConversationRead(activeConversationId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [activeConversationId]);
+
+    // A message arriving in the conversation you're already looking at is read
+    // on arrival, so it should never raise the badge.
+    useEffect(() => {
+        if (!activeConversationId || localMessages.length === 0) return;
+        const latest = localMessages[localMessages.length - 1];
+        if (latest && latest.senderId !== currentUserId) {
+            markConversationRead(activeConversationId);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [localMessages.length]);
 
     // Join/leave conversation rooms
     useEffect(() => {
@@ -640,24 +694,38 @@ const Chat = () => {
                                             size={44}
                                         />
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex justify-between items-center gap-2">
-                                                <p className="font-semibold text-white text-sm truncate">
+                                            <p className="font-semibold text-white text-sm flex items-center gap-1.5">
+                                                <span className="truncate">
                                                     {fullName(otherUser) || "------"}
-                                                </p>
-                                                <span className="text-xs text-gray-400 flex-shrink-0">
-                                                    {formatLastMessageTime(conversation.lastMessageAt || conversation.updatedAt)}
                                                 </span>
-                                            </div>
-                                            <p className="text-sm text-purple-400 truncate mt-0.5">
+                                                {unreadFor(conversation) > 0 && (
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-purple-500 flex-shrink-0" />
+                                                )}
+                                            </p>
+                                            <p
+                                                className={`text-sm truncate mt-0.5 ${
+                                                    unreadFor(conversation) > 0
+                                                        ? "text-white font-medium"
+                                                        : "text-purple-400"
+                                                }`}
+                                            >
                                                 {toPlainText(conversation.lastMessage) ||
                                                     "No messages yet"}
                                             </p>
                                         </div>
-                                        {conversation.unreadCount && conversation.unreadCount > 0 && (
-                                            <span className="bg-purple-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                                                {conversation.unreadCount}
+                                        {/* Time on top, unread count beneath it */}
+                                        <div className="flex flex-col items-end gap-1 flex-shrink-0 self-start pt-0.5">
+                                            <span className="text-xs text-gray-400 whitespace-nowrap">
+                                                {formatLastMessageTime(conversation.lastMessageAt || conversation.updatedAt)}
                                             </span>
-                                        )}
+                                            {unreadFor(conversation) > 0 && (
+                                                <span className="bg-purple-500 text-white text-[11px] font-medium rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center">
+                                                    {unreadFor(conversation) > 99
+                                                        ? "99+"
+                                                        : unreadFor(conversation)}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                 );
                             })
