@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { CommonTable, FilterConfig } from "@/components/ui/table/commonTable";
 import { Eye } from "lucide-react";
 import { capitalizeFirstLetter } from "@/lib/utils";
@@ -7,10 +7,22 @@ import { useGetReportManagementListQuery } from "@/hooks/useReportManagementMuta
 import ReportViewModal from "./ReportViewModal";
 
 export default function ReportManagementPage() {
-  const [selectedReport, setSelectedReport] = useState<any>(null);
+  const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
   const [openViewModal, setOpenViewModal] = useState(false);
 
   const { data, isLoading } = useGetReportManagementListQuery();
+
+  // Track the id and read the row back out of the query result, rather than
+  // holding a copy of it. The suspend/dismiss/resolve mutations invalidate
+  // ["reportManagement"], so a snapshot would keep showing the pre-action
+  // status inside the open modal while the table behind it already refreshed.
+  const selectedReport = useMemo(
+    () =>
+      Array.isArray(data)
+        ? data.find((row: any) => row.id === selectedReportId) ?? null
+        : null,
+    [data, selectedReportId]
+  );
 
   const columns = [
     {
@@ -54,7 +66,7 @@ export default function ReportManagementPage() {
           <button
             className="p-1 border border-gray-600 rounded-md hover:bg-gray-700"
             onClick={() => {
-              setSelectedReport(row); // set current row to state
+              setSelectedReportId(row.id); // remember which report is open
               setOpenViewModal(true); // open modal
             }}
           >

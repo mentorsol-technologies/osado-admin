@@ -21,12 +21,22 @@ interface EventInfoModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   selectedEvent: any;
+  /**
+   * Edit and Suspend reuse the modals the events page already owns rather than
+   * duplicating them here - the page closes this dialog and opens its own. Both
+   * are optional so any other place rendering this modal keeps working with the
+   * buttons simply hidden.
+   */
+  onEdit?: () => void;
+  onSuspend?: () => void;
 }
 
 export default function EventInfoModal({
   open,
   onOpenChange,
   selectedEvent,
+  onEdit,
+  onSuspend,
 }: EventInfoModalProps) {
   const id = selectedEvent?.id;
   const { data: eventData, isLoading } = useViewEventDetailsQuery(id);
@@ -62,6 +72,9 @@ export default function EventInfoModal({
     deleteEvent(id, {
       onSuccess: () => {
         setDeleteOpen(false);
+        // The event no longer exists, so leaving its detail dialog open would
+        // show a stale record - drop back to the (refreshed) list.
+        onOpenChange(false);
       },
     });
   };
@@ -100,7 +113,9 @@ export default function EventInfoModal({
             <div className="space-y-4">
               <div className="flex justify-between">
                 <p className="text-white">Date</p>
-                <p> {FormatDate(event?.createdAt)}</p>
+                {/* The event's own date - this previously rendered createdAt,
+                    making it identical to "Registration Date" below. */}
+                <p> {FormatDate(event?.date)}</p>
               </div>
               <div className="flex justify-between">
                 <p className="text-white">Time</p>
@@ -148,8 +163,19 @@ export default function EventInfoModal({
                     <Badge
                       key={cat.id}
                       variant="secondary"
-                      className="w-auto px-3 py-1"
+                      className="w-auto px-3 py-1 flex items-center gap-1.5"
                     >
+                      {/* Not every category has an icon uploaded, so the chip
+                          falls back to the name on its own. */}
+                      {cat.iconUrl && (
+                        <Image
+                          src={cat.iconUrl}
+                          alt=""
+                          width={14}
+                          height={14}
+                          className="w-3.5 h-3.5 object-contain shrink-0"
+                        />
+                      )}
                       {cat.name}
                     </Badge>
                   ))}
@@ -190,11 +216,24 @@ export default function EventInfoModal({
                   <User size={14} />
                   <p className="text-xs">Organizer</p>
                 </div>
+                {/* Only shown once the organiser actually has reviews - a
+                    hardcoded "0.0 (0)" would read as a bad rating rather than
+                    as "not rated yet". */}
+                {event?.creator?.totalReviews > 0 && (
+                  <div className="flex items-center gap-1 mt-0.5 text-xs text-gray-300">
+                    <Star size={13} className="shrink-0 fill-yellow-400 text-yellow-400" />
+                    <span>{event.creator.averageRating}</span>
+                    <span className="text-gray-500">
+                      ({event.creator.totalReviews})
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
+            {/* No Edit here on purpose - editing the event is offered once, in
+                the footer. This row is about the organiser. */}
             <div className="flex flex-col lg:flex-row gap-3 w-full lg:w-auto">
-              {/* <Button className="flex-1 lg:flex-none">Edit</Button> */}
               <Button
                 variant="outline"
                 className="flex-1 lg:flex-none"
@@ -213,7 +252,12 @@ export default function EventInfoModal({
                   <InfluencerCard
                     key={user.id}
                     name={`${user.name || ""} ${user.surName || ""}`.trim() || "--"}
-                    date={FormatDate(user?.invite?.createdAt)}
+                    // An influencer who applied has a proposal, not an invite -
+                    // reading only the invite date left the card showing
+                    // "Applied -" for everyone who applied on their own.
+                    date={FormatDate(
+                      user?.proposal?.createdAt ?? user?.invite?.createdAt,
+                    )}
                     avatar={user.photoURL}
                   />
                 ))
@@ -222,41 +266,72 @@ export default function EventInfoModal({
               )}
             </div>
           </Section>
-          {/* Applied Booked Service  */}
-          <Section title="Booked Service & Providers">
-            <div className="grid lg:grid-cols-2 gap-4">
-              {serviceProviders.length > 0 ? (
-                serviceProviders.map((user: any) => (
-                  <BookedServiceProviderCard
-                    key={user.id}
-                    name={`${user.name || ""} ${user.surName || ""}`.trim() || "--"}
-                    date={FormatDate(user?.proposal?.createdAt)}
-                    avatar={user.photoURL}
-                  />
-                ))
-              ) : (
-                <p className="text-sm text-gray-400">
-                  No service providers booked
-                </p>
-              )}
-            </div>
-          </Section>
+          {/* Booked Services & Providers - one section holding both the people
+              booked and the packages they were booked for, since they describe
+              the same booking. The two used to be separate sections, which split
+              a provider away from the package they came with. */}
+          <Section title="Booked Services & Providers">
+            {serviceProviders.length === 0 && bookedPackages.length === 0 ? (
+              <p className="text-sm text-gray-400">No services booked</p>
+            ) : (
+              <div className="flex flex-col gap-4">
+                {serviceProviders.length > 0 && (
+                  <div className="grid lg:grid-cols-2 gap-4">
+                    {serviceProviders.map((user: any) => (
+                      <BookedServiceProviderCard
+                        key={user.id}
+                        name={
+                          `${user.name || ""} ${user.surName || ""}`.trim() || "--"
+                        }
+                        date={FormatDate(
+                          user?.invite?.createdAt ?? user?.proposal?.createdAt,
+                        )}
+                        avatar={user.photoURL}
+                      />
+                    ))}
+                  </div>
+                )}
 
-          {/* Booked Services */}
-          <Section title="Booked Services">
-            <div className="grid lg:grid-cols-2 gap-4">
-              {bookedPackages.length > 0 ? (
-                bookedPackages.map((pkg: any) => (
-                  <WeddingsCard key={pkg.id} pkg={pkg} />
-                ))
-              ) : (
-                <p className="text-sm text-gray-400">No services booked</p>
-              )}
-            </div>
+                {bookedPackages.length > 0 && (
+                  <div className="grid lg:grid-cols-2 gap-4">
+                    {bookedPackages.map((pkg: any) => (
+                      <WeddingsCard key={pkg.id} pkg={pkg} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </Section>
 
           {/* Footer buttons */}
-          <div className="mt-6 flex flex-col justify-between gap-3">
+          <div className="mt-6 flex flex-col gap-3">
+            {(onEdit || onSuspend) && (
+              <div className="flex flex-col sm:flex-row gap-3">
+                {onEdit && (
+                  <Button
+                    className="flex-1"
+                    onClick={() => {
+                      onOpenChange(false);
+                      onEdit();
+                    }}
+                  >
+                    Edit
+                  </Button>
+                )}
+                {onSuspend && (
+                  <Button
+                    className="flex-1"
+                    variant="outline"
+                    onClick={() => {
+                      onOpenChange(false);
+                      onSuspend();
+                    }}
+                  >
+                    Suspend
+                  </Button>
+                )}
+              </div>
+            )}
             <Button
               className="flex-1"
               variant="outline"
@@ -306,6 +381,42 @@ function Section({
   );
 }
 
+/**
+ * Avatar that tolerates a missing photo.
+ *
+ * Accounts created by phone signup often have no photoId at all, so photoURL
+ * comes back null - and next/image throws "Cannot read properties of null" when
+ * handed a null src, taking the whole modal down. Falls back to the person's
+ * initial, then a generic icon, matching how EventCard renders its organizer.
+ */
+function CardAvatar({ name, avatar }: { name: string; avatar?: string | null }) {
+  if (avatar) {
+    return (
+      <Image
+        src={avatar}
+        alt={name}
+        width={50}
+        height={50}
+        className="rounded-full object-cover w-10 h-10"
+      />
+    );
+  }
+
+  const initial = name?.trim()?.charAt(0) ?? "";
+
+  return (
+    <div className="w-10 h-10 rounded-full bg-black-300 flex items-center justify-center flex-shrink-0">
+      {initial && initial !== "-" ? (
+        <span className="text-sm font-semibold text-white uppercase">
+          {initial}
+        </span>
+      ) : (
+        <User size={18} className="text-gray-400" />
+      )}
+    </div>
+  );
+}
+
 function InfluencerCard({
   name,
   date,
@@ -313,18 +424,12 @@ function InfluencerCard({
 }: {
   name: string;
   date: string;
-  avatar: string;
+  avatar?: string | null;
 }) {
   return (
     <Card className="bg-black-600 text-white">
       <CardHeader className="flex flex-row items-center gap-3">
-        <Image
-          src={avatar}
-          alt={name}
-          width={50}
-          height={50}
-          className="rounded-full object-cover w-10 h-10"
-        />
+        <CardAvatar name={name} avatar={avatar} />
         <div>
           <CardTitle className="text-sm font-medium text-white">
             {name}
@@ -346,18 +451,12 @@ function BookedServiceProviderCard({
 }: {
   name: string;
   date: string;
-  avatar: string;
+  avatar?: string | null;
 }) {
   return (
     <Card className="bg-black-600 text-white">
       <CardHeader className="flex flex-row items-center gap-3">
-        <Image
-          src={avatar}
-          alt={name}
-          width={50}
-          height={50}
-          className="rounded-full w-10 h-10 object-cover"
-        />
+        <CardAvatar name={name} avatar={avatar} />
         <div>
           <CardTitle className="text-sm font-medium text-white">
             {name}

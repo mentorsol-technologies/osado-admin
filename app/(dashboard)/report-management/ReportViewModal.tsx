@@ -8,7 +8,7 @@ import { capitalizeFirstLetter } from "@/lib/utils";
 import { useReportDismissalMutation, useReportResolvedMutation, useSendWarningMutation } from "@/hooks/useReportManagementMutations";
 import { toast } from "react-toastify";
 import StatusReportModal from "@/components/ui/commonComponent/StatusReportModal";
-import SuspendUserModal from "./suspendReportManagement";
+import SuspendChatModal from "./suspendReportManagement";
 
 interface Role {
     id: string;
@@ -58,10 +58,24 @@ const ReportViewModal: React.FC<ReportViewModalProps> = ({
 
     if (!report) return null;
 
+    // Once a report has been actioned to a final outcome there is nothing left
+    // to do with it, so the action buttons come off. `pending` and `warning`
+    // stay open on purpose - a warning doesn't close the case, the admin can
+    // still escalate it to a suspension or resolve/dismiss it afterwards.
+    // The backend agrees: suspendUserAccount rejects an already-suspended user
+    // with a 400, so offering the button again could only ever fail.
+    const status = report.status?.toLowerCase();
+    const isClosed =
+        status === "suspended" || status === "dismissed" || status === "resolved";
+
     const handleSendWarning = () => {
         sendWarning(report.id, {
             onSuccess: () => {
                 toast.success("Warning sent successfully");
+                // Unlike resolve/dismiss there's no follow-up success dialog to
+                // land on, so close straight out to the list - the toast is the
+                // confirmation and the row's status refreshes behind it.
+                onOpenChange(false);
             },
             onError: () => {
                 toast.error("Failed to send warning");
@@ -103,18 +117,30 @@ const ReportViewModal: React.FC<ReportViewModalProps> = ({
                 title="Report Info"
                 size="lg"
                 footer={
-                    <div className="flex items-center gap-4 mt-4 w-full">
-                        <Button
-                            variant="default"
-                            className="flex-1"
-                            onClick={() => setSuspendOpen(true)}
-                        >
-                            Suspend Account
-                        </Button>
-                        <Button variant="outline" className="flex-1" onClick={handleDismiss}>
-                            Dismiss Report
-                        </Button>
-                    </div>
+                    isClosed ? (
+                        <p className="mt-4 w-full text-center text-sm text-gray-400">
+                            This report is already {capitalizeFirstLetter(status)} — no
+                            further action is available.
+                        </p>
+                    ) : (
+                        <div className="flex items-center gap-4 mt-4 w-full">
+                            <Button
+                                variant="default"
+                                className="flex-1"
+                                onClick={() => setSuspendOpen(true)}
+                            >
+                                Suspend Chat
+                            </Button>
+                            <Button
+                                variant="outline"
+                                className="flex-1"
+                                onClick={handleDismiss}
+                                disabled={dismissing}
+                            >
+                                {dismissing ? "Dismissing..." : "Dismiss Report"}
+                            </Button>
+                        </div>
+                    )
                 }
             >
                 <div className="space-y-6 text-white">
@@ -175,14 +201,20 @@ const ReportViewModal: React.FC<ReportViewModalProps> = ({
                     <div>
                         <div className="flex justify-between items-center mb-2">
                             <h3 className="font-semibold ">Reported User Details</h3>
-                            <div className=" flex gap-3">
-                                <Button onClick={handleSendWarning} disabled={isPending}>
-                                    {isPending ? "Sending..." : "Send Warning"}
-                                </Button>
-                                <Button variant="outline" onClick={handleResolve}>
-                                    Mark as Resolved
-                                </Button>
-                            </div>
+                            {!isClosed && (
+                                <div className=" flex gap-3">
+                                    <Button onClick={handleSendWarning} disabled={isPending}>
+                                        {isPending ? "Sending..." : "Send Warning"}
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        onClick={handleResolve}
+                                        disabled={resolving}
+                                    >
+                                        {resolving ? "Resolving..." : "Mark as Resolved"}
+                                    </Button>
+                                </div>
+                            )}
                         </div>
 
 
@@ -241,13 +273,15 @@ const ReportViewModal: React.FC<ReportViewModalProps> = ({
                 />
 
             </Modal >
-            <SuspendUserModal
+            <SuspendChatModal
                 open={suspendOpen}
                 onOpenChange={setSuspendOpen}
-                onConfirm={(data) => {
-                    console.log("Suspension Payload:", data);
-                    // Toast is now handled inside SuspendUserModal
+                onConfirm={() => {
+                    // Toast is handled inside SuspendChatModal; closing the
+                    // report dialog too lands the admin back on the refreshed
+                    // list, same as Send Warning.
                     setSuspendOpen(false);
+                    onOpenChange(false);
                 }}
                 reportId={report?.id || ""}
             />

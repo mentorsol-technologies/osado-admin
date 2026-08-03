@@ -26,3 +26,13 @@ export const SuspendAccount = async (
   const response = await api.patch(`/reports/${id}/suspend-account`, payload);
   return response.data;
 };
+
+// Freezes the conversation between the reporter and the reported user. Both
+// accounts stay active - only this chat stops accepting new messages.
+export const SuspendChat = async (
+  id: string,
+  payload: { reason: string }
+) => {
+  const response = await api.patch(`/reports/${id}/suspend-chat`, payload);
+  return response.data;
+};

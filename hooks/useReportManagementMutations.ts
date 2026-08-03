@@ -4,6 +4,7 @@ import {
   reportResolved,
   reportSendWarning,
   SuspendAccount,
+  SuspendChat,
 } from "@/services/report-management/ReportManagementServices";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -62,6 +63,23 @@ export const useSuspendAccountMutation = () => {
     }) => SuspendAccount(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["reportManagement"] });
+    },
+  });
+};
+
+export const useSuspendChatMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: { reason: string } }) =>
+      SuspendChat(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["reportManagement"] });
+      // The chat screens render conversation status, so they need to re-read
+      // once a conversation has been frozen. Both the list and any open
+      // conversation (["chatConversation", id] matches by prefix).
+      queryClient.invalidateQueries({ queryKey: ["chatConversations"] });
+      queryClient.invalidateQueries({ queryKey: ["chatConversation"] });
     },
   });
 };

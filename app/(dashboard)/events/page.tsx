@@ -188,6 +188,10 @@ const EventsManagement = () => {
           open={openModal}
           onOpenChange={setOpenModal}
           selectedEvent={selectedEvent}
+          // Reuse the page's existing Edit / Suspend modals - selectedEvent is
+          // already set, so these only need to open them.
+          onEdit={() => setIsEditModalOpen(true)}
+          onSuspend={() => setSuspendOpen(true)}
         />
       )}
 
