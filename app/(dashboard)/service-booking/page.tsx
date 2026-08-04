@@ -143,12 +143,6 @@ export default function ServiceBookingPage() {
       type: "date",
     },
   ];
-  const handleRefundSubmit = (data: any) => {
-    console.log("Refund Data:", data);
-
-    setRefundOpen(false);
-    setSuspendOpen(true);
-  };
   const handleEditSave = (data: any) => {
     console.log("Edited Booking Data:", data);
     setEditOpen(false);
@@ -227,12 +221,7 @@ export default function ServiceBookingPage() {
       <RefundBookingModal
         open={refundOpen}
         setOpen={setRefundOpen}
-        selectedRefund={{
-          amount: selectedBooking?.amount ?? "",
-          reason: selectedBooking?.reason ?? "Service Not Provided",
-          comment: "",
-        }}
-        onSave={handleRefundSubmit}
+        bookingId={selectedBooking?.id}
         onCancelClick={() => setRefundOpen(false)}
       />
 

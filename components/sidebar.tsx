@@ -97,6 +97,8 @@ const menuItems: MenuItem[] = [
     children: [
       { label: "Transactions", href: "/finance/transaction" },
       { label: "Payouts", href: "/finance/payout" },
+      { label: "Refund Requests", href: "/finance/refund-requests" },
+      { label: "Refunds", href: "/finance/refunds" },
     ],
   },
   {
