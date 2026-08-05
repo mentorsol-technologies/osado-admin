@@ -5,6 +5,7 @@ import {
   getRefundRequests,
   getRefundRequestStats,
   rejectRefundRequest,
+  ApproveRefundPayload,
   RefundRequestStatus,
 } from "@/services/refunds/RefundRequestServices";
 
@@ -55,8 +56,11 @@ const invalidateAfterReview = (queryClient: ReturnType<typeof useQueryClient>) =
 export const useApproveRefundRequestMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, notes }: { id: string; notes?: string }) =>
-      approveRefundRequest(id, notes),
+    mutationFn: ({
+      id,
+      ...payload
+    }: { id: string } & ApproveRefundPayload) =>
+      approveRefundRequest(id, payload),
     onSuccess: () => invalidateAfterReview(queryClient),
   });
 };

@@ -46,7 +46,6 @@ export default function ReviewRefundRequestModal({
   onOpenChange,
   requestId,
 }: Props) {
-  const [notes, setNotes] = useState("");
   const [rejectReason, setRejectReason] = useState("");
   const [mode, setMode] = useState<"review" | "reject">("review");
 
@@ -58,9 +57,15 @@ export default function ReviewRefundRequestModal({
 
   const request = data?.request;
   const quote = data?.quote;
+  const history = data?.history;
+
+  // Worth the admin's attention: a repeat refunder, or someone who has already
+  // been refunded for this very service. Per-booking guards can't catch either,
+  // because each new booking passes them cleanly.
+  const isNotable =
+    (history?.sameServiceRefunds ?? 0) > 0 || (history?.completed ?? 0) >= 2;
 
   const close = () => {
-    setNotes("");
     setRejectReason("");
     setMode("review");
     onOpenChange(false);
@@ -72,7 +77,7 @@ export default function ReviewRefundRequestModal({
   const handleApprove = () => {
     if (!requestId) return;
     approve(
-      { id: requestId, notes: notes.trim() || undefined },
+      { id: requestId },
       {
         onSuccess: () => {
           toast.success(
@@ -230,19 +235,50 @@ export default function ReviewRefundRequestModal({
             </div>
           </div>
 
-          {mode === "review" ? (
-            isPending && (
-              <div>
-                <label className="block text-sm mb-1">
-                  Internal note <span className="text-gray-500">(optional)</span>
-                </label>
-                <Textarea
-                  value={notes}
-                  placeholder="Recorded against the review. Not sent to the requester."
-                  className={FIELD_CLASS}
-                  onChange={(e) => setNotes(e.target.value)}
-                />
+          {/* Requester track record. Informational, never blocking - a provider
+              who genuinely cancelled twice isn't the customer's fault. */}
+          {history && history.totalRequests > 0 && (
+            <div
+              className={`flex gap-2 rounded-[14px] border p-3 ${
+                isNotable
+                  ? "border-yellow-500/30 bg-yellow-500/5 text-yellow-200"
+                  : "border-black-300 bg-black-600 text-gray-300"
+              }`}
+            >
+              {isNotable ? (
+                <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+              ) : (
+                <Info size={16} className="shrink-0 mt-0.5" />
+              )}
+              <div className="space-y-1">
+                <p className="font-medium text-white">Requester history</p>
+                <p>
+                  {history.totalRequests} previous refund
+                  {history.totalRequests === 1 ? " request" : " requests"} —{" "}
+                  {history.completed} approved, {history.rejected} declined
+                </p>
+                {history.sameServiceRefunds > 0 && (
+                  <p className="text-white">
+                    Already refunded for this same service{" "}
+                    {history.sameServiceRefunds === 1
+                      ? "once"
+                      : `${history.sameServiceRefunds} times`}
+                    .
+                  </p>
+                )}
               </div>
+            </div>
+          )}
+
+          {mode === "review" ? (
+            // Nothing to fill in on approval: the refund amount comes from the
+            // policy shown above, so the admin's only decision is yes or no.
+            isPending && (
+              <p className="text-xs text-gray-500">
+                Approving refunds{" "}
+                <span className="text-gray-300">{quote?.refundableAmount}</span>{" "}
+                automatically, as determined by the refund policy above.
+              </p>
             )
           ) : (
             <div>

@@ -29,11 +29,11 @@ const REASON_LABELS: Record<string, string> = {
 };
 
 const TABS: { label: string; value?: RefundRequestStatus }[] = [
+  { label: "All", value: undefined },
   { label: "Pending", value: "PENDING" },
   { label: "Completed", value: "COMPLETED" },
   { label: "Declined", value: "REJECTED" },
   { label: "Failed", value: "FAILED" },
-  { label: "All", value: undefined },
 ];
 
 export default function RefundRequestsPage() {

@@ -130,7 +130,7 @@ export default function TransactionPage() {
           mobileView="card"
           data={data}
           columns={columns}
-          rowsPerPage={5}
+          rowsPerPage={10}
           filters={filters}
           searchable
         />

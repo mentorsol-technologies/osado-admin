@@ -104,7 +104,7 @@ export default function PayoutPage() {
           mobileView="card"
           data={data}
           columns={columns}
-          rowsPerPage={5}
+          rowsPerPage={10}
           searchable
           filters={filters}
         />

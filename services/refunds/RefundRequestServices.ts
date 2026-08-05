@@ -53,17 +53,42 @@ export const getRefundRequestStats = async (): Promise<
  * A single request together with the refund policy quote for its booking, so
  * the admin reviews the ask and the entitlement on one screen.
  */
+/** The requester's refund track record, shown to the reviewing admin. */
+export interface RefundRequesterHistory {
+  /** Their other refund requests, excluding the one being reviewed. */
+  totalRequests: number;
+  completed: number;
+  rejected: number;
+  /** Completed refunds they've already had on this same service package. */
+  sameServiceRefunds: number;
+}
+
 export const getRefundRequest = async (
   id: string,
-): Promise<{ request: RefundRequest; quote: RefundQuote | null }> => {
+): Promise<{
+  request: RefundRequest;
+  quote: RefundQuote | null;
+  history: RefundRequesterHistory | null;
+}> => {
   return (await api.get(`/refund-requests/${id}`)) as unknown as {
     request: RefundRequest;
     quote: RefundQuote | null;
+    history: RefundRequesterHistory | null;
   };
 };
 
-export const approveRefundRequest = async (id: string, notes?: string) => {
-  return await api.patch(`/refund-requests/${id}/approve`, { notes });
+export interface ApproveRefundPayload {
+  notes?: string;
+  /** True when the admin has already paid the refund outside the gateway. */
+  manual?: boolean;
+  manualReference?: string;
+}
+
+export const approveRefundRequest = async (
+  id: string,
+  payload: ApproveRefundPayload = {},
+) => {
+  return await api.patch(`/refund-requests/${id}/approve`, payload);
 };
 
 export const rejectRefundRequest = async (id: string, reason: string) => {
