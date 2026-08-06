@@ -85,9 +85,14 @@ export default function RefundBookingModal({
   const notRefundable =
     !quote || quote.eligibility === "NONE" || quote.refundableAmount <= 0;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!quote?.paymentId) {
       toast.error("No payment was found for this booking");
+      return;
+    }
+
+    if (!bookingId) {
+      toast.error("No booking ID found for this refund");
       return;
     }
 
@@ -109,11 +114,12 @@ export default function RefundBookingModal({
         amount: value,
         reason,
         comment: comment.trim() || undefined,
+        bookingId, // Include booking ID so backend knows to cancel it
       },
       {
         onSuccess: () => {
           toast.success(
-            "Refund approved. The customer has been notified that it is being processed.",
+            "Booking cancelled and refund approved. The customer has been notified.",
           );
           onSaved?.();
           close();

@@ -20,6 +20,7 @@ export interface RefundQuote {
 
 export interface CreateRefundPayload {
   paymentId: string;
+  bookingId?: string; // Optional: if provided, the booking will be cancelled
   amount?: number;
   reason: RefundReason;
   comment?: string;
