@@ -13,7 +13,12 @@ import DeleteConfirmModal from "@/components/ui/commonComponent/DeleteConfirmMod
 import DiscountCodeModal from "./DiscountCodeModal";
 
 export default function DiscountCodesPage() {
-  const { data: codes } = useGetDiscountCodesQuery();
+  const [page, setPage] = useState(1);
+  const limit = 10;
+  const { data: response } = useGetDiscountCodesQuery(page, limit);
+  const codes = (response as any)?.data ?? [];
+  const total = (response as any)?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
   const { mutate: deleteCode, isPending: isDeleting } =
     useDeleteDiscountCodeMutation();
 
@@ -124,9 +129,12 @@ export default function DiscountCodesPage() {
           mobileView="card"
           data={tableData}
           columns={columns}
-          rowsPerPage={10}
+          rowsPerPage={limit}
           filters={filters}
           searchable
+          currentPage={page}
+          onPageChange={setPage}
+          totalPages={totalPages}
           renderCardActions={(row: any) => (
             <div className="flex gap-2 w-full">
               <Button

@@ -11,7 +11,12 @@ import AddRoleModal from "./CreateRole";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const RoleManagement = () => {
-  const { data: rolesList, isLoading } = useRolesQuery();
+  const [page, setPage] = useState(1);
+  const limit = 10;
+  const { data: response, isLoading } = useRolesQuery(page, limit);
+  const rolesList = (response as any)?.data ?? [];
+  const total = (response as any)?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
 
   const [addOpen, setAddOpen] = useState(false);
 
@@ -74,8 +79,11 @@ const RoleManagement = () => {
           mobileView="card"
           data={data}
           columns={columns}
-          rowsPerPage={10}
+          rowsPerPage={limit}
           searchable
+          currentPage={page}
+          onPageChange={setPage}
+          totalPages={totalPages}
         />
       </div>
       <AddRoleModal

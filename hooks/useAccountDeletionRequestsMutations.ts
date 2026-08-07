@@ -7,10 +7,10 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
-export const useAccountDeletionRequestsQuery = () => {
+export const useAccountDeletionRequestsQuery = (page = 1, limit = 10) => {
   return useQuery({
-    queryKey: ["accountDeletionRequests"],
-    queryFn: getAccountDeletionRequests,
+    queryKey: ["accountDeletionRequests", page, limit],
+    queryFn: () => getAccountDeletionRequests(page, limit),
     staleTime: 1000 * 60 * 2,
   });
 };

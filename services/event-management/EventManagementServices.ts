@@ -1,7 +1,7 @@
 import api from "@/lib/axios";
 
-export const GetAllEventsLIst = async () => {
-  const response = await api.get("/events");
+export const GetAllEventsLIst = async (page = 1, limit = 8) => {
+  const response = await api.get("/events", { params: { page, limit } });
   return response;
 };
 

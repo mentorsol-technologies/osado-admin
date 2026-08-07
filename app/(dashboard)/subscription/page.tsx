@@ -13,7 +13,12 @@ import DeleteConfirmModal from "@/components/ui/commonComponent/DeleteConfirmMod
 import SubscriptionPlanModal from "./SubscriptionPlanModal";
 
 export default function SubscriptionPage() {
-  const { data: plans } = useGetSubscriptionPlansQuery();
+  const [page, setPage] = useState(1);
+  const limit = 10;
+  const { data: response } = useGetSubscriptionPlansQuery(page, limit);
+  const plans = (response as any)?.data ?? [];
+  const total = (response as any)?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
   const { mutate: deletePlan, isPending: isDeleting } =
     useDeleteSubscriptionPlanMutation();
 
@@ -120,9 +125,12 @@ export default function SubscriptionPage() {
           mobileView="card"
           data={tableData}
           columns={columns}
-          rowsPerPage={10}
+          rowsPerPage={limit}
           filters={filters}
           searchable
+          currentPage={page}
+          onPageChange={setPage}
+          totalPages={totalPages}
           renderCardActions={(row: any) => (
             <div className="flex gap-2 w-full">
               <Button

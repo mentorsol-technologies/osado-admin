@@ -6,10 +6,10 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
-export const useBussinessOwnerQuery = () => {
+export const useBussinessOwnerQuery = (page = 1, limit = 10) => {
   return useQuery({
-    queryKey: ["owner"],
-    queryFn: BussinessOwnerService,
+    queryKey: ["owner", page, limit],
+    queryFn: () => BussinessOwnerService(page, limit),
     staleTime: 1000 * 60 * 2,
   });
 };

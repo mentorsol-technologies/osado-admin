@@ -1,8 +1,7 @@
 import api from "@/lib/axios";
 
-export const getDiscountCodes = async () => {
-  const response = await api.get("/discount-codes");
-  return response.data;
+export const getDiscountCodes = async (page = 1, limit = 10) => {
+  return await api.get("/discount-codes", { params: { page, limit } });
 };
 
 export const createDiscountCode = async (data: any) => {

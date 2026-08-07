@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useState, useLayoutEffect } from "react";
 import { Sidebar } from "@/components/sidebar";
 import { Navbar } from "@/components/navbar";
 import { useRouter } from "next/navigation";
@@ -13,13 +13,22 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
+  // Must default to false on the very first render, matching what the server
+  // renders (it has no cookie to read) - reading the cookie in the useState
+  // initializer instead broke hydration, since the client's first render
+  // would then disagree with the server's HTML.
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
+  // useLayoutEffect (not useEffect) so this runs before the browser paints
+  // the "Loading..." state below - the swap to real content happens before
+  // that frame is ever shown, so there's no visible flash on a client-side
+  // navigation (e.g. right after login), while a fresh/hard page load still
+  // hydrates correctly since the first render matches the server either way.
+  useLayoutEffect(() => {
     const token = Cookies.get("osado-admin-token");
     if (!token) {
       router.push("/login");
+      setIsAuthenticated(false);
     } else {
       setIsAuthenticated(true);
     }

@@ -21,7 +21,12 @@ export default function SubAdminPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const { data, isLoading, isError } = useGetSubAdminsQuery();
+  const [page, setPage] = useState(1);
+  const limit = 10;
+  const { data: response, isLoading, isError } = useGetSubAdminsQuery(page, limit);
+  const data = (response as any)?.data ?? [];
+  const total = (response as any)?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
   const { mutate: deleteSubAdmin, isPending } = useDeleteSubAdminMutation();
 
   const handleDelete = () => {
@@ -140,9 +145,12 @@ export default function SubAdminPage() {
           mobileView="card"
           data={data}
           columns={columns}
-          rowsPerPage={10}
+          rowsPerPage={limit}
           filters={filters}
           searchable
+          currentPage={page}
+          onPageChange={setPage}
+          totalPages={totalPages}
           renderCardActions={(row) => (
             <div className="flex gap-2 w-full">
               <Button

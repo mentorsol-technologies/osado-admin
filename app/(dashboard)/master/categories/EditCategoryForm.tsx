@@ -167,7 +167,7 @@ export default function EditCategoryModal({
     >
       {/* Category Name + Status */}
       <div className="flex flex-col sm:flex-row gap-3 w-full">
-        <div className="flex-1">
+        <div className="flex-1 px-1">
           <label className="block text-sm mb-1">Category Name</label>
           <CommonInput placeholder="Category Name" {...register("name")} />
           {errors.name && (
@@ -195,7 +195,7 @@ export default function EditCategoryModal({
       </div>
 
       {/* Description */}
-      <div className="mt-4">
+      <div className="mt-4 px-1">
         <label className="block text-sm mb-1">Description</label>
         <Textarea
           rows={4}
@@ -205,7 +205,7 @@ export default function EditCategoryModal({
       </div>
 
       {/* File Upload */}
-      <div className="mt-4">
+      <div className="mt-4 px-1">
         <Upload
           label="Upload Images"
           multiple

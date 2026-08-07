@@ -1,6 +1,16 @@
 "use client";
 
-import { X, ChevronDown } from "lucide-react";
+import {
+  X,
+  ChevronDown,
+  ShieldCheck,
+  Building2,
+  BadgeCheck,
+  UserX,
+  CreditCard,
+  Percent,
+  type LucideIcon,
+} from "lucide-react";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -9,13 +19,15 @@ import { useEffect, useState } from "react";
 interface MenuChild {
   label: string;
   href?: string;
-  icon?: string;
 }
 
 interface MenuItem {
   label: string;
   href?: string;
-  icon: string;
+  // Either an existing custom SVG path, or - only for items that previously
+  // shared an icon with something else - a Lucide component to keep every
+  // entry visually distinct without needing a new asset file.
+  icon: string | LucideIcon;
   children?: MenuChild[];
 }
 
@@ -61,7 +73,8 @@ const menuItems: MenuItem[] = [
     href: "/service-booking",
   },
   {
-    icon: "/images/mingcute_document-fill (1).svg",
+    // Was a duplicate of Service Booking's document icon.
+    icon: ShieldCheck,
     label: "Role Management",
     href: "/role-management",
   },
@@ -71,12 +84,14 @@ const menuItems: MenuItem[] = [
     href: "/events",
   },
   {
-    icon: "/images/tdesign_user-business-filled.svg",
+    // Was a duplicate of Users/KYC's business-user icon.
+    icon: Building2,
     label: "Business Owners",
     href: "/business-owners",
   },
   {
-    icon: "/images/tdesign_user-business-filled.svg",
+    // Was a duplicate of Users/Business Owners's business-user icon.
+    icon: BadgeCheck,
     label: "KYC Management",
     href: "/kyc-management",
   },
@@ -86,7 +101,8 @@ const menuItems: MenuItem[] = [
     href: "/report-management",
   },
   {
-    icon: "/images/material-symbols_report-rounded.svg",
+    // Was a duplicate of Report Management's report icon.
+    icon: UserX,
     label: "Account Deletion Requests",
     href: "/account-deletion-requests",
   },
@@ -102,12 +118,14 @@ const menuItems: MenuItem[] = [
     ],
   },
   {
-    icon: "/images/material-symbols_finance-rounded.svg",
+    // Was a duplicate of Finance Module/Discount Codes's finance icon.
+    icon: CreditCard,
     label: "Subscription Plans",
     href: "/subscription",
   },
   {
-    icon: "/images/material-symbols_finance-rounded.svg",
+    // Was a duplicate of Finance Module/Subscription Plans's finance icon.
+    icon: Percent,
     label: "Discount Codes",
     href: "/discount-codes",
   },
@@ -128,6 +146,14 @@ const menuItems: MenuItem[] = [
   },
   // { icon: Settings, label: "Settings", href: "/settings" },
 ];
+
+function MenuIcon({ icon, label }: { icon: string | LucideIcon; label: string }) {
+  if (typeof icon === "string") {
+    return <Image src={icon} alt={label} width={20} height={20} />;
+  }
+  const Icon = icon;
+  return <Icon size={20} />;
+}
 
 interface SidebarProps {
   onClose?: () => void;
@@ -180,7 +206,7 @@ export function Sidebar({ onClose }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1">
+      <nav className="flex-1 pb-6">
         <ul className="space-y-1">
           {menuItems.map((item) => {
             const isActive =
@@ -200,12 +226,7 @@ export function Sidebar({ onClose }: SidebarProps) {
                       }`}
                   >
                     <div className="flex items-center gap-3">
-                      <Image
-                        src={item.icon}
-                        alt={item.label}
-                        width={20}
-                        height={20}
-                      />
+                      <MenuIcon icon={item.icon} label={item.label} />
                       <span>{item.label}</span>
                     </div>
                     <ChevronDown
@@ -230,18 +251,7 @@ export function Sidebar({ onClose }: SidebarProps) {
                                   : "text-gray-300 hover:text-white"
                                 }`}
                             >
-                              <div
-                                className={`flex items-center gap-3 ${child?.icon ? "" : "pl-2"
-                                  }`}
-                              >
-                                {child?.icon && (
-                                  <Image
-                                    src={child?.icon}
-                                    alt={child?.label}
-                                    width={20}
-                                    height={20}
-                                  />
-                                )}
+                              <div className="flex items-center gap-3 pl-2">
                                 <span>{child.label}</span>
                               </div>
                             </Link>
@@ -265,12 +275,7 @@ export function Sidebar({ onClose }: SidebarProps) {
                       : "text-gray-300 hover:text-white"
                     }`}
                 >
-                  <Image
-                    src={item.icon}
-                    alt={item.label}
-                    width={20}
-                    height={20}
-                  />
+                  <MenuIcon icon={item.icon} label={item.label} />
                   <span>{item.label}</span>
                 </Link>
               </li>

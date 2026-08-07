@@ -41,6 +41,17 @@ interface Props<T> {
   onSuspendClick?: (row: T) => void;
   onEditClick?: (row: T) => void;
   renderCardActions?: (row: T) => ReactNode;
+  /**
+   * Controlled/server-driven pagination: pass all three when `data` is
+   * already just the current page (fetched from the server) rather than the
+   * full dataset. When provided, the table stops slicing `data` itself and
+   * renders its pagination footer from these instead of computing its own -
+   * otherwise a parent-rendered <Pagination> alongside a server-paged fetch
+   * doubles up with this table's own internal one.
+   */
+  currentPage?: number;
+  onPageChange?: (page: number) => void;
+  totalPages?: number;
 }
 
 export function CommonTable<T extends { [key: string]: any }>({
@@ -55,8 +66,15 @@ export function CommonTable<T extends { [key: string]: any }>({
   onSuspendClick,
   onEditClick,
   renderCardActions,
+  currentPage,
+  onPageChange,
+  totalPages: totalPagesProp,
 }: Props<T>) {
-  const [page, setPage] = useState(1);
+  const isControlled =
+    currentPage !== undefined && onPageChange !== undefined && totalPagesProp !== undefined;
+  const [internalPage, setInternalPage] = useState(1);
+  const page = isControlled ? currentPage! : internalPage;
+  const setPage = isControlled ? onPageChange! : setInternalPage;
   const [search, setSearch] = useState("");
   const [selectedFilters, setSelectedFilters] = useState<
     Record<string, string>
@@ -247,16 +265,25 @@ export function CommonTable<T extends { [key: string]: any }>({
     return result;
   }, [data, search, selectedFilters, filters, columns]);
 
-  const totalPages = Math.ceil(filteredData?.length / rowsPerPage);
+  const totalPages = isControlled
+    ? totalPagesProp || 1
+    : Math.ceil(filteredData?.length / rowsPerPage);
 
   const paginated = useMemo(() => {
+    // Controlled mode: `data` is already exactly the current server page,
+    // so re-slicing it here would just chop it down further.
+    if (isControlled) return filteredData;
     const start = (page - 1) * rowsPerPage;
     return filteredData?.slice(start, start + rowsPerPage);
-  }, [page, filteredData, rowsPerPage]);
+  }, [isControlled, page, filteredData, rowsPerPage]);
 
   useEffect(() => {
-    setPage(1);
-  }, [search, selectedFilters]);
+    // In controlled mode, resetting to page 1 here would trigger a real
+    // server refetch on every keystroke in the search box - search only
+    // ever filters within the current page's rows, so it shouldn't move
+    // server-side pagination at all.
+    if (!isControlled) setPage(1);
+  }, [search, selectedFilters, isControlled]);
 
   // ------------------ Render ------------------
 

@@ -4,10 +4,10 @@ import { toast } from "react-toastify";
 
 
 
-export const useRolesQuery = () => {
+export const useRolesQuery = (page = 1, limit = 10) => {
     return useQuery({
-        queryKey: ["roles"],
-        queryFn: getRoles,
+        queryKey: ["roles", page, limit],
+        queryFn: () => getRoles(page, limit),
         staleTime: 1000 * 60 * 2,
     });
 };

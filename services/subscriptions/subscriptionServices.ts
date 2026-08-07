@@ -1,8 +1,7 @@
 import api from "@/lib/axios";
 
-export const getSubscriptionPlans = async () => {
-  const response = await api.get("/subscription-plans");
-  return response.data;
+export const getSubscriptionPlans = async (page = 1, limit = 10) => {
+  return await api.get("/subscription-plans", { params: { page, limit } });
 };
 
 export const createSubscriptionPlan = async (data: any) => {

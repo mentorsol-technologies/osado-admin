@@ -19,8 +19,13 @@ const ROLE_LABELS: Record<string, string> = {
 export default function TransactionPage() {
   const [openViewModal, setOpenViewModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+  const [page, setPage] = useState(1);
+  const limit = 10;
 
-  const { data: transactions } = useGetWalletTransactionsQuery();
+  const { data: response } = useGetWalletTransactionsQuery(page, limit);
+  const transactions = (response as any)?.data ?? [];
+  const total = (response as any)?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
 
   const columns = [
     { key: "transaction_id", label: "Transaction ID" },
@@ -130,9 +135,12 @@ export default function TransactionPage() {
           mobileView="card"
           data={data}
           columns={columns}
-          rowsPerPage={10}
+          rowsPerPage={limit}
           filters={filters}
           searchable
+          currentPage={page}
+          onPageChange={setPage}
+          totalPages={totalPages}
         />
       </div>
       <TransactionViewForm

@@ -1,10 +1,9 @@
 import api from "@/lib/axios";
 
-export const getAccountDeletionRequests = async () => {
-  const response = await api.get("/account-deletion-requests", {
-    params: { limit: 100 },
+export const getAccountDeletionRequests = async (page = 1, limit = 10) => {
+  return await api.get("/account-deletion-requests", {
+    params: { page, limit },
   });
-  return response.data;
 };
 
 export const getAccountDeletionRequestDetails = async (id: string) => {

@@ -1,6 +1,6 @@
 "use client";
 import FiltersBar, { Filter } from "@/components/ui/commonComponent/FiltersBar";
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import EventCard from "./EventCard";
 import EventInfoModal from "./EventInfoModalForm";
 import SuspendedEventModal from "./SuspendEventModal";
@@ -17,7 +17,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Pagination from "@/components/ui/pagination";
 
 const EventsManagement = () => {
-  const { data: eventlist, isLoading } = useGetAllEventsQuery();
+  const pageSize = 8;
+  const [currentPage, setCurrentPage] = useState(1);
+  const { data: eventlist, isLoading } = useGetAllEventsQuery(currentPage, pageSize);
   const { mutate: suspendEvent } = useSuspendEventMutation();
 
   const [selectedFilters, setSelectedFilters] = useState<{
@@ -25,7 +27,6 @@ const EventsManagement = () => {
   }>({});
   const [search, setSearch] = useState("");
   const [openModal, setOpenModal] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
@@ -66,8 +67,11 @@ const EventsManagement = () => {
     },
   ];
 
-  // Apply filters to event list
-  const filteredEvents = useMemo(() => {
+  // Apply filters to event list. Search/filter run only within the current
+  // server page's events - pagination itself is server-driven (see
+  // useGetAllEventsQuery(currentPage, pageSize) above), so this is no longer
+  // re-sliced locally.
+  const paginatedEvents = useMemo(() => {
     const events = eventlist?.data || [];
     return applyFilters(events, search, selectedFilters, {
       searchKeys: ["title", "city"],
@@ -76,19 +80,8 @@ const EventsManagement = () => {
     });
   }, [eventlist?.data, search, selectedFilters]);
 
-  /* -------------------- PAGINATION -------------------- */
-  const pageSize = 8;
-  const totalPages = Math.ceil(filteredEvents.length / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const paginatedEvents = filteredEvents.slice(
-    startIndex,
-    startIndex + pageSize
-  );
-
-  // Reset to page 1 when filters or search change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search, selectedFilters]);
+  const total = eventlist?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   const handleFilterChange = (key: string, value: string) => {
     setSelectedFilters((prev) => {

@@ -6,17 +6,17 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
-export const useGetWithdrawalRequestsQuery = () => {
+export const useGetWithdrawalRequestsQuery = (page = 1, limit = 10) => {
   return useQuery({
-    queryKey: ["withdrawal-requests"],
-    queryFn: getWithdrawalRequests,
+    queryKey: ["withdrawal-requests", page, limit],
+    queryFn: () => getWithdrawalRequests(page, limit),
   });
 };
 
 export const useMarkWithdrawalRequestPaidMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, transactionId }: { id: string; transactionId: string }) =>
+    mutationFn: ({ id, transactionId }: { id: string; transactionId?: string }) =>
       markWithdrawalRequestPaid(id, transactionId),
     onSuccess: () => {
       toast.success("Withdrawal marked as paid!");

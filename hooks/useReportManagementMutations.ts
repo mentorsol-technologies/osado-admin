@@ -8,10 +8,10 @@ import {
 } from "@/services/report-management/ReportManagementServices";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-export const useGetReportManagementListQuery = () => {
+export const useGetReportManagementListQuery = (page = 1, limit = 10) => {
   return useQuery({
-    queryKey: ["reportManagement"],
-    queryFn: getReportMangementList,
+    queryKey: ["reportManagement", page, limit],
+    queryFn: () => getReportMangementList(page, limit),
     staleTime: 1000 * 60 * 2,
   });
 };

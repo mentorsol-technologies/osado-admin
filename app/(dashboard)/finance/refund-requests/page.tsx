@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Eye } from "lucide-react";
 import { CommonTable } from "@/components/ui/table/commonTable";
 import { Badge } from "@/components/ui/badge";
-import Pagination from "@/components/ui/pagination";
 import {
   useRefundRequestsQuery,
   useRefundRequestStatsQuery,
@@ -165,19 +164,12 @@ export default function RefundRequestsPage() {
             data={rows}
             columns={columns}
             rowsPerPage={limit}
+            currentPage={page}
+            onPageChange={setPage}
+            totalPages={totalPages}
           />
         )}
       </div>
-
-      {totalPages > 1 && (
-        <div className="mt-auto pt-8">
-          <Pagination
-            totalPages={totalPages}
-            currentPage={page}
-            onPageChange={setPage}
-          />
-        </div>
-      )}
 
       <ReviewRefundRequestModal
         open={reviewOpen}

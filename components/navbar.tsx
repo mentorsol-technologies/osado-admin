@@ -54,7 +54,6 @@ export function Navbar({ onMenuClick }: NavbarProps) {
     logout();
     toast.success("Logout Successfully");
     router.push("/login");
-    router.refresh(); // ✅ ensures no stale auth state remains
   };
 
   return (

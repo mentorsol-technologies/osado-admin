@@ -10,7 +10,12 @@ export default function AccountDeletionRequestsPage() {
   const [openViewModal, setOpenViewModal] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
 
-  const { data: requests, isLoading, isError } = useAccountDeletionRequestsQuery();
+  const [page, setPage] = useState(1);
+  const limit = 10;
+  const { data: response, isLoading, isError } = useAccountDeletionRequestsQuery(page, limit);
+  const requests = (response as any)?.data ?? [];
+  const total = (response as any)?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
 
   const columns = [
     {
@@ -107,9 +112,12 @@ export default function AccountDeletionRequestsPage() {
           mobileView="card"
           data={requests}
           columns={columns}
-          rowsPerPage={10}
+          rowsPerPage={limit}
           filters={filters}
           searchable
+          currentPage={page}
+          onPageChange={setPage}
+          totalPages={totalPages}
         />
       </div>
 

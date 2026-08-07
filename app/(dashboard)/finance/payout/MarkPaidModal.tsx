@@ -1,9 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Modal from "@/components/ui/Modal";
-import CommonInput from "@/components/ui/input";
 import { useMarkWithdrawalRequestPaidMutation } from "@/hooks/useWithdrawalRequestMutations";
 
 interface MarkPaidModalProps {
@@ -19,16 +17,14 @@ export default function MarkPaidModal({
   withdrawalRequestId,
   onSuccess,
 }: MarkPaidModalProps) {
-  const [transactionId, setTransactionId] = useState("");
   const { mutate: markPaid, isPending } = useMarkWithdrawalRequestPaidMutation();
 
   const handleSubmit = () => {
-    if (!withdrawalRequestId || !transactionId.trim()) return;
+    if (!withdrawalRequestId) return;
     markPaid(
-      { id: withdrawalRequestId, transactionId: transactionId.trim() },
+      { id: withdrawalRequestId },
       {
         onSuccess: () => {
-          setTransactionId("");
           onOpenChange(false);
           onSuccess?.();
         },
@@ -46,7 +42,7 @@ export default function MarkPaidModal({
           <Button
             className="flex-1"
             onClick={handleSubmit}
-            disabled={isPending || !transactionId.trim()}
+            disabled={isPending}
           >
             {isPending ? "Saving..." : "Confirm Paid"}
           </Button>
@@ -60,19 +56,10 @@ export default function MarkPaidModal({
         </div>
       }
     >
-      <div className="space-y-4 text-white p-2">
-        <div>
-          <label className="block text-sm mb-1">Bank Transaction ID</label>
-          <CommonInput
-            placeholder="e.g. TXN-20260715-001"
-            value={transactionId}
-            onChange={(e) => setTransactionId(e.target.value)}
-          />
-          <p className="text-xs text-gray-400 mt-1">
-            Enter the reference ID from the manual bank transfer you completed. This will be shown to the provider.
-          </p>
-        </div>
-      </div>
+      <p className="text-sm text-gray-300 p-2">
+        Confirm that you've sent this provider their withdrawal via bank transfer.
+        This marks the request as paid and notifies the provider.
+      </p>
     </Modal>
   );
 }

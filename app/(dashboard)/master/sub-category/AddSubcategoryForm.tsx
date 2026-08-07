@@ -181,7 +181,7 @@ export default function AddSubCategoryModal({
       }
     >
       {/* Subcategory Name + Status */}
-      <div className="flex flex-col sm:flex-row gap-3 w-full">
+      <div className="flex flex-col sm:flex-row gap-3 w-full px-1">
         {/* Name */}
         <div className="flex-1">
           <label className="block text-sm mb-1">Subcategory Name</label>
@@ -218,7 +218,7 @@ export default function AddSubCategoryModal({
       </div>
 
       {/* Description */}
-      <div className="mt-4">
+      <div className="mt-4 px-1">
         <label className="block text-sm mb-1">Description</label>
         <Textarea
           rows={4}
@@ -228,7 +228,7 @@ export default function AddSubCategoryModal({
       </div>
 
       {/* Assign to Category */}
-      <div className="mt-4">
+      <div className="mt-4 px-1">
         <label className="block text-sm mb-1">Assign to Category</label>
         <Select
           disabled={isLoading || isError}
@@ -254,7 +254,7 @@ export default function AddSubCategoryModal({
       </div>
 
       {/* Upload */}
-      <div className="mt-4">
+      <div className="mt-4 px-1">
         <Upload
           label="Upload Images"
           multiple

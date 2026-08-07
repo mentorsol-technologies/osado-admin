@@ -4,10 +4,10 @@ import { toast } from "react-toastify";
 
 
 //  Fetch all Sub Admins
-export const useGetBannersQuery = () => {
+export const useGetBannersQuery = (page = 1, limit = 6) => {
     return useQuery({
-        queryKey: ["banners"],
-        queryFn: getBanner,
+        queryKey: ["banners", page, limit],
+        queryFn: () => getBanner(page, limit),
     });
 };
 

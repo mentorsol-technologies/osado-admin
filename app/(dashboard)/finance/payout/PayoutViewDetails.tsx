@@ -27,7 +27,6 @@ const PayoutViewForm = ({
     { label: "Amount", key: "amountDisplay" },
     { label: "Requested date", key: "requestedDate" },
     { label: "Paid date", key: "paidDate" },
-    { label: "Transaction ID", key: "transactionId" },
     { label: "Status", key: "status" },
     ...(payout?.status === "REJECTED"
       ? [{ label: "Rejection Reason", key: "rejectionReason" }]

@@ -9,8 +9,13 @@ import ReportViewModal from "./ReportViewModal";
 export default function ReportManagementPage() {
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
   const [openViewModal, setOpenViewModal] = useState(false);
+  const [page, setPage] = useState(1);
+  const limit = 10;
 
-  const { data, isLoading } = useGetReportManagementListQuery();
+  const { data: response, isLoading } = useGetReportManagementListQuery(page, limit);
+  const data = (response as any)?.data ?? [];
+  const total = (response as any)?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
 
   // Track the id and read the row back out of the query result, rather than
   // holding a copy of it. The suspend/dismiss/resolve mutations invalidate
@@ -105,9 +110,12 @@ export default function ReportManagementPage() {
           mobileView="card"
           data={data}
           columns={columns}
-          rowsPerPage={10}
+          rowsPerPage={limit}
           filters={filters}
           searchable
+          currentPage={page}
+          onPageChange={setPage}
+          totalPages={totalPages}
         />
       </div>
 

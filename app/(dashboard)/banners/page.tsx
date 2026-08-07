@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Plus, Search, Filter, Tags } from "lucide-react";
 import CommonInput from "@/components/ui/input";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import FiltersBar from "@/components/ui/commonComponent/FiltersBar";
 import BannerCard from "./BannerCards";
 import DeleteConfirmModal from "@/components/ui/commonComponent/DeleteConfirmModal";
@@ -31,6 +31,7 @@ export default function BannersPage() {
     [key: string]: string;
   }>({});
   const [search, setSearch] = useState("");
+  const pageSize = 6;
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedBanner, setSelectedBanner] = useState<any>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -38,7 +39,9 @@ export default function BannersPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
 
-  const { data, isLoading, isError } = useGetBannersQuery();
+  const { data: response, isLoading, isError } = useGetBannersQuery(currentPage, pageSize);
+  const data = (response as any)?.data ?? [];
+  const total = (response as any)?.total ?? 0;
   const { mutate: deleteBanner, isPending } = useDeleteBannersMutation();
   const { mutate: suspendBanner } = useSuspendBannerMutation();
 
@@ -88,24 +91,17 @@ export default function BannersPage() {
     },
   ];
 
-  const filteredBannerPromotional = useMemo(() => {
+  // Search/filter run only within the current server page's banners -
+  // pagination itself is server-driven (useGetBannersQuery(currentPage,
+  // pageSize) above), so this is no longer re-sliced locally.
+  const paginatedBanners = useMemo(() => {
     return applyFilters(data, search, selectedFilters, {
       searchKeys: ["bannerTitle"],
       dateKey: "createdAt",
     });
   }, [data, search, selectedFilters]);
 
-  /* -------------------- PAGINATION -------------------- */
-  const pageSize = 6;
-  const banners = filteredBannerPromotional || [];
-  const totalPages = Math.ceil(banners.length / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const paginatedBanners = banners.slice(startIndex, startIndex + pageSize);
-
-  // Reset to page 1 when filters or search change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search, selectedFilters]);
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   const handleFilterChange = (key: string, value: string) => {
     setSelectedFilters((prev) => {

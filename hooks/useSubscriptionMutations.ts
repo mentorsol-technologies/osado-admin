@@ -7,10 +7,10 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
-export const useGetSubscriptionPlansQuery = () => {
+export const useGetSubscriptionPlansQuery = (page = 1, limit = 10) => {
   return useQuery({
-    queryKey: ["subscription-plans"],
-    queryFn: getSubscriptionPlans,
+    queryKey: ["subscription-plans", page, limit],
+    queryFn: () => getSubscriptionPlans(page, limit),
   });
 };
 

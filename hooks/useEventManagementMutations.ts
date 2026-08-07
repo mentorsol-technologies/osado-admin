@@ -4,10 +4,10 @@ import { toast } from "react-toastify";
 
 
 
-export const useGetAllEventsQuery = () => {
+export const useGetAllEventsQuery = (page = 1, limit = 8) => {
     return useQuery({
-        queryKey: ["events"],
-        queryFn: GetAllEventsLIst,
+        queryKey: ["events", page, limit],
+        queryFn: () => GetAllEventsLIst(page, limit),
     });
 };
 

@@ -1,6 +1,5 @@
 import api from "@/lib/axios";
 
-export const getWalletTransactions = async () => {
-  const response = await api.get("/wallet/transactions");
-  return response.data;
+export const getWalletTransactions = async (page = 1, limit = 10) => {
+  return await api.get("/wallet/transactions", { params: { page, limit } });
 };

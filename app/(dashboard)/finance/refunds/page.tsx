@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { CommonTable } from "@/components/ui/table/commonTable";
 import { Badge } from "@/components/ui/badge";
-import Pagination from "@/components/ui/pagination";
 import { useRefundsQuery } from "@/hooks/useRefundMutations";
 import { FormatDate } from "@/lib/utils";
 
@@ -109,19 +108,12 @@ export default function RefundsPage() {
             data={rows}
             columns={columns}
             rowsPerPage={limit}
+            currentPage={page}
+            onPageChange={setPage}
+            totalPages={totalPages}
           />
         )}
       </div>
-
-      {totalPages > 1 && (
-        <div className="mt-auto pt-8">
-          <Pagination
-            totalPages={totalPages}
-            currentPage={page}
-            onPageChange={setPage}
-          />
-        </div>
-      )}
     </div>
   );
 }

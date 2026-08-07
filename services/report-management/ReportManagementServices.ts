@@ -1,8 +1,7 @@
 import api from "@/lib/axios";
 
-export const getReportMangementList = async () => {
-  const response = await api.get("/reports/admin/list");
-  return response.data;
+export const getReportMangementList = async (page = 1, limit = 10) => {
+  return await api.get("/reports/admin/list", { params: { page, limit } });
 };
 
 export const reportSendWarning = async (id: string) => {

@@ -14,8 +14,13 @@ export default function PayoutPage() {
   const [markPaidOpen, setMarkPaidOpen] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
   const [selectedPayout, setSelectedPayout] = useState<any>(null);
+  const [page, setPage] = useState(1);
+  const limit = 10;
 
-  const { data: requests } = useGetWithdrawalRequestsQuery();
+  const { data: response } = useGetWithdrawalRequestsQuery(page, limit);
+  const requests = (response as any)?.data ?? [];
+  const total = (response as any)?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
 
   const columns = [
     { key: "id", label: "Payout ID" },
@@ -23,7 +28,6 @@ export default function PayoutPage() {
     { key: "amountDisplay", label: "Amount" },
     { key: "requestedDate", label: "Requested date" },
     { key: "paidDate", label: "Paid date" },
-    { key: "transactionId", label: "Transaction ID" },
     {
       key: "status",
       label: "Status",
@@ -104,9 +108,12 @@ export default function PayoutPage() {
           mobileView="card"
           data={data}
           columns={columns}
-          rowsPerPage={10}
+          rowsPerPage={limit}
           searchable
           filters={filters}
+          currentPage={page}
+          onPageChange={setPage}
+          totalPages={totalPages}
         />
       </div>
 

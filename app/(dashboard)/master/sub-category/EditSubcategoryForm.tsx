@@ -189,7 +189,7 @@ export default function EditSubCategoryModal({
       }
     >
       {/* Subcategory Name + Status */}
-      <div className="flex flex-col sm:flex-row gap-3 w-full">
+      <div className="flex flex-col sm:flex-row gap-3 w-full px-1">
         {/* Name */}
         <div className="flex-1">
           <label className="block text-sm mb-1">Subcategory Name</label>
@@ -223,7 +223,7 @@ export default function EditSubCategoryModal({
       </div>
 
       {/* Description */}
-      <div className="mt-4">
+      <div className="mt-4 px-1">
         <label className="block text-sm mb-1">Description</label>
         <Textarea
           rows={4}
@@ -233,7 +233,7 @@ export default function EditSubCategoryModal({
       </div>
 
       {/* ✅ Assign Category - Fixed */}
-      <div className="mt-4">
+      <div className="mt-4 px-1">
         <label className="block text-sm mb-1">Assign to Category</label>
         <Controller
           control={control}
@@ -265,7 +265,7 @@ export default function EditSubCategoryModal({
       </div>
 
       {/* File Upload */}
-      <div className="mt-4">
+      <div className="mt-4 px-1">
         <Upload
           label="Upload Icon/Image"
           multiple

@@ -122,9 +122,11 @@ export default function ProfilePage() {
 
       setPhotoId(uploadId);
       setProfileImage(URL.createObjectURL(file));
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      toast.error("Avatar upload failed");
+      const apiMessage = err?.response?.data?.message;
+      const reason = Array.isArray(apiMessage) ? apiMessage.join(", ") : apiMessage;
+      toast.error(reason || "Avatar upload failed. Please use a JPG or PNG image.");
     }
   };
 
@@ -173,7 +175,7 @@ export default function ProfilePage() {
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/jpg,image/png"
               className="hidden"
               onChange={handleFileChange}
             />

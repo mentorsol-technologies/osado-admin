@@ -14,7 +14,12 @@ import {
 } from "@/hooks/useBussinessOwnerMutations";
 
 export default function ServiceBookingPage() {
-  const { data: owners, isLoading, isError } = useBussinessOwnerQuery();
+  const [page, setPage] = useState(1);
+  const limit = 10;
+  const { data: response, isLoading, isError } = useBussinessOwnerQuery(page, limit);
+  const owners = (response as any)?.data ?? [];
+  const total = (response as any)?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
   const { mutate: suspendOwner } = useSuspendBussinessOwnerMutation();
   const [openViewModal, setOpenViewModal] = useState(false);
   const [selectedBusiness, setSelectedBusiness] = useState<any>(null);
@@ -150,9 +155,12 @@ export default function ServiceBookingPage() {
           mobileView="card"
           data={tableData}
           columns={columns}
-          rowsPerPage={10}
+          rowsPerPage={limit}
           filters={filters}
           searchable
+          currentPage={page}
+          onPageChange={setPage}
+          totalPages={totalPages}
           renderCardActions={(row) => (
             <div className="flex gap-2 w-full flex-wrap">
               <Button

@@ -11,9 +11,8 @@ export const getCurrentUser = async () => {
 };
 
 // Get All SubCategories
-export const getSubAdmin = async () => {
-  const response = await api.get("/users/sub-admin");
-  return response.data;
+export const getSubAdmin = async (page = 1, limit = 10) => {
+  return await api.get("/users/sub-admin", { params: { page, limit } });
 };
 
 // Get All Users

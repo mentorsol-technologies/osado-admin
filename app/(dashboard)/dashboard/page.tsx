@@ -43,7 +43,17 @@ const mapApplicationStatus = (status: string) => {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { data: applicationsResponse } = useInfluencerApplicationsQuery();
+  const [applicationsPage, setApplicationsPage] = useState(1);
+  const applicationsLimit = 10;
+  const { data: applicationsResponse } = useInfluencerApplicationsQuery(
+    applicationsPage,
+    applicationsLimit,
+  );
+  const applicationsTotal = (applicationsResponse as any)?.total ?? 0;
+  const applicationsTotalPages = Math.max(
+    1,
+    Math.ceil(applicationsTotal / applicationsLimit),
+  );
   const { data: CategoriesList } = useCategoriesQuery();
 
   const [selectedApplication, setSelectedApplication] = useState<any>(null);
@@ -205,9 +215,12 @@ export default function DashboardPage() {
           title="Influencer Applications"
           data={applications}
           columns={columns}
-          rowsPerPage={10}
+          rowsPerPage={applicationsLimit}
           filters={filters}
           searchable
+          currentPage={applicationsPage}
+          onPageChange={setApplicationsPage}
+          totalPages={applicationsTotalPages}
         />
         <ApplicationDetailModal
           open={detailOpen}

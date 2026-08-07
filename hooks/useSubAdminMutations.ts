@@ -4,10 +4,10 @@ import { toast } from "react-toastify";
 
 
 // 🔹 Fetch all Sub Admins
-export const useGetSubAdminsQuery = () => {
+export const useGetSubAdminsQuery = (page = 1, limit = 10) => {
     return useQuery({
-        queryKey: ["subAdmins"],
-        queryFn: getSubAdmin,
+        queryKey: ["subAdmins", page, limit],
+        queryFn: () => getSubAdmin(page, limit),
     });
 };
 

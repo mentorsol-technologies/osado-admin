@@ -7,10 +7,10 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
-export const useGetDiscountCodesQuery = () => {
+export const useGetDiscountCodesQuery = (page = 1, limit = 10) => {
   return useQuery({
-    queryKey: ["discount-codes"],
-    queryFn: getDiscountCodes,
+    queryKey: ["discount-codes", page, limit],
+    queryFn: () => getDiscountCodes(page, limit),
   });
 };
 

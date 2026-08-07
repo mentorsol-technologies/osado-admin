@@ -2,9 +2,8 @@ import api from "@/lib/axios";
 
 
 
-export const getRoles = async () => {
-    const response = await api.get("/roles");
-    return response.data;
+export const getRoles = async (page = 1, limit = 10) => {
+    return await api.get("/roles", { params: { page, limit } });
 };
 
 export const createRole = async (data: any)=>{
