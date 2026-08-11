@@ -20,6 +20,7 @@ import { getBannerUploadLink } from "@/services/banners/bannersService";
 import { uploadToS3 } from "@/lib/s3Upload";
 import { useUpdateBannersMutation } from "@/hooks/useBannersMutations";
 import Image from "next/image";
+import { toast } from "react-toastify";
 
 // Banners are only ever targeted at service providers and influencers.
 const TARGET_AUDIENCES = ["Service Providers", "Influencers"];
@@ -30,16 +31,26 @@ const TARGET_AUDIENCES = ["Service Providers", "Influencers"];
 const sanitizeAudiences = (values?: string[] | null) =>
   (values ?? []).filter((v) => TARGET_AUDIENCES.includes(v));
 
-const schema = z.object({
-  image: z.any().optional(),
-  link: z.string().url("Valid URL required"),
-  status: z.string().min(1, "Status is required"),
-  startDate: z.string().min(1, "Start date required"),
-  endDate: z.string().min(1, "End date required"),
-  displayCategories: z
-    .array(z.string())
-    .min(1, "Select at least one target audience"),
-});
+const schema = z
+  .object({
+    image: z.any().optional(),
+    link: z.string().url("Valid URL required"),
+    status: z.string().min(1, "Status is required"),
+    startDate: z.string().min(1, "Start date required"),
+    endDate: z.string().min(1, "End date required"),
+    displayCategories: z
+      .array(z.string())
+      .min(1, "Select at least one target audience"),
+  })
+  // Checked once at submit instead of pre-disabling calendar days against
+  // each other - cross-locking the two pickers' min/maxDate made it
+  // impossible to tell which field to edit first when relaunching an
+  // already-expired banner (Start Date's max was still the old, past
+  // End Date, so every future month looked entirely disabled).
+  .refine((data) => new Date(data.startDate) <= new Date(data.endDate), {
+    message: "End date must be on or after the start date",
+    path: ["endDate"],
+  });
 
 type FormData = z.infer<typeof schema> & { id?: string };
 
@@ -58,6 +69,15 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
   bannerData,
   onUpdate,
 }) => {
+  // New dates can never be backdated - existing past dates on an expired
+  // banner are left alone unless the admin actively picks a new one, in
+  // which case it must be today or later.
+  const today = (() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  })();
+
   const {
     register,
     handleSubmit,
@@ -139,8 +159,11 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
 
       setUploadIds(uploadedIds);
       setValue("image", files);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Upload failed", err);
+      const apiMessage = err?.response?.data?.message;
+      const reason = Array.isArray(apiMessage) ? apiMessage.join(", ") : apiMessage;
+      toast.error(reason || "Image upload failed. Please use a JPG or PNG image.");
     }
   };
   const onSubmit = (data: FormData) => {
@@ -207,6 +230,8 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
           <Upload
             label="Upload Images"
             multiple
+            accept="image/jpeg,image/jpg,image/png"
+            formatsLabel="JPG, PNG"
             onFileSelect={async (files) => {
               if (files?.length) await handleMultipleFileUpload(files);
             }}
@@ -269,22 +294,23 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div>
             <label className="block mb-1 text-sm">Start Date</label>
+            {/* minDate is today, not the other field's value - no cross-
+                locking between Start/End here, that's what made editing an
+                expired banner impossible before. start <= end is validated
+                once at submit instead, so editing either field first
+                always works. */}
             <CommonInput
               placeholder="Start Date"
               type="calendar"
               value={watch("startDate")}
               onChange={(e) => setValue("startDate", e.target.value)}
-              minDate={(() => {
-                const d = new Date();
-                d.setHours(0, 0, 0, 0);
-                return d;
-              })()}
-              maxDate={
-                watch("endDate")
-                  ? new Date(watch("endDate") + "T00:00:00")
-                  : undefined
-              }
+              minDate={today}
             />
+            {errors.startDate && (
+              <p className="text-xs text-red-500 mt-1">
+                {errors.startDate.message}
+              </p>
+            )}
           </div>
           <div>
             <label className="block mb-1 text-sm">End Date</label>
@@ -293,16 +319,13 @@ const EditPromotionalBannerModal: React.FC<EditPromotionalBannerModalProps> = ({
               type="calendar"
               value={watch("endDate")}
               onChange={(e) => setValue("endDate", e.target.value)}
-              minDate={
-                watch("startDate")
-                  ? new Date(watch("startDate") + "T00:00:00")
-                  : (() => {
-                      const d = new Date();
-                      d.setHours(0, 0, 0, 0);
-                      return d;
-                    })()
-              }
+              minDate={today}
             />
+            {errors.endDate && (
+              <p className="text-xs text-red-500 mt-1">
+                {errors.endDate.message}
+              </p>
+            )}
           </div>
         </div>
 

@@ -1,4 +1,4 @@
-import { getRoles, createRole, uploadRoleIcon } from "@/services/roles/rolesService";
+import { getRoles, createRole, updateRole, deleteRole, uploadRoleIcon } from "@/services/roles/rolesService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
@@ -22,6 +22,35 @@ export const useCreateRoleMutation = () => {
         },
         onError: (error: any) => {
             console.error("Error creating role:", error);
+            toast.error(error?.response?.data?.message || "Failed to create role");
+        },
+    });
+};
+
+export const useUpdateRoleMutation = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, data }: { id: string; data: any }) => updateRole(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["roles"] });
+        },
+        onError: (error: any) => {
+            toast.error(error?.response?.data?.message || "Failed to update role");
+        },
+    });
+};
+
+export const useDeleteRoleMutation = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id: string) => deleteRole(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["roles"] });
+        },
+        onError: (error: any) => {
+            toast.error(error?.response?.data?.message || "Failed to delete role");
         },
     });
 };

@@ -9,6 +9,7 @@ interface BannerCardProps {
   bannerId: string;
   startDate: string;
   endDate: string;
+  rawEndDate?: string;
   displayCategories: string;
   status: string;
   onEdit?: () => void;
@@ -22,6 +23,7 @@ export default function BannerCard({
   bannerId,
   startDate,
   endDate,
+  rawEndDate,
   displayCategories,
   status,
   onEdit,
@@ -32,6 +34,16 @@ export default function BannerCard({
   // An already-suspended banner has nothing to suspend - hide the action.
   // Compared case-insensitively since the API returns lowercase statuses.
   const isSuspended = status?.toLowerCase() === "suspended";
+  // The stored status never auto-flips once endDate passes (the admin list
+  // intentionally keeps showing past banners for management purposes), so an
+  // "active" banner here can be well past its window and no longer actually
+  // showing to end users. Reflect that in the label instead of the stale
+  // "Active" text, without hiding the banner itself.
+  const isExpired =
+    status?.toLowerCase() === "active" &&
+    !!rawEndDate &&
+    new Date(rawEndDate) < new Date();
+  const displayStatus = isExpired ? "Expired" : status;
   return (
     <div className="rounded-xl bg-black-500 border border-black-200 text-white shadow-lg overflow-hidden flex flex-col">
       {/* Image */}
@@ -88,7 +100,9 @@ export default function BannerCard({
 
           <div className="flex justify-between flex-wrap">
             <span className="text-white">Status</span>
-            <span className="capitalize">{status}</span>
+            <span className={`capitalize ${isExpired ? "text-gray-400" : ""}`}>
+              {displayStatus}
+            </span>
           </div>
         </div>
       </div>

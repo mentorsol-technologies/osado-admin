@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Plus, Search, Filter, Tags } from "lucide-react";
 import CommonInput from "@/components/ui/input";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import FiltersBar from "@/components/ui/commonComponent/FiltersBar";
 import BannerCard from "./BannerCards";
 import DeleteConfirmModal from "@/components/ui/commonComponent/DeleteConfirmModal";
@@ -39,7 +39,7 @@ export default function BannersPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
 
-  const { data: response, isLoading, isError } = useGetBannersQuery(currentPage, pageSize);
+  const { data: response, isLoading, isError } = useGetBannersQuery(currentPage, pageSize, search);
   const data = (response as any)?.data ?? [];
   const total = (response as any)?.total ?? 0;
   const { mutate: deleteBanner, isPending } = useDeleteBannersMutation();
@@ -91,17 +91,24 @@ export default function BannersPage() {
     },
   ];
 
-  // Search/filter run only within the current server page's banners -
-  // pagination itself is server-driven (useGetBannersQuery(currentPage,
-  // pageSize) above), so this is no longer re-sliced locally.
+  // Search is now server-side (useGetBannersQuery above sends `search` as
+  // searchQuery, matched against title and bannerId across all banners, not
+  // just the current page) - only status filter + sort still run locally
+  // over the already-filtered, already-paginated page.
   const paginatedBanners = useMemo(() => {
-    return applyFilters(data, search, selectedFilters, {
+    return applyFilters(data, "", selectedFilters, {
       searchKeys: ["bannerTitle"],
       dateKey: "createdAt",
     });
-  }, [data, search, selectedFilters]);
+  }, [data, selectedFilters]);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+  // A stale currentPage from before a search/filter change could point past
+  // the new, smaller result set - reset to page 1 whenever either changes.
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, selectedFilters]);
 
   const handleFilterChange = (key: string, value: string) => {
     setSelectedFilters((prev) => {
@@ -172,6 +179,7 @@ export default function BannersPage() {
                     bannerId={banner.bannerId}
                     startDate={new Date(banner.startDate).toLocaleDateString()}
                     endDate={new Date(banner.endDate).toLocaleDateString()}
+                    rawEndDate={banner.endDate}
                     displayCategories={banner.displayCategories}
                     status={banner.status}
                     onEdit={() => {

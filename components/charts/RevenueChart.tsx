@@ -45,15 +45,29 @@ interface RevenueChartProps {
   onMonthChange?: (month: string) => void;
 }
 
+// Neutral grey for the no-data state - matches the axis stroke color already
+// used in this chart, rather than the brand purple which implies real data.
+const NO_DATA_COLOR = "#888";
+
 export default function RevenueChart({
   data = [],
   selectedMonth = months[new Date().getMonth()],
   onMonthChange,
 }: RevenueChartProps) {
-  const chartData = data.map((point) => ({
-    month: monthLabel(point.month),
-    revenue: point.revenue,
-  }));
+  const hasData = data.length > 0;
+
+  // The backend only returns months that had at least one successful
+  // payment, so a genuinely empty period comes back as [] rather than a
+  // zero-value point. Synthesize a flat zero point for the selected month so
+  // the chart still has axes to draw instead of rendering nothing.
+  const chartData = hasData
+    ? data.map((point) => ({
+        month: monthLabel(point.month),
+        revenue: point.revenue,
+      }))
+    : [{ month: selectedMonth.slice(0, 3), revenue: 0 }];
+
+  const lineColor = hasData ? brand[500] : NO_DATA_COLOR;
 
   return (
     <div className="w-full h-[450px] bg-black-500 rounded-2xl p-4">
@@ -83,8 +97,8 @@ export default function RevenueChart({
         >
           <defs>
             <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={brand[500]} stopOpacity={0.8} />
-              <stop offset="95%" stopColor={brand[500]} stopOpacity={0} />
+              <stop offset="5%" stopColor={lineColor} stopOpacity={0.8} />
+              <stop offset="95%" stopColor={lineColor} stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
@@ -112,7 +126,7 @@ export default function RevenueChart({
           <Area
             type="monotone"
             dataKey="revenue"
-            stroke={brand[500]}
+            stroke={lineColor}
             fillOpacity={1}
             fill="url(#colorRevenue)"
             strokeWidth={2}

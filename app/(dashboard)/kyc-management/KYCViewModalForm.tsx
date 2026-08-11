@@ -24,6 +24,7 @@ interface KYCViewModalProps {
     };
     dateOfBirth: string;
     gender: string;
+    status?: string;
     avatar_url?: string;
     frontDocumentURL?: string;
     backDocumentURL?: string;
@@ -44,6 +45,8 @@ export default function KYCViewModal({
   const { mutate: updateStatus, isPending } = useUpdateKycStatusMutation();
 
   if (!kyc) return null;
+
+  const isPendingReview = !kyc.status || kyc.status === "pending";
 
   const handleAction = (status: "approved" | "rejected") => {
     const reason = getValues("description") || "";
@@ -74,23 +77,37 @@ export default function KYCViewModal({
       onOpenChange={onOpenChange}
       title="KYC Details"
       footer={
-        <div className="flex flex-col sm:flex-row gap-3 pt-3 w-full">
-          <Button
-            onClick={() => handleAction("approved")}
-            disabled={isPending}
-            className="flex-1"
-          >
-            {isPending ? "Approving..." : "Approve"}
-          </Button>
-          <Button
-            onClick={() => handleAction("rejected")}
-            disabled={isPending}
-            variant="outline"
-            className="flex-1"
-          >
-            {isPending ? "Rejecting..." : "Reject"}
-          </Button>
-        </div>
+        isPendingReview ? (
+          <div className="flex flex-col sm:flex-row gap-3 pt-3 w-full">
+            <Button
+              onClick={() => handleAction("approved")}
+              disabled={isPending}
+              className="flex-1"
+            >
+              {isPending ? "Approving..." : "Approve"}
+            </Button>
+            <Button
+              onClick={() => handleAction("rejected")}
+              disabled={isPending}
+              variant="outline"
+              className="flex-1"
+            >
+              {isPending ? "Rejecting..." : "Reject"}
+            </Button>
+          </div>
+        ) : (
+          <p className="pt-3 w-full text-center text-sm text-white-100">
+            This KYC has already been{" "}
+            <span
+              className={
+                kyc.status === "approved" ? "text-green-400" : "text-purple-400"
+              }
+            >
+              {capitalizeFirstLetter(kyc.status || "")}
+            </span>
+            .
+          </p>
+        )
       }
     >
       <div className="rounded-2xl text-white px-6 py-6 space-y-6">

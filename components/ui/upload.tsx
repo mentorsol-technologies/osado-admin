@@ -8,10 +8,24 @@ interface UploadProps {
   onFileSelect?: (files: File[] | null) => void;
   multiple?: boolean;
   existingFiles?: { id: string; url: string }[];
-
+  /** Native file input `accept` attribute. Defaults to the widest set
+   * (images + svg) for backward compatibility, but most backend upload
+   * endpoints only actually accept jpg/jpeg/png - pass the real allow-list
+   * for this upload so the picker (and the label below) don't advertise
+   * formats the server will reject. */
+  accept?: string;
+  /** Human-readable format list shown under the upload box. Should match
+   * `accept`. */
+  formatsLabel?: string;
 }
 
-export default function Upload({ label, onFileSelect, multiple = false, existingFiles = [],
+export default function Upload({
+  label,
+  onFileSelect,
+  multiple = false,
+  existingFiles = [],
+  accept = "image/*,.svg",
+  formatsLabel = "JPG, PNG, WEBP, SVG",
 }: UploadProps) {
   const [files, setFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
@@ -53,11 +67,11 @@ export default function Upload({ label, onFileSelect, multiple = false, existing
         className="border border-dashed border-purple-600 rounded-lg p-3 text-center cursor-pointer transition-colors hover:bg-purple-600/10"
       >
         <p className="text-sm text-gray-500">
-          Click to upload {multiple ? "images" : "an image"}. Supported formats: JPG, PNG, WEBP, SVG. Max 10MB each.
+          Click to upload {multiple ? "images" : "an image"}. Supported formats: {formatsLabel}. Max 10MB each.
         </p>
         <input
           type="file"
-          accept="image/*,.svg"
+          accept={accept}
           multiple={multiple}
           ref={fileInputRef}
           onChange={handleFileChange}

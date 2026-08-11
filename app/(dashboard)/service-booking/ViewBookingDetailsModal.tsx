@@ -34,7 +34,11 @@ export default function ViewProviderDetails({
       booking?.bookingServiceDetails?.map((detail: any) => {
         const portfolio = detail.providerPortfolio;
         const pkg = detail.providerPackage;
-        const user = portfolio?.user;
+        // The customer who actually made the booking - not the provider.
+        // The endpoint used to omit this and this fell back to
+        // portfolio?.user (the provider), which showed the provider's own
+        // name/photo under a "Client" badge on every card.
+        const customer = booking?.user;
 
         return {
           photos:
@@ -48,11 +52,11 @@ export default function ViewProviderDetails({
               id: cat.id,
               name: cat.name,
             })) || [],
-          city: booking?.city || user?.city || "",
+          city: booking?.city || customer?.city || "",
           time: booking?.bookingTime || "",
           creator: {
-            name: user?.name || "Unknown",
-            photoURL: user?.profileImage || "",
+            name: customer?.name || "Unknown Client",
+            photoURL: customer?.profileImage || "",
           },
           priceType: "KWD",
           price: pkg?.customPrice || pkg?.minPrice || "--",
@@ -67,6 +71,7 @@ export default function ViewProviderDetails({
     { name: "Instagram", url: providerUser?.instagramUrl },
     { name: "TikTok", url: providerUser?.tiktokUrl },
     { name: "Facebook", url: providerUser?.facebookUrl },
+    { name: "Snapchat", url: providerUser?.snapchatUrl },
   ];
 
   return (

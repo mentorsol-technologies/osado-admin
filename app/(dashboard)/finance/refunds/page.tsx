@@ -32,11 +32,6 @@ export default function RefundsPage() {
 
   const columns = [
     {
-      key: "createdAt",
-      label: "Date",
-      render: (row: any) => FormatDate(row.createdAt),
-    },
-    {
       key: "amount",
       label: "Refunded",
       render: (row: any) => `${row.amount} ${row.currency ?? ""}`.trim(),
@@ -67,19 +62,23 @@ export default function RefundsPage() {
       label: "Status",
       render: (row: any) => (
         <span
-          className={`rounded px-2 py-1 text-xs ${
-            STATUS_CLASSES[row.status] ?? "text-gray-400 border border-gray-500/30"
-          }`}
+          className={`rounded px-2 py-1 text-xs ${STATUS_CLASSES[row.status] ?? "text-gray-400 border border-gray-500/30"
+            }`}
         >
           {row.status}
         </span>
       ),
     },
     {
+      key: "createdAt",
+      label: "Date",
+      render: (row: any) => FormatDate(row.createdAt),
+    },
+    {
       key: "failureReason",
       label: "Note",
       render: (row: any) => (
-        <span className="text-xs text-gray-400">
+        <span className="text-xs line-clamp-2 text-gray-400 max-w-[240px]">
           {row.failureReason || row.comment || "------"}
         </span>
       ),

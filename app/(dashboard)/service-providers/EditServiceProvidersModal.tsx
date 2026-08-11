@@ -45,6 +45,12 @@ const schema = z.object({
     .refine((v) => !v || /\./.test(v), {
       message: "Enter a valid link (e.g. tiktok.com/@username)",
     }),
+  snapchat: z
+    .string()
+    .optional()
+    .refine((v) => !v || /\./.test(v), {
+      message: "Enter a valid link (e.g. snapchat.com/add/username)",
+    }),
   categories: z.array(z.string()).min(1, "Select at least one category"),
   photoURL: z.string().optional(),
 });
@@ -112,6 +118,7 @@ export default function EditServiceProviderModal({
         bio: providerData.bio || "",
         instagram: (providerData as any).instagramUrl || (providerData as any).instagram || "",
         tiktok: (providerData as any).tiktokUrl || (providerData as any).tiktok || "",
+        snapchat: (providerData as any).snapchatUrl || (providerData as any).snapchat || "",
         categories: uniqueIds,
       });
       setSelectedCategories(uniqueIds);
@@ -159,6 +166,7 @@ export default function EditServiceProviderModal({
       // @IsOptional and clears the field.
       instagramUrl: data.instagram || null,
       tiktokUrl: data.tiktok || null,
+      snapchatUrl: data.snapchat || null,
       categories: selectedCategories,
       photoId: uploadId || (providerData as any).photoId,
     };
@@ -374,6 +382,19 @@ export default function EditServiceProviderModal({
             {errors.tiktok && (
               <p className="text-xs text-red-500 mt-1">
                 {errors.tiktok.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <CommonInput
+              label="Snapchat"
+              placeholder="snapchat link"
+              {...register("snapchat")}
+            />
+            {errors.snapchat && (
+              <p className="text-xs text-red-500 mt-1">
+                {errors.snapchat.message}
               </p>
             )}
           </div>

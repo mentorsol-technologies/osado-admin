@@ -214,6 +214,22 @@ const CommonInput = React.forwardRef<HTMLInputElement, CommonInputProps>(
                   <Calendar
                     mode="single"
                     selected={value ? new Date(value) : undefined}
+                    // Without this, react-day-picker always opens on today's
+                    // month regardless of what's already selected - if the
+                    // existing value (or the valid min/max range) falls in a
+                    // different month, every visible day looks disabled with
+                    // no clue the admin just needs to navigate elsewhere.
+                    // Also clamp into [minDate, maxDate]: an existing value
+                    // that's now outside the allowed range (e.g. a past date
+                    // once minDate becomes "today") would otherwise open on a
+                    // month where every single day is disabled.
+                    defaultMonth={(() => {
+                      let base = value ? new Date(value) : maxDate || minDate;
+                      if (!base) return undefined;
+                      if (minDate && base < minDate) base = minDate;
+                      if (maxDate && base > maxDate) base = maxDate;
+                      return base;
+                    })()}
                     disabled={[
                       ...(minDate ? [{ before: minDate }] : []),
                       ...(maxDate ? [{ after: maxDate }] : []),

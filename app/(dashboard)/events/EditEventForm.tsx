@@ -168,9 +168,11 @@ export default function EditEventModal({
       setUploadIds(uploaded.map((u) => u.id));
       setExistingFiles(uploaded);
       setValue("image", files);
-    } catch (error) {
+    } catch (error: any) {
       console.error("File upload failed:", error);
-      toast.error("Failed to upload image(s)");
+      const apiMessage = error?.response?.data?.message;
+      const reason = Array.isArray(apiMessage) ? apiMessage.join(", ") : apiMessage;
+      toast.error(reason || "Failed to upload image(s)");
     }
   };
 

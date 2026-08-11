@@ -26,11 +26,17 @@ export const useUpdateKycStatusMutation = () => {
 
     return useMutation({
         mutationFn: updateKycStatus,
-        onSuccess: () => {
+        onSuccess: (_data, variables: any) => {
             queryClient.invalidateQueries({ queryKey: ["kycList"] });
+            toast.success(
+                `KYC ${variables?.status === "rejected" ? "rejected" : "approved"} successfully!`
+            );
         },
-        onError: (error) => {
-            console.error("Error updating KYC status:", error);
+        onError: (error: any) => {
+            const message = Array.isArray(error?.response?.data?.message)
+                ? error.response.data.message.join(", ")
+                : error?.response?.data?.message || "Failed to update KYC status.";
+            toast.error(message);
         },
     });
 };

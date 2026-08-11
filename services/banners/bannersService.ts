@@ -8,8 +8,10 @@ export const createBanner = async (data: any) => {
 };
 
 // Get All SubCategories
-export const getBanner = async (page = 1, limit = 6) => {
-    return await api.get("/banners", { params: { page, limit } });
+export const getBanner = async (page = 1, limit = 6, searchQuery?: string) => {
+    return await api.get("/banners", {
+        params: { page, limit, ...(searchQuery ? { searchQuery } : {}) },
+    });
 };
 
 export const updateBanner = async (id: string | number, data: any,) => {

@@ -11,6 +11,16 @@ export const createRole = async (data: any)=>{
     return response.data;
 }
 
+export const updateRole = async (id: string, data: any) => {
+    const response = await api.patch(`/roles/${id}`, data);
+    return response.data;
+};
+
+export const deleteRole = async (id: string) => {
+    const response = await api.delete(`/roles/${id}`);
+    return response.data;
+};
+
 export const uploadRoleIcon = async (fileType: string) => {
   const response = await api.post("/roles/upload-link?linkType=icon", { fileType });
   const data = response.data ?? response;

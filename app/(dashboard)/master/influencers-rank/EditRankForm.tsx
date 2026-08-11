@@ -110,9 +110,11 @@ export default function EditRankModal({
 
       setUploadIds(uploadedIds);
       setValue("image", uploadedIds);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Upload failed:", error);
-      toast.error("File upload failed!");
+      const apiMessage = error?.response?.data?.message;
+      const reason = Array.isArray(apiMessage) ? apiMessage.join(", ") : apiMessage;
+      toast.error(reason || "Image upload failed. Please use a JPG or PNG image.");
     }
   };
 
@@ -260,6 +262,8 @@ export default function EditRankModal({
         <Upload
           label="Upload Images"
           multiple
+          accept="image/jpeg,image/jpg,image/png"
+          formatsLabel="JPG, PNG"
           onFileSelect={async (files) => {
             if (!files?.length) return;
             await handleMultipleFileUpload(files);

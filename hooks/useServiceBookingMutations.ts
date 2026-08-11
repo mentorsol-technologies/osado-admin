@@ -25,10 +25,14 @@ export const useCreateServiceBookingMutation = () => {
   return useMutation({
     mutationFn: CreateServiceBooking,
     onSuccess: (data) => {
+      toast.success("Service Booking created successfully!");
       queryClient.invalidateQueries({ queryKey: ["serviceBookings"] });
     },
     onError: (error: any) => {
-      console.error("Error creating Service Booking:", error);
+      const message = Array.isArray(error?.response?.data?.message)
+        ? error.response.data.message.join(", ")
+        : error?.response?.data?.message || "Failed to create Service Booking!";
+      toast.error(message);
     },
   });
 };

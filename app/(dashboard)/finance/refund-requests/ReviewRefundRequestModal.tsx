@@ -143,7 +143,7 @@ export default function ReviewRefundRequestModal({
               onClick={() => setMode("reject")}
               disabled={approving}
             >
-              Decline
+              Reject
             </Button>
           </div>
         ) : (

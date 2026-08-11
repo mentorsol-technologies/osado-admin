@@ -31,7 +31,7 @@ const TABS: { label: string; value?: RefundRequestStatus }[] = [
   { label: "All", value: undefined },
   { label: "Pending", value: "PENDING" },
   { label: "Completed", value: "COMPLETED" },
-  { label: "Declined", value: "REJECTED" },
+  { label: "Rejected", value: "REJECTED" },
   { label: "Failed", value: "FAILED" },
 ];
 
@@ -54,25 +54,15 @@ export default function RefundRequestsPage() {
 
   const columns = [
     {
-      key: "createdAt",
-      label: "Submitted",
-      render: (row: any) => FormatDate(row.createdAt),
-    },
-    {
-      key: "customerName",
-      label: "Customer",
-      render: (row: any) => row.customerName || "------",
-    },
-    {
-      // Who asked matters: a provider-raised request warrants different
-      // scrutiny from a customer-raised one.
       key: "requesterName",
       label: "Requested By",
       render: (row: any) => (
         <div className="flex flex-col">
           <span>{row.requesterName || "------"}</span>
           {/* <span className="text-xs text-gray-500">
-            {row.requestedByCustomer ? "customer" : "service provider"}
+            {row.requestedByCustomer
+              ? "Customer"
+              : `Service Provider${row.customerName ? ` · for ${row.customerName}` : ""}`}
           </span> */}
         </div>
       ),
@@ -84,7 +74,7 @@ export default function RefundRequestsPage() {
     },
     {
       key: "refundedAmount",
-      label: "Refunded",
+      label: "Refund Amount",
       render: (row: any) =>
         row.refundedAmount != null ? row.refundedAmount : "------",
     },
@@ -93,13 +83,17 @@ export default function RefundRequestsPage() {
       label: "Status",
       render: (row: any) => (
         <span
-          className={`rounded px-2 py-1 text-xs ${
-            STATUS_CLASSES[row.status] ?? "text-gray-400 border border-gray-500/30"
-          }`}
+          className={`rounded px-2 py-1 text-xs ${STATUS_CLASSES[row.status] ?? "text-gray-400 border border-gray-500/30"
+            }`}
         >
           {row.status}
         </span>
       ),
+    },
+    {
+      key: "createdAt",
+      label: "Submitted",
+      render: (row: any) => FormatDate(row.createdAt),
     },
     {
       key: "actions",
@@ -139,11 +133,10 @@ export default function RefundRequestsPage() {
               setStatus(tab.value);
               setPage(1);
             }}
-            className={`rounded-full px-4 py-1.5 text-sm transition-colors ${
-              status === tab.value
+            className={`rounded-full px-4 py-1.5 text-sm transition-colors ${status === tab.value
                 ? "bg-purple-600 text-white"
                 : "bg-black-600 text-gray-300 hover:bg-black-400"
-            }`}
+              }`}
           >
             {tab.label}
             {tab.value === "PENDING" && pendingCount > 0 && ` (${pendingCount})`}

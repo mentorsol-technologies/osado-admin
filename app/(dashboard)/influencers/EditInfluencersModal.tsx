@@ -46,6 +46,12 @@ const schema = z.object({
     .refine((v) => !v || /\./.test(v), {
       message: "Enter a valid link (e.g. tiktok.com/@username)",
     }),
+  snapchat: z
+    .string()
+    .optional()
+    .refine((v) => !v || /\./.test(v), {
+      message: "Enter a valid link (e.g. snapchat.com/add/username)",
+    }),
   categories: z.array(z.string()).min(1, "Select at least one category"),
 });
 
@@ -112,6 +118,7 @@ export default function EditInfluencerModal({
         description: influencerData.bio || "",
         instagram: influencerData.instagramUrl || "",
         tiktok: influencerData.tiktokUrl || "",
+        snapchat: influencerData.snapchatUrl || "",
         categories: uniqueIds,
       });
       setSelectedCategories(uniqueIds);
@@ -159,6 +166,7 @@ export default function EditInfluencerModal({
       // @IsOptional and clears the field.
       instagramUrl: data.instagram || null,
       tiktokUrl: data.tiktok || null,
+      snapchatUrl: data.snapchat || null,
       categories: selectedCategories,
       photoId: uploadId || influencerData.photoId,
     };
@@ -383,6 +391,19 @@ export default function EditInfluencerModal({
             {errors.tiktok && (
               <p className="text-xs text-red-500 mt-1">
                 {errors.tiktok.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <CommonInput
+              label="Snapchat"
+              placeholder="snapchatlink"
+              {...register("snapchat")}
+            />
+            {errors.snapchat && (
+              <p className="text-xs text-red-500 mt-1">
+                {errors.snapchat.message}
               </p>
             )}
           </div>

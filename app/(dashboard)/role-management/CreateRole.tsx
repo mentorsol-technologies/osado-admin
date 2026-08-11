@@ -9,6 +9,13 @@ import { Button } from "@/components/ui/button";
 import Modal from "@/components/ui/Modal";
 import CommonInput from "@/components/ui/input";
 import Upload from "@/components/ui/upload";
+import {
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem,
+} from "@/components/ui/select";
 
 
 import { uploadToS3 } from "@/lib/s3Upload";
@@ -16,9 +23,22 @@ import { useCreateRoleMutation } from "@/hooks/useRolesMutations";
 import { uploadRoleIcon } from "@/services/roles/rolesService";
 import { toast } from "react-toastify";
 
+// Matches the backend's USER_ROLES enum - the "role" column is a native
+// enum, not free text, so this has to be a fixed choice, not a text input.
+// "admin" is excluded: the backend rejects creating that role outright.
+// "photographer" is hidden for now (not in active use yet).
+export const ROLE_OPTIONS = [
+    { value: "user", label: "User" },
+    { value: "influencer", label: "Influencer" },
+    { value: "service_provider", label: "Service Provider" },
+    { value: "subAdmin", label: "Sub Admin" },
+    // { value: "photographer", label: "Photographer" },
+    { value: "business_owner", label: "Business Owner" },
+];
+
 // ✅ Schema validation
 const schema = z.object({
-    role: z.string().min(2, "role name is required"),
+    role: z.string().min(1, "Please select a role"),
     description: z.string().optional(),
     image: z.any().optional(),
 });
@@ -36,6 +56,7 @@ export default function AddRoleModal({ open, setOpen, onSave }: AddRoleModalProp
         register,
         handleSubmit,
         setValue,
+        watch,
         formState: { errors },
         reset,
     } = useForm<FormData>({
@@ -74,8 +95,11 @@ export default function AddRoleModal({ open, setOpen, onSave }: AddRoleModalProp
 
             setUploadIds((prev) => [...prev, ...uploadedIds]);
             setValue("image", uploadedIds);
-        } catch (error) {
+        } catch (error: any) {
             console.error("File upload failed:", error);
+            const apiMessage = error?.response?.data?.message;
+            const reason = Array.isArray(apiMessage) ? apiMessage.join(", ") : apiMessage;
+            toast.error(reason || "Icon upload failed. Please use a JPG or PNG image.");
         }
     };
 
@@ -131,10 +155,21 @@ export default function AddRoleModal({ open, setOpen, onSave }: AddRoleModalProp
             <div className="flex flex-col sm:flex-row gap-3 w-full">
                 <div className="flex-1">
                     <label className="block text-sm mb-1">Role</label>
-                    <CommonInput
-                        placeholder="Role"
-                        {...register("role")}
-                    />
+                    <Select
+                        value={watch("role")}
+                        onValueChange={(val) => setValue("role", val, { shouldValidate: true })}
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {ROLE_OPTIONS.map((opt) => (
+                                <SelectItem key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                     {errors.role && (
                         <p className="text-xs text-red-500 mt-1">{errors.role.message}</p>
                     )}
@@ -157,6 +192,8 @@ export default function AddRoleModal({ open, setOpen, onSave }: AddRoleModalProp
                 <Upload
                     label="Upload Images"
                     multiple
+                    accept="image/jpeg,image/jpg,image/png"
+                    formatsLabel="JPG, PNG"
                     onFileSelect={async (files) => {
                         if (!files?.length) return;
                         await handleMultipleFileUpload(files);

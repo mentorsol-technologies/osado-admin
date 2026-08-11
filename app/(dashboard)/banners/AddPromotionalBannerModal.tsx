@@ -19,6 +19,7 @@ import Upload from "@/components/ui/upload";
 import { useCreateBannersMutation } from "@/hooks/useBannersMutations";
 import { uploadToS3 } from "@/lib/s3Upload";
 import { getBannerUploadLink } from "@/services/banners/bannersService";
+import { toast } from "react-toastify";
 
 // Banners are only ever targeted at service providers and influencers.
 const TARGET_AUDIENCES = ["Service Providers", "Influencers"];
@@ -95,8 +96,11 @@ export default function AddPromotionalBannerModal({
 
       setUploadIds((prev) => [...prev, ...uploadedIds]);
       setValue("image", files);
-    } catch (error) {
+    } catch (error: any) {
       console.error("File upload failed:", error);
+      const apiMessage = error?.response?.data?.message;
+      const reason = Array.isArray(apiMessage) ? apiMessage.join(", ") : apiMessage;
+      toast.error(reason || "Image upload failed. Please use a JPG or PNG image.");
     }
   };
 
@@ -153,6 +157,8 @@ export default function AddPromotionalBannerModal({
           <Upload
             label="Upload Images"
             multiple
+            accept="image/jpeg,image/jpg,image/png"
+            formatsLabel="JPG, PNG"
             onFileSelect={async (files) => {
               if (!files?.length) return;
               await handleMultipleFileUpload(files);
