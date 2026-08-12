@@ -142,7 +142,10 @@ const menuItems: MenuItem[] = [
   {
     icon: "/images/mdi_image-edit.svg",
     label: "Banners Manager",
-    href: "/banners",
+    children: [
+      { label: "All Banners", href: "/banners" },
+      { label: "Requests", href: "/banners/requests" },
+    ],
   },
   // { icon: Settings, label: "Settings", href: "/settings" },
 ];

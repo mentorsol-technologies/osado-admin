@@ -22,12 +22,12 @@ import { useUpdateBannersMutation } from "@/hooks/useBannersMutations";
 import Image from "next/image";
 import { toast } from "react-toastify";
 
-// Banners are only ever targeted at service providers and influencers.
-const TARGET_AUDIENCES = ["Service Providers", "Influencers"];
+const TARGET_AUDIENCES = ["All", "Service Providers", "Influencers", "Users", "Business Owners"];
 
-// Older banners were saved against retired audiences ("All", "Users", ...).
-// Drop anything no longer offered so the badges reflect what will actually be
-// submitted, instead of silently re-saving a value the admin can't see.
+// Older banners may have been saved against an audience no longer offered.
+// Drop anything not in the current list so the badges reflect what will
+// actually be submitted, instead of silently re-saving a value the admin
+// can't see.
 const sanitizeAudiences = (values?: string[] | null) =>
   (values ?? []).filter((v) => TARGET_AUDIENCES.includes(v));
 

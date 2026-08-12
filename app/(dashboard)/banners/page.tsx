@@ -72,7 +72,6 @@ export default function BannersPage() {
 
     deleteBanner(selectedBanner.id, {
       onSuccess: () => {
-        toast.error("Banner deleted Successfully!");
         setDeleteOpen(false);
         setSelectedBanner(null);
       },
@@ -231,7 +230,7 @@ export default function BannersPage() {
         onOpenChange={setDeleteOpen}
         onConfirm={handleDelete}
         title="Delete Banner"
-        description={`Are you sure you want to delete "${selectedBanner?.bannerTitle}"? This action cannot be undone.`}
+        description={`Are you sure you want to delete "${selectedBanner?.bannerId}"? This action cannot be undone.`}
       />
       {/* Suspended modal */}
       <SuspendedBannerModal

@@ -11,6 +11,17 @@ export const useGetBannersQuery = (page = 1, limit = 6, searchQuery?: string) =>
     });
 };
 
+// A banner that came from a business-owner request can appear on both "All
+// Banners" (["banners"]) and the "Requests" review queue/detail (
+// ["bannerRequests"]/["banner"]) - every mutation that changes a banner
+// needs to invalidate all three, or one of those screens just keeps showing
+// stale data until a full reload.
+const invalidateBannerQueries = (queryClient: ReturnType<typeof useQueryClient>) => {
+    queryClient.invalidateQueries({ queryKey: ["banners"] });
+    queryClient.invalidateQueries({ queryKey: ["bannerRequests"] });
+    queryClient.invalidateQueries({ queryKey: ["banner"] });
+};
+
 //  Create Sub Admin
 export const useCreateBannersMutation = () => {
     const queryClient = useQueryClient();
@@ -18,11 +29,11 @@ export const useCreateBannersMutation = () => {
     return useMutation({
         mutationFn: createBanner,
         onSuccess: () => {
-            toast.success("Banners created successfully!");
-            queryClient.invalidateQueries({ queryKey: ["banners"] });
+            toast.success("Banner created successfully!");
+            invalidateBannerQueries(queryClient);
         },
         onError: (error: any) => {
-            toast.error(error?.response?.data?.message || "Failed to create Sub Admin");
+            toast.error(error?.response?.data?.message || "Failed to create banner");
         },
     });
 };
@@ -35,29 +46,30 @@ export const useUpdateBannersMutation = () => {
         mutationFn: ({ id, data }: { id: string; data: any }) =>
             updateBanner(id, data),
         onSuccess: () => {
-            toast.success("Banners updated successfully!");
-            queryClient.invalidateQueries({ queryKey: ["banners"] });
+            toast.success("Banner updated successfully!");
+            invalidateBannerQueries(queryClient);
         },
         onError: (error: any) => {
-            toast.error(error?.response?.data?.message || "Failed to update Sub Admin");
+            toast.error(error?.response?.data?.message || "Failed to update banner");
         },
     });
 };
-        export const useSuspendBannerMutation = () => {
-        const queryClient = useQueryClient();
 
-        return useMutation({
-            mutationFn: ({ id, data }: { id: string | number; data: any }) =>
+export const useSuspendBannerMutation = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, data }: { id: string | number; data: any }) =>
             suspendedBanner(id, data),
-            onSuccess: () => {
+        onSuccess: () => {
             toast.success("Banner suspended successfully!");
-            queryClient.invalidateQueries({ queryKey: ["banners"] });
-            },
-            onError: (error: any) => {
+            invalidateBannerQueries(queryClient);
+        },
+        onError: (error: any) => {
             toast.error(error?.response?.data?.message || "Failed to suspend banner");
-            },
-        });
-        };
+        },
+    });
+};
 
 //  Delete Sub Admin
 export const useDeleteBannersMutation = () => {
@@ -66,9 +78,11 @@ export const useDeleteBannersMutation = () => {
     return useMutation({
         mutationFn: (id: string | number) => deleteBanner(id),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["banners"] });
+            toast.success("Banner deleted successfully!");
+            invalidateBannerQueries(queryClient);
         },
         onError: (error: any) => {
+            toast.error(error?.response?.data?.message || "Failed to delete banner");
         },
     });
 };

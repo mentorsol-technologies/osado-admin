@@ -21,8 +21,7 @@ import { uploadToS3 } from "@/lib/s3Upload";
 import { getBannerUploadLink } from "@/services/banners/bannersService";
 import { toast } from "react-toastify";
 
-// Banners are only ever targeted at service providers and influencers.
-const TARGET_AUDIENCES = ["Service Providers", "Influencers"];
+const TARGET_AUDIENCES = ["All", "Service Providers", "Influencers", "Users", "Business Owners"];
 
 const schema = z.object({
   image: z.any().optional(),
