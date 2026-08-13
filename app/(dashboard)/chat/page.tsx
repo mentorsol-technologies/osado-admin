@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -154,13 +153,6 @@ const Chat = () => {
                   day: "numeric",
               });
     };
-
-    // Built from the address fields; many accounts have none filled in.
-    const formatLocation = (person?: { city?: string | null; state?: string | null } | null) =>
-        [person?.city, person?.state]
-            .map((part) => part?.trim())
-            .filter(Boolean)
-            .join(", ") || PLACEHOLDER;
 
     const formatStatus = (status?: string | null) =>
         status ? status.charAt(0).toUpperCase() + status.slice(1) : PLACEHOLDER;
@@ -562,7 +554,7 @@ const Chat = () => {
             name: fullName(activeOtherUser) || "------",
             role: formatRole(activeOtherUser.role) || "------",
             memberSince: formatMemberSince(activeOtherUser.createdAt),
-            location: formatLocation(activeOtherUser),
+            location: activeOtherUser.city?.trim() || PLACEHOLDER,
             status: formatStatus(activeOtherUser.status),
             // The API field is photoURL; `avatar` kept as a fallback.
             avatar: (activeOtherUser.photoURL ||
@@ -918,7 +910,6 @@ const Chat = () => {
                 <h3 className="mt-4 text-lg font-semibold text-white">{userInfo.name}</h3>
 
                 <div className="flex items-center gap-1.5 mt-1 text-gray-400">
-                    <MapPin size={14} />
                     <span className="text-sm">{userInfo.role}</span>
                 </div>
 

@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Pencil, Loader2 } from "lucide-react";
 import CommonInput from "@/components/ui/input";
 import {
-  useCurrentAdminQuery,
-  useUpdateProfileMutation,
-} from "@/hooks/useProfileMutations";
+  useGetCurrentUserQuery,
+  useUpdateCurrentUserProfileMutation,
+} from "@/hooks/useUsersMutations";
 import { uploadToS3 } from "@/lib/s3Upload";
 import { getUserUploadLink } from "@/services/users/userServices";
 import { toast } from "react-toastify";
@@ -51,8 +51,8 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 export default function ProfilePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { data: adminData, isLoading } = useCurrentAdminQuery();
-  const updateProfileMutation = useUpdateProfileMutation();
+  const { data: currentUserResponse, isLoading } = useGetCurrentUserQuery();
+  const updateProfileMutation = useUpdateCurrentUserProfileMutation();
 
   const [profileImage, setProfileImage] = useState<string>("");
   const [photoId, setPhotoId] = useState<string>("");
@@ -83,9 +83,10 @@ export default function ProfilePage() {
 
   /* Populate data */
   useEffect(() => {
-    if (!adminData) return;
-
-    const user = adminData?.data || adminData;
+    // /users/me returns { data: [user] } - array-wrapped, unlike the old
+    // admin-only endpoint's bare object.
+    const user = (currentUserResponse as any)?.data?.[0];
+    if (!user) return;
 
     reset({
       name: user.name || "",
@@ -106,7 +107,7 @@ export default function ProfilePage() {
     if (user.photoId) {
       setExistingPhotoId(user.photoId);
     }
-  }, [adminData, reset]);
+  }, [currentUserResponse, reset]);
 
   const handlePencilClick = () => {
     fileInputRef.current?.click();

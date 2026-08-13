@@ -11,6 +11,7 @@ import { useCreateSubAdminMutation } from "@/hooks/useSubAdminMutations";
 import { useEffect, useState } from "react";
 import { Country, useCountries } from "@/components/ui/CountryPicker";
 import { passwordRegex } from "@/lib/utils";
+import { SUB_ADMIN_PERMISSION, SUB_ADMIN_PERMISSION_LABELS } from "@/types/subAdmin";
 
 const schema = z.object({
   fullName: z.string().min(1, "Full name is required"),
@@ -34,16 +35,7 @@ interface AddSubAdminModalProps {
   selectedAdmin?: FormData;
 }
 
-const permissionsList = [
-  "Manage Events",
-  "Manage Photographers",
-  "Manage Influencers",
-  "Handle Transactions",
-  "View Analytics",
-  "Manage Categories",
-  "Manage Refunds",
-  "Access Chat Support",
-];
+const permissionsList = Object.values(SUB_ADMIN_PERMISSION);
 
 export default function AddSubAdminModal({
   open,
@@ -101,7 +93,6 @@ export default function AddSubAdminModal({
       phoneNumber,
       callingCode: selectedCountry?.code || "+965",
       countryCode: selectedCountry?.iso3 || "KWT",
-      roleId: "a75721e5-3d79-46d7-9da1-91d896409e9a",
       status: "active",
     };
     createSubAdmin(payload, {
@@ -218,7 +209,7 @@ export default function AddSubAdminModal({
           {permissionsList.map((permission) => (
             <Checkbox
               key={permission}
-              label={permission}
+              label={SUB_ADMIN_PERMISSION_LABELS[permission]}
               checked={selectedPermissions.includes(permission)}
               onCheckedChange={(checked) =>
                 handlePermissionChange(permission, checked as boolean)

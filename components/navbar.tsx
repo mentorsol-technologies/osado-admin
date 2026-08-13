@@ -16,7 +16,7 @@ import Image from "next/image";
 import { useAuthStore } from "@/app/store/authStore";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import { useCurrentAdminQuery } from "@/hooks/useProfileMutations";
+import { useCurrentUserAccess } from "@/hooks/useCurrentUserAccess";
 
 interface NavbarProps {
   onMenuClick?: () => void;
@@ -25,10 +25,11 @@ interface NavbarProps {
 export function Navbar({ onMenuClick }: NavbarProps) {
   const router = useRouter();
   const { user, logout } = useAuthStore();
-  const { data: adminData } = useCurrentAdminQuery();
+  const { user: currentUserData } = useCurrentUserAccess();
 
-  // Get user data from query or fallback to auth store
-  const currentUser = adminData?.data || adminData || user;
+  // Get user data from query (works for admin and sub-admin alike) or
+  // fallback to auth store.
+  const currentUser = currentUserData || user;
 
   // Get display name
   const displayName = currentUser?.name

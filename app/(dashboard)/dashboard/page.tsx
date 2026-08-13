@@ -10,10 +10,13 @@ import {
 } from "@/hooks/useProfileMutations";
 import { useInfluencerApplicationsQuery } from "@/hooks/useInfluencerApplicationsMutations";
 import ApplicationDetailModal from "./ApplicationDetailModal";
-import { Eye } from "lucide-react";
+import { Eye, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MdOutlineEdit } from "react-icons/md";
+import { useCurrentUserAccess } from "@/hooks/useCurrentUserAccess";
+import { getFirstAccessibleHref } from "@/components/sidebar";
+import { SUB_ADMIN_PERMISSION } from "@/types/subAdmin";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -63,12 +66,26 @@ export default function DashboardPage() {
   const [paymentsMonth, setPaymentsMonth] = useState(currentMonthName);
   const [revenueMonth, setRevenueMonth] = useState(currentMonthName);
 
+  const { isAdmin, hasPermission, isLoading: accessLoading } = useCurrentUserAccess();
+  const canViewAnalytics = isAdmin || hasPermission(SUB_ADMIN_PERMISSION.VIEW_ANALYTICS);
+
+  // A sub-admin without View Analytics has no reason to land here - the
+  // whole page is built around admin-dashboard/revenue-chart data they'd
+  // just get 403s on. Send them to the first section they can actually use.
+  useEffect(() => {
+    if (!accessLoading && !canViewAnalytics) {
+      router.replace(getFirstAccessibleHref(isAdmin, hasPermission));
+    }
+  }, [accessLoading, canViewAnalytics, isAdmin, hasPermission, router]);
+
   const { data: dashboardStats } = useGetDashboardStatsQuery(
     monthNameToYYYYMM(paymentsMonth),
+    canViewAnalytics,
   );
   const { data: revenueChart } = useGetRevenueChartQuery(
     monthNameToYYYYMM(revenueMonth),
     6,
+    canViewAnalytics,
   );
 
   // Flatten each application (proposal) into a row the table can
@@ -190,6 +207,19 @@ export default function DashboardPage() {
       ),
     },
   ];
+
+  // Don't flash the full analytics page before the redirect effect above
+  // has a chance to run - render nothing (admin: brief spinner while we
+  // confirm access; sub-admin without View Analytics: same spinner while
+  // navigating away) instead of the real content.
+  if (accessLoading || !canViewAnalytics) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <StatsCards stats={dashboardStats as unknown as DashboardStats[]} />

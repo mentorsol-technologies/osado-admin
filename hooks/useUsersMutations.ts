@@ -4,11 +4,13 @@ import {
   deleteServiceProvider,
   getUsersList,
   getUserUploadLink,
+  updateCurrentUserProfile,
   updateInfluencerServiceProvider,
   updateUserStatus,
 } from "@/services/users/userServices";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
+import { useAuthStore } from "@/app/store/authStore";
 
 export const useGetUsersListQuery = () => {
   return useQuery({
@@ -21,6 +23,27 @@ export const useGetCurrentUserQuery = () => {
   return useQuery({
     queryKey: ["currentUsers"],
     queryFn: getCurrentUser,
+  });
+};
+
+// Role-agnostic profile update - works for admin and sub-admin alike.
+export const useUpdateCurrentUserProfileMutation = () => {
+  const queryClient = useQueryClient();
+  const { setUser } = useAuthStore();
+
+  return useMutation({
+    mutationFn: (data: any) => updateCurrentUserProfile(data),
+    onSuccess: (response: any) => {
+      toast.success("Profile updated successfully!");
+      queryClient.invalidateQueries({ queryKey: ["currentUsers"] });
+      const userData = response?.data || response;
+      if (userData) {
+        setUser(userData);
+      }
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || "Failed to update profile!");
+    },
   });
 };
 

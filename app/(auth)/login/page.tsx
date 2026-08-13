@@ -25,7 +25,7 @@ export default function LoginPage() {
     countries.find((c) => c.iso3 === "KWT") || null,
   );
 
-  const { setUser, setToken } = useAuthStore();
+  const { setUser, setToken, setRole } = useAuthStore();
 
   // ✅ React Query Mutation
   const { mutate: login, isPending } = useMutation({
@@ -36,8 +36,8 @@ export default function LoginPage() {
 
       const userRole = res?.role?.role;
 
-      // Check if role is admin
-      if (userRole !== "admin") {
+      // Only admin and sub-admin accounts get into this dashboard.
+      if (userRole !== "admin" && userRole !== "subAdmin") {
         toast.error("You are not authorized to Login");
         return;
       }
@@ -46,13 +46,14 @@ export default function LoginPage() {
         Cookies.set("osado-admin-token", accessToken, { expires: 7 });
         setToken(accessToken);
         setUser(userId);
+        setRole(userRole);
         toast.success("Login successful!");
         router.push("/dashboard");
       }
     },
     onError: (error: any) => {
       console.error("Login Error:", error);
-      toast.error("Failed Login");
+      toast.error(error?.response?.data?.message || "Failed to login");
     },
   });
 

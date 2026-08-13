@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useUpdateSubAdminMutation } from "@/hooks/useSubAdminMutations";
 import { useEffect, useState } from "react";
 import { Country, useCountries } from "@/components/ui/CountryPicker";
+import { SUB_ADMIN_PERMISSION, SUB_ADMIN_PERMISSION_LABELS } from "@/types/subAdmin";
 
 const schema = z.object({
   fullName: z.string().min(1, "Full name is required"),
@@ -28,16 +29,7 @@ interface EditSubAdminModalProps {
   selectedAdmin?: any; 
 }
 
-const permissionsList = [
-  "Manage Events",
-  "Manage Photographers",
-  "Manage Influencers",
-  "Handle Transactions",
-  "View Analytics",
-  "Manage Categories",
-  "Manage Refunds",
-  "Access Chat Support",
-];
+const permissionsList = Object.values(SUB_ADMIN_PERMISSION);
 
 export default function EditSubAdminModal({
   open,
@@ -195,7 +187,7 @@ export default function EditSubAdminModal({
           {permissionsList.map((permission) => (
             <Checkbox
               key={permission}
-              label={permission}
+              label={SUB_ADMIN_PERMISSION_LABELS[permission]}
               checked={selectedPermissions.includes(permission)}
               onCheckedChange={(checked) =>
                 handlePermissionChange(permission, checked as boolean)

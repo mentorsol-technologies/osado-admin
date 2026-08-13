@@ -10,6 +10,14 @@ export const getCurrentUser = async () => {
   return response;
 };
 
+// Role-agnostic - works for admin and sub-admin alike, unlike
+// /admin/currentAdmin and /admin/updateProfile which explicitly 403 anyone
+// who isn't role=admin.
+export const updateCurrentUserProfile = async (data: any) => {
+  const response = await api.patch("/users/updateProfile", data);
+  return response;
+};
+
 // Get All SubCategories
 export const getSubAdmin = async (page = 1, limit = 10) => {
   return await api.get("/users/sub-admin", { params: { page, limit } });
@@ -29,6 +37,11 @@ export const updateSubAdmin = async (id: string | number, data: any) => {
 // Delete a SubCategory
 export const deleteSubAdmin = async (id: string | number) => {
   const response = await api.delete(`/users/sub-admin/${id}`);
+  return response;
+};
+
+export const suspendSubAdmin = async (id: string | number, suspendedReason: string) => {
+  const response = await api.patch(`/users/sub-admin/suspend/${id}`, { suspendedReason });
   return response;
 };
 

@@ -1,4 +1,4 @@
-import { createSubAdmin, deleteSubAdmin, getSubAdmin, updateSubAdmin } from "@/services/users/userServices";
+import { createSubAdmin, deleteSubAdmin, getSubAdmin, suspendSubAdmin, updateSubAdmin } from "@/services/users/userServices";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
@@ -54,6 +54,23 @@ export const useDeleteSubAdminMutation = () => {
             queryClient.invalidateQueries({ queryKey: ["subAdmins"] });
         },
         onError: (error: any) => {
+        },
+    });
+};
+
+// 🔹 Suspend Sub Admin
+export const useSuspendSubAdminMutation = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, suspendedReason }: { id: string | number; suspendedReason: string }) =>
+            suspendSubAdmin(id, suspendedReason),
+        onSuccess: () => {
+            toast.success("Sub Admin suspended successfully!");
+            queryClient.invalidateQueries({ queryKey: ["subAdmins"] });
+        },
+        onError: (error: any) => {
+            toast.error(error?.response?.data?.message || "Failed to suspend Sub Admin");
         },
     });
 };

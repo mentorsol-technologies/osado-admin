@@ -12,6 +12,7 @@ import { MdOutlineEdit } from "react-icons/md";
 import {
   useDeleteSubAdminMutation,
   useGetSubAdminsQuery,
+  useSuspendSubAdminMutation,
 } from "@/hooks/useSubAdminMutations";
 import { formatDate } from "@/lib/utils";
 
@@ -28,6 +29,7 @@ export default function SubAdminPage() {
   const total = (response as any)?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / limit));
   const { mutate: deleteSubAdmin, isPending } = useDeleteSubAdminMutation();
+  const { mutate: suspendSubAdmin } = useSuspendSubAdminMutation();
 
   const handleDelete = () => {
     if (!selectedAdmin?.id) return;
@@ -120,8 +122,18 @@ export default function SubAdminPage() {
     },
   ];
 
-  const handleSuspendSubmit = (data: any) => {
-    console.log("Suspended Sub Admin Reason:", data);
+  const handleSuspendSubmit = (reason: string) => {
+    if (!selectedAdmin?.id) return;
+
+    suspendSubAdmin(
+      { id: selectedAdmin.id, suspendedReason: reason },
+      {
+        onSuccess: () => {
+          setSuspendOpen(false);
+          setSelectedAdmin(null);
+        },
+      },
+    );
   };
 
   return (

@@ -17,17 +17,19 @@ export const useCurrentAdminQuery = () => {
   });
 };
 
-export const useGetDashboardStatsQuery = (month?: string) => {
+export const useGetDashboardStatsQuery = (month?: string, enabled = true) => {
   return useQuery({
     queryKey: ["dashboardStats", month],
     queryFn: () => getDashboardEventsDataService(month),
+    enabled,
   });
 };
 
-export const useGetRevenueChartQuery = (endMonth?: string, months?: number) => {
+export const useGetRevenueChartQuery = (endMonth?: string, months?: number, enabled = true) => {
   return useQuery({
     queryKey: ["revenueChart", endMonth, months],
     queryFn: () => getRevenueChartService(endMonth, months),
+    enabled,
   });
 };
 

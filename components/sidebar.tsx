@@ -16,9 +16,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useCurrentUserAccess } from "@/hooks/useCurrentUserAccess";
+import { SUB_ADMIN_PERMISSION, SubAdminPermission } from "@/types/subAdmin";
 interface MenuChild {
   label: string;
   href?: string;
+  // Omitted = admin-only (hidden from every sub-admin, whatever they've been
+  // granted) - used for sensitive/unmapped sections like Role Management.
+  permission?: SubAdminPermission;
 }
 
 interface MenuItem {
@@ -29,6 +34,7 @@ interface MenuItem {
   // entry visually distinct without needing a new asset file.
   icon: string | LucideIcon;
   children?: MenuChild[];
+  permission?: SubAdminPermission;
 }
 
 const menuItems: MenuItem[] = [
@@ -36,13 +42,14 @@ const menuItems: MenuItem[] = [
     icon: "/images/si_dashboard-fill.svg",
     label: "Dashboard",
     href: "/dashboard",
+    permission: SUB_ADMIN_PERMISSION.VIEW_ANALYTICS,
   },
   {
     label: "Master",
     icon: "/images/material-symbols_admin-panel-settings-rounded.svg",
     children: [
-      { label: "Categories", href: "/master/categories" },
-      { label: "Sub Categories", href: "/master/sub-category" },
+      { label: "Categories", href: "/master/categories", permission: SUB_ADMIN_PERMISSION.MANAGE_CATEGORIES },
+      { label: "Sub Categories", href: "/master/sub-category", permission: SUB_ADMIN_PERMISSION.MANAGE_CATEGORIES },
       { label: "Countries", href: "/master/countries" },
       { label: "Influencers Rank", href: "/master/influencers-rank" },
     ],
@@ -56,6 +63,7 @@ const menuItems: MenuItem[] = [
     icon: "/images/noun-influencer-7727039 1 (1).svg",
     label: "Influencers",
     href: "/influencers",
+    permission: SUB_ADMIN_PERMISSION.MANAGE_INFLUENCERS,
   },
   // {
   //   icon: "/images/mdi_camera.svg",
@@ -82,6 +90,7 @@ const menuItems: MenuItem[] = [
     icon: "/images/ci_calendar.svg",
     label: "Events Management",
     href: "/events",
+    permission: SUB_ADMIN_PERMISSION.MANAGE_EVENTS,
   },
   {
     // Was a duplicate of Users/KYC's business-user icon.
@@ -111,10 +120,10 @@ const menuItems: MenuItem[] = [
     label: "Finance Module",
     icon: "/images/material-symbols_finance-rounded.svg",
     children: [
-      { label: "Transactions", href: "/finance/transaction" },
+      { label: "Transactions", href: "/finance/transaction", permission: SUB_ADMIN_PERMISSION.HANDLE_TRANSACTIONS },
       { label: "Payouts", href: "/finance/payout" },
-      { label: "Refund Requests", href: "/finance/refund-requests" },
-      { label: "Refunds", href: "/finance/refunds" },
+      { label: "Refund Requests", href: "/finance/refund-requests", permission: SUB_ADMIN_PERMISSION.MANAGE_REFUNDS },
+      { label: "Refunds", href: "/finance/refunds", permission: SUB_ADMIN_PERMISSION.MANAGE_REFUNDS },
     ],
   },
   {
@@ -150,6 +159,51 @@ const menuItems: MenuItem[] = [
   // { icon: Settings, label: "Settings", href: "/settings" },
 ];
 
+// Sub-admins only see items tied to a permission they were actually
+// granted - anything with no permission mapping (Users, Service Providers,
+// Role Management, Sub Admin, etc.) is either admin-sensitive or simply
+// isn't one of the 6 grantable permissions, so it stays admin-only.
+function getVisibleMenuItems(
+  isAdmin: boolean,
+  hasPermission: (permission: SubAdminPermission) => boolean,
+): MenuItem[] {
+  if (isAdmin) return menuItems;
+
+  return menuItems.reduce<MenuItem[]>((acc, item) => {
+    if (item.children) {
+      const visibleChildren = item.children.filter(
+        (child) => child.permission && hasPermission(child.permission),
+      );
+      if (visibleChildren.length > 0) {
+        acc.push({ ...item, children: visibleChildren });
+      }
+      return acc;
+    }
+
+    if (item.permission && hasPermission(item.permission)) {
+      acc.push(item);
+    }
+    return acc;
+  }, []);
+}
+
+// The first href a sub-admin actually lands on after login / when they hit
+// a page they don't have access to - avoids dropping them on a Dashboard
+// that's all failed requests if they weren't granted View Analytics.
+export function getFirstAccessibleHref(
+  isAdmin: boolean,
+  hasPermission: (permission: SubAdminPermission) => boolean,
+): string {
+  if (isAdmin) return "/dashboard";
+
+  for (const item of getVisibleMenuItems(isAdmin, hasPermission)) {
+    if (item.href) return item.href;
+    if (item.children?.[0]?.href) return item.children[0].href;
+  }
+
+  return "/login";
+}
+
 function MenuIcon({ icon, label }: { icon: string | LucideIcon; label: string }) {
   if (typeof icon === "string") {
     return <Image src={icon} alt={label} width={20} height={20} />;
@@ -165,20 +219,25 @@ interface SidebarProps {
 export function Sidebar({ onClose }: SidebarProps) {
   const pathname = usePathname();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const { isAdmin, hasPermission, isLoading } = useCurrentUserAccess();
+  // Nothing renders until we know the role - showing the full admin menu
+  // for a flash before narrowing it down would leak section names/routes a
+  // sub-admin isn't meant to see.
+  const visibleMenuItems = isLoading ? [] : getVisibleMenuItems(isAdmin, hasPermission);
 
   const handleAccordion = (label: string) => {
     setOpenMenu(openMenu === label ? null : label);
   };
 
   useEffect(() => {
-    const parentWithActiveChild = menuItems.find(
+    const parentWithActiveChild = visibleMenuItems.find(
       (item) =>
         item.children && item.children.some((child) => pathname === child.href)
     );
     if (parentWithActiveChild) {
       setOpenMenu(parentWithActiveChild.label);
     }
-  }, [pathname]);
+  }, [pathname, visibleMenuItems]);
 
   return (
     <div className="h-full flex flex-col overflow-y-auto bg-black-500 border-r border-black-300 px-7">
@@ -211,7 +270,7 @@ export function Sidebar({ onClose }: SidebarProps) {
       {/* Navigation */}
       <nav className="flex-1 pb-6">
         <ul className="space-y-1">
-          {menuItems.map((item) => {
+          {visibleMenuItems.map((item) => {
             const isActive =
               pathname === item.href ||
               (item.children &&
