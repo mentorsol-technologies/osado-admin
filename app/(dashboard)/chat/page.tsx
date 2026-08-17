@@ -911,7 +911,7 @@ const Chat = () => {
 
                 <div className="flex items-center gap-1.5 mt-1 text-gray-400">
                     <span className="text-sm">{userInfo.role}</span>
-                </div>
+                </div> 
 
                 <div className="w-full mt-8 space-y-4">
                     <div className="flex justify-between items-center">
